@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32407.343
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailHexLib", "RailHexLib\RailHexLib.csproj", "{228C4DE2-CADB-408A-9E6D-DC4CA95B3324}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{7DFC22F0-BA5E-4337-AD45-F47981E8F5F0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{228C4DE2-CADB-408A-9E6D-DC4CA95B3324}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{228C4DE2-CADB-408A-9E6D-DC4CA95B3324}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{228C4DE2-CADB-408A-9E6D-DC4CA95B3324}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{228C4DE2-CADB-408A-9E6D-DC4CA95B3324}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DFC22F0-BA5E-4337-AD45-F47981E8F5F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DFC22F0-BA5E-4337-AD45-F47981E8F5F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DFC22F0-BA5E-4337-AD45-F47981E8F5F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DFC22F0-BA5E-4337-AD45-F47981E8F5F0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2E31E4C0-5E70-48B0-BF4A-BB03D384FD4F}
+	EndGlobalSection
+EndGlobal
