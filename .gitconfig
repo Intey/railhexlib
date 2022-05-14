@@ -1,0 +1,29 @@
+[alias]
+	ls = log --oneline --decorate --graph
+	st = status
+	cm = commit -m
+	last = commit --amend --no-edit
+	co = checkout
+	df = diff
+	poh = push origin HEAD
+	dc = diff --cached
+	setups = push -u origin HEAD
+	u = add -u
+	dropstage = restore -s@ -SW
+[core]
+	excludesFile = ~/.gitignore
+	quotePath = off
+[merge]
+	tool = kdiff3
+[pull]
+	autostash = true
+[user]
+	email = ziexe0@gmail.com
+	name = Intey
+[http]
+	postBuffer = 157286400
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
