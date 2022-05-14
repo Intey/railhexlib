@@ -25,7 +25,7 @@ using System.Collections.Generic;
 namespace RailHexLib
 {
     // [System.Serializable]
-    public class Cell : IEquatable<Cell>
+    public class Cell : IEquatable<Cell>, IDistancable<Cell>
     {
         // [SerializeField]
         private int r, q;
@@ -111,6 +111,13 @@ namespace RailHexLib
                    R == cell.R &&
                    Q == cell.Q;
         }
+
+
+        public int DistanceTo(Cell other)
+        {
+            return (Math.Abs(R - other.R) + Math.Abs(Q - other.Q) + Math.Abs(S - other.S)) / 2;
+        }
+
 
         public static Cell operator +(Cell l, Cell r)
         {

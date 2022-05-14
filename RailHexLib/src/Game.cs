@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Random = System.Random;
 using RailHexLib.Interfaces;
+using RailHexLib.DevTools;
 
 namespace RailHexLib
 {
@@ -14,12 +15,11 @@ namespace RailHexLib
     public class Game
     {
 
-        
-        public Game(TileStack stack = null, ILogger logger=null)
+        public Game(TileStack stack = null, ILogger logger = null)
         {
-            this.logger = logger;
+            this.logger = logger ?? new DefaultSilentLogger();
             placedTiles = new Dictionary<Cell, Tile>(new CellEqualityComparer());
-            structures = new Dictionary<Cell, StructureRoads>();
+            structures = new Dictionary<Cell, StructureRoad>();
             if (stack == null)
             {
                 this.rnd = new Random(1);
@@ -36,7 +36,9 @@ namespace RailHexLib
         {
             foreach (var structure in structures)
             {
-                this.structures[structure.Center] = new StructureRoads(structure);
+                this.structures[structure.Center] = new StructureRoad(structure);
+                foreach (var cell in structure.GetHexes())
+                    placedTiles[cell.Key] = cell.Value;
             }
         }
 
@@ -45,7 +47,12 @@ namespace RailHexLib
 
         public Dictionary<Cell, Structure> Structures => structures.ToDictionary(kv => kv.Key, kv => kv.Value.structure);
 
-        public List<Route> Routes
+        public void PushTile(Tile newTile)
+        {
+            stack.PushTile(newTile);
+        }
+
+        public List<TradeRoute> Routes
         {
             get => tradeRoutes;
         }
@@ -54,27 +61,48 @@ namespace RailHexLib
         /// </summary>
         /// <param name="placedCell"></param>
         /// <returns>false if tile is not placed</returns>
-        public bool PlaceCurrentTile(Cell placedCell)
+        public PlacementResult PlaceCurrentTile(Cell placedCell)
         {
             if (!CanPlaceCurrentTile(placedCell))
             {
-                return false;
+                return PlacementResult.Fail;
             }
             logger.Log($"place tile {currentTile} on {placedCell}");
             placedTiles[placedCell] = currentTile;
 
-            // TODO: make class for JoinedCells:
-            // because we can need to know which tile was placed and
-            // which - is exist (joined)
-            // also may require custom hightlight algorithms
-            Dictionary<Cell, Ground> joinsOfPlacedCell = FindJoins(placedCell);
-            BuildRoads(joinsOfPlacedCell);
+            Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(placedCell);
+
+            var roadJoins = from t in joinedNeighbors where t.Value is Road select new GraphNode<Cell>(t.Key);
+
+            var linked = false;
+            foreach (var orphanRoad in orphanRoads)
+            {
+                GraphNode<Cell> newNode = orphanRoad.AddToChildrenBy(placedCell, (a, b) => a.DistanceTo(b) == 1);
+                if (newNode != null)
+                {
+                    newNode.Children = roadJoins.ToList();
+                    linked |= BuildRoads(orphanRoad);
+                }
+            }
+            if (!linked)
+            {
+                var root = new GraphNode<Cell>(placedCell);
+                root.Children = roadJoins.ToList();
+                linked = BuildRoads(root);
+                if (!linked)
+                {
+                    orphanRoads.Add(root);
+                }
+
+                //orphanRoads.Add(root);
+            }
 
             // checks joins: if some join contains village - 
 
             // now we know all joins of placed cell. 
             //rebuildStructures(joinsOfPlacedCell);
-            return true;
+
+            return new PlacementResult(true, joinedNeighbors);
         }
         public void RotateCurrentTile()
         {
@@ -89,46 +117,71 @@ namespace RailHexLib
             currentTile = stack.PopTile();
         }
 
-        private void BuildRoads(Dictionary<Cell, Ground> joinsOfPlacedCell)
+        private bool BuildRoads(GraphNode<Cell> roadGraph)
         {
-            Dictionary<StructureRoads, Cell> paved = new Dictionary<StructureRoads, Cell>();
+            bool result = false;
+            // StructureRoads paved by Key
+            Dictionary<Cell, List<StructureRoad>> roadsToJoin = new Dictionary<Cell, List<StructureRoad>>();
+
+            // TODO: check the order: if we try cell (0,-2) on graph (0,0) we fail.
+            // But in next iteration we can have (0,-1) which linked with (0,-2) and (0,0)
             foreach (var structureGraph in structures.Values)
             {
-                foreach (var possiblyNewRoad in joinsOfPlacedCell)
+                if (structureGraph.TryAddToRoad(roadGraph))
                 {
-                    if (!(possiblyNewRoad.Value is Road)) continue;
-
-                    if (structureGraph.PaveTheRoad(new GraphNode<Cell>(possiblyNewRoad.Key)))
-                    {
-                        paved[structureGraph] = possiblyNewRoad.Key;
-                    }
+                    result = true;
+                    // is first and just create empty list
+                    if (!roadsToJoin.ContainsKey(roadGraph.Value)) roadsToJoin[roadGraph.Value] = new List<StructureRoad>();
+                    // add current struct to paved
+                    roadsToJoin[roadGraph.Value].Add(structureGraph);
                 }
             }
-            if (paved.Keys.Count > 1)
+            // build trade route
+            BuildTradeRoutes(roadsToJoin.Where(g => g.Value.Count > 1));
+            return result;
+        }
+
+        private void BuildTradeRoutes(IEnumerable<KeyValuePair<Cell, List<StructureRoad>>> RoadsToJoin)
+        {
+            foreach (var group in RoadsToJoin)
             {
-                var res = from pp in paved
-                          group pp.Key by pp.Value;
-
-                foreach (var group in res)
+                var joineryCell = group.Key;
+                var pairs = MakePairs(group.Value);
+                foreach (var pair in pairs)
                 {
-                    var joineryCell = group.Key;
-
-                    Route newRoute = new Route();
-                    foreach (var structure in group)
-                    {
-                        // CONTINUE
-                        // ADD struct to newRoute
-                        newRoute.tradePoints.Add(structure.StartPoint, structure.structure);
-                        // ADD points to Route
-                        tradeRoutes.Add(newRoute);
-
-                    }
+                    TradeRoute newRoute = new TradeRoute();
+                    // ADD struct to newRoute
+                    newRoute.tradePoints.Add(pair[0].StartPoint, pair[0].structure);
+                    newRoute.tradePoints.Add(pair[1].StartPoint, pair[1].structure);
+                    newRoute.cells.AddRange(pair[0].road.PathTo(joineryCell).Reverse<Cell>()); // add income cell too
+                    newRoute.cells.Add(joineryCell);
+                    newRoute.cells.AddRange(pair[1].road.PathTo(joineryCell));
+                    // ADD points to Route
+                    tradeRoutes.Add(newRoute);
                 }
 
             }
         }
 
-        private Dictionary<Cell, Ground> FindJoins(Cell placedCell)
+        static List<List<T>> MakePairs<T>(List<T> list)
+        {
+            List<List<T>> result = new List<List<T>>();
+            for (int j = 0; j < list.Count() - 1; j++)
+            {
+                for (int i = j + 1; i < list.Count(); i++)
+                {
+                    result.Add(new List<T>() { list[j], list[i] });
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// find hexes with wich newly placed tile has joins
+        /// </summary>
+        /// <param name="placedCell"></param>
+        /// <returns>Dictionary of neighbors that joined by Ground(in Value) with `placedCell`</returns>
+        private Dictionary<Cell, Ground> FindJoinedNeighbors(Cell placedCell)
         {
             Dictionary<Cell, Ground> joinsOfPlacedCell = new Dictionary<Cell, Ground>();
             foreach (var neighbor in placedCell.Neighbours()) // structures.Boundaries()) // place struct: if "currentTile" will be the cell, then curentTile.Neighbours() may return complex boundary
@@ -149,7 +202,7 @@ namespace RailHexLib
                     Tile neighborTile = placedTiles[neighbor];
                     var neighborSideBiome = neighborTile.GetSideBiome(currentTileSide.Inverted());
 
-                    logger.Log($"Compare side of currentTile {currentTileSide}+[{currentTile.Rotation}]({currentTileSideBiome}) with neighbors({neighbor}+[{neighborTile.Rotation}]) side {currentTileSide.Inverted()}({neighborSideBiome})");
+                    logger.Log($"Compare side {currentTileSide} of currentTile {placedCell}+[{currentTile.Rotation}]({currentTileSideBiome}) with neighbors({neighbor}+[{neighborTile.Rotation}]) side {currentTileSide.Inverted()}({neighborSideBiome})");
 
                     if (currentTileSideBiome == neighborSideBiome)
                     {
@@ -183,7 +236,7 @@ namespace RailHexLib
             for (int i = 0; i < 20; i++)
             {
                 var tile = MakeRandomTileType();
-                stack.AddTile(tile);
+                stack.PushTile(tile);
             }
         }
 
@@ -195,72 +248,10 @@ namespace RailHexLib
         /// Key is center of structure
         /// Value is Structures placed in Cell and it's 
         /// </summary>
-        private Dictionary<Cell, StructureRoads> structures;
-        private List<Route> tradeRoutes = new List<Route>();
+        private Dictionary<Cell, StructureRoad> structures;
+        private List<GraphNode<Cell>> orphanRoads = new List<GraphNode<Cell>>();
+        private List<TradeRoute> tradeRoutes = new List<TradeRoute>();
         private ILogger logger;
 
     }
-
-    public class Route
-    {
-        public List<Cell> cells;
-        public Dictionary<Cell, Structure> tradePoints;
-    }
-
-    public class StructureRoads
-    {
-        public StructureRoads(Structure structure)
-        {
-            this.structure = structure;
-            roads = new GraphNode<Cell>(structure.GetIcomeRoadCell());
-        }
-
-        public Cell StartPoint => structure.GetIcomeRoadCell();
-        public Structure structure;
-        /// contains cell and it's road tile to know how roads 
-        public GraphNode<Cell> roads;
-
-        /// <summary>
-        /// place cell in graph if it has join with some of other cells
-        /// </summary>
-        /// <param name="newRoadCell"></param>
-        /// <returns>is road placed</returns>
-        internal bool PaveTheRoad(GraphNode<Cell> newRoadCell)
-        {
-            var currentNode = roads;
-            if (newRoadCell.Children.Contains(currentNode))
-            {
-                newRoadCell.Children.Remove(currentNode);
-                currentNode.Children.Add(newRoadCell);
-                return true;
-            }
-
-            return false;
-        }
-        public static GraphNode<Cell> CellTileToGraphNode(Cell position, Tile tile)
-        {
-            var roadSides = from s in tile.Sides
-                            where s is Road
-                            select s.Key;
-            var result = new GraphNode<Cell>(position);
-            foreach (var cell in roadSides)
-            {
-                result.Children.Add(new GraphNode<Cell>(position + cell));
-            }
-            return result;
-        }
-    }
-
-    public class GraphNode<T>
-    {
-        public GraphNode(T v)
-        {
-            Value = v;
-            Children = new List<GraphNode<T>>();
-        }
-        public T Value;
-        public List<GraphNode<T>> Children;
-
-    }
-
 }

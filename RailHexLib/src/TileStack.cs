@@ -9,7 +9,7 @@ namespace RailHexLib
         {
             tiles = new Queue<Tile>();
         }
-        public void AddTile(Tile t)
+        public void PushTile(Tile t)
         {
             tiles.Enqueue(t);
         }

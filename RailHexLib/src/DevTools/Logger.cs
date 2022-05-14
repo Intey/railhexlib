@@ -13,4 +13,9 @@ namespace RailHexLib.DevTools
             Debug.WriteLine(msg);
         }
     }
+    public class DefaultSilentLogger : ILogger
+    {
+        public void Log(string msg) { }
+    }
+
 }

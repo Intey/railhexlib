@@ -1,14 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using RailHexLib;
 using System.Collections.Generic;
 
 namespace RailHexLib.Test
 {
 
-    [TestClass]
+    [TestFixture]
     public class CellsTest
     {
-        [TestMethod]
+        [Test]
         public void TestCompare()
         {
             var c1 = new IdentityCell(0, 1);
@@ -24,6 +24,13 @@ namespace RailHexLib.Test
             };
             Assert.IsNotNull(testStruct[c2]);
             Assert.AreEqual(testStruct[c2], 0);
+        }
+        [Test]
+        public void TestDistance()
+        {
+            Assert.AreEqual(1, new Cell(0, 0).DistanceTo(new Cell(0, -1)));
+            Assert.AreEqual(2, new Cell(0, 0).DistanceTo(new Cell(1, -2)));
+            Assert.AreEqual(2, new Cell(0, 0).DistanceTo(new Cell(-1, -1)));
         }
     }
 }

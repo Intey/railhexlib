@@ -6,7 +6,7 @@ namespace RailHexLib
     public class Settlement : Structure
     {
 
-        public Settlement(Cell center) : base(center)
+        public Settlement(Cell center, string name="GIVEMEADEFAULTNAME") : base(center, name)
         {
             sides = new Dictionary<IdentityCell, Tile>(new IdentityCellEqualityComparer());
             foreach (var neighbor in center.Neighbours())
@@ -53,12 +53,25 @@ namespace RailHexLib
             return "Settlement";
         }
 
-        public override Cell GetIcomeRoadCell()
+        public override Cell GetEnterCell()
         {
             return center + incomeRoadCell;
         }
         private IdentityCell incomeRoadCell;
 
+        public override Dictionary<Cell, Tile> GetHexes()
+        {
+            var result = base.GetHexes();
+            foreach(var side in sides)
+            {
+                result[center + side.Key] = side.Value;
+            }
+            return result;
+        }
+        public override string ToString()
+        {
+            return $"{name} Settlement";
+        }
     }
 
 }
