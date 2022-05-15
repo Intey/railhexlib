@@ -45,28 +45,29 @@ namespace RailHexLib
             this.size = size;
         }
 
-        public static Cell Rounded(float r, float q)
+        public static Cell Rounded(float r, float q, float size = 1.15f)
         {
-            var qn = Math.Round(q);
+            var qn = Math.Round(q+.0001);
             var rn = Math.Round(r);
             var sn = Math.Round(-q - r);
 
+            // Guarantee rule R+Q+S == 0
             var q_diff = Math.Abs(qn - q);
             var r_diff = Math.Abs(rn - r);
             var s_diff = Math.Abs(sn - q - r);
 
-
-            if (q_diff > r_diff && q_diff > s_diff)
+            // Q is biggest coord value - reset
+            if (q_diff > r_diff)
             {
                 qn = -rn - sn;
 
             }
-            else if (r_diff > s_diff)
+            else 
             {
                 rn = -qn - sn;
-
             }
-            return new Cell((int)Math.Ceiling(rn), (int)Math.Ceiling(qn));
+           
+            return new Cell((int)Math.Ceiling(rn), (int)Math.Ceiling(qn), size);
         }
 
         public static Cell operator -(Cell l, Cell r)
@@ -124,6 +125,36 @@ namespace RailHexLib
             Debug.Assert(l.size == r.size);
             return new Cell(l.R + r.R, l.Q + r.Q, l.size);
         }
+
+
+        public IdentityCell GetDirectionTo(Cell c)
+        {
+            return new IdentityCell(PathTo(c)[0]);
+        }
+        public List<Cell> PathTo(Cell c)
+        {
+            var result = new List<Cell>();
+            var distance = DistanceTo(c);
+            for (int i = 0; i <= distance; i++)
+            {
+                result.Add(CellLerp(c, 1.0f / distance * i));
+            }
+            return result;
+        }
+
+        private float Lerp(int a, int b, float t)
+        {
+            return a + (b - a) * t;
+        }
+        private Cell CellLerp(Cell b, float t)
+        {
+            Debug.Assert(this.size == b.size);
+
+            float r = Lerp(R, b.R, t);
+            float q = Lerp(Q, b.Q, t);
+            return Rounded(r, q);
+        }
+
 
     }
     // new Dictionary<Cell, int>(new CellEqualityComparer());

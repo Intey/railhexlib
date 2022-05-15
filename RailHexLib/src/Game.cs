@@ -56,6 +56,7 @@ namespace RailHexLib
         {
             get => tradeRoutes;
         }
+
         /// <summary>
         /// Place tile on game board
         /// </summary>
@@ -74,28 +75,33 @@ namespace RailHexLib
 
             var roadJoins = from t in joinedNeighbors where t.Value is Road select new GraphNode<Cell>(t.Key);
 
-            var linked = false;
-            foreach (var orphanRoad in orphanRoads)
-            {
-                GraphNode<Cell> newNode = orphanRoad.AddToChildrenBy(placedCell, (a, b) => a.DistanceTo(b) == 1);
-                if (newNode != null)
-                {
-                    newNode.Children = roadJoins.ToList();
-                    linked |= BuildRoads(orphanRoad);
-                }
-            }
-            if (!linked)
-            {
-                var root = new GraphNode<Cell>(placedCell);
-                root.Children = roadJoins.ToList();
-                linked = BuildRoads(root);
-                if (!linked)
-                {
-                    orphanRoads.Add(root);
-                }
+            //var linked = false;
+            //var toAdd = new HexNode();
+            //foreach(var neighbor in joinedNeighbors)
+            //{
+            //    Debug.Assert(toAdd.Add(neighbor.Key) != null);
+            //}
+            //foreach (var orphanRoad in orphanRoads)
+            //{
+            //    HexNode newNode = orphanRoad.AddToChildren(placedCell);
+            //    if (newNode != null)
+            //    {
+            //        newNode.Children = roadJoins.ToList();
+            //        linked |= BuildRoads(orphanRoad);
+            //    }
+            //}
+            //if (!linked)
+            //{
+            //    var root = new GraphNode<Cell>(placedCell);
+            //    root.Children = roadJoins.ToList();
+            //    linked = BuildRoads(root);
+            //    if (!linked)
+            //    {
+            //        orphanRoads.Add(root);
+            //    }
 
-                //orphanRoads.Add(root);
-            }
+            //    //orphanRoads.Add(root);
+            //}
 
             // checks joins: if some join contains village - 
 
@@ -249,7 +255,7 @@ namespace RailHexLib
         /// Value is Structures placed in Cell and it's 
         /// </summary>
         private Dictionary<Cell, StructureRoad> structures;
-        private List<GraphNode<Cell>> orphanRoads = new List<GraphNode<Cell>>();
+        private List<HexNode> orphanRoads = new List<HexNode>();
         private List<TradeRoute> tradeRoutes = new List<TradeRoute>();
         private ILogger logger;
 

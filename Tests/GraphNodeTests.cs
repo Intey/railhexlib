@@ -42,5 +42,19 @@ namespace RailHexLib.Tests
             Assert.AreSame(target, expectedOwnerChildren[0].Value);
 
         }
+
+        [Test]
+        public void Link2HexNodeReference()
+        {
+            var node1 = new HexNode(new Cell(0, 0));
+            var node2 = new HexNode(new Cell(0, 1));
+
+            node1.Right = new(new Cell(0, 3));
+
+            node2.Right = node1;
+
+            Assert.IsNotNull(node2.Right.Right, "Should save as reference");
+            Assert.AreSame(node2, node2.Right.Left, "Should make backlink in node2");
+        }
     }
 }

@@ -4,7 +4,25 @@ using System.Collections.Generic;
 
 namespace RailHexLib.Test
 {
-
+    /**
+      * Grids
+      * 
+      * ^ R Axis    \ Q Axis (Diagonal left-up to right-down)
+      * |            v
+      * ======================================================
+      *  /R\
+      * | Q |
+      *  \S/
+      * ======================================================
+      *    /1\ /1\
+      *   | - | 0 |
+      *  /0\ /0\ /0\
+      * | - | 0 | 1 |
+      *  \ /-\ /-\ /
+      *   | 0 | 1 |
+      *    \ / \ /
+      *    
+      */
     [TestFixture]
     public class CellsTest
     {
@@ -31,6 +49,50 @@ namespace RailHexLib.Test
             Assert.AreEqual(1, new Cell(0, 0).DistanceTo(new Cell(0, -1)));
             Assert.AreEqual(2, new Cell(0, 0).DistanceTo(new Cell(1, -2)));
             Assert.AreEqual(2, new Cell(0, 0).DistanceTo(new Cell(-1, -1)));
+            Assert.AreEqual(3, new Cell(0, 0).DistanceTo(new Cell(-1, 3)));
+            Assert.AreEqual(3, new Cell(0, 0).DistanceTo(new Cell(0, 3)));
+
+            Assert.AreEqual(2, new Cell(0, 1).DistanceTo(new Cell(-1, 3)));
+            Assert.AreEqual(3, new Cell(0, 1).DistanceTo(new Cell(-1, 4)));
+        }
+
+
+        /**
+         * 
+         *                  |       |       |       |       |       |       |     
+         *                /-1?\   /-1 \   /-1?\   /-1 \   /   \   /-1 \   /-1 \    
+         *              |???-2??|   -1 |????0??|    0  |       |    3  |    4  |
+         *                \???/ 0 \   / 0 \???/ 0 \   / 0 \   /.0.\   / 0 \   / 0 \
+         *                  |   -2  |   -1  |    0  |    1  |....2..|    3  |    4  |
+         *                /   \   /-1 \   / 1 \   / 1 \   / 1 \.../ 1 \   / 1 \   / 1.\
+         *                      |   -2  |   -1  |    0  |    1  |    2  |    3  |....4..|
+         *                \   /   \   /   \   /   \   / 2 \   / 2 \   / 2 \   / 2 \.../
+         *                  |       |       |       |    0  |       |    2  |    3  |
+         *                /   \   /   \   /   \   /   \   /   \   /   \   /   \   /
+         *                      |       |       |       |       |       |       |
+         *                \   /   \   /   \   /   \   /   \   /   \   /   \   /
+         *  
+         */
+        [Test]
+        public void TestPathTo()
+        {
+            var c1 = new Cell(0, 2);
+            var c2 = new Cell(-1, 4);
+            var r1 = c1.PathTo(c2);
+            Assert.AreEqual(3, r1.Count);
+            Assert.AreEqual(new Cell(0, 2), r1[0]);
+            Assert.AreEqual(new Cell(-1, 3), r1[1]);
+            Assert.AreEqual(new Cell(-1, 4), r1[2]);
+
+            c1 = new Cell(0, 0);
+            c2 = new Cell(2, 2);
+            r1 = c1.PathTo(c2);
+            Assert.AreEqual(5, r1.Count);
+            Assert.AreEqual(new Cell(0, 0), r1[0]);
+            Assert.AreEqual(new Cell(0, 1), r1[1]);
+            Assert.AreEqual(new Cell(1, 1), r1[2]);
+            Assert.AreEqual(new Cell(1, 2), r1[3]);
+            Assert.AreEqual(new Cell(2, 2), r1[4]);
         }
     }
 }

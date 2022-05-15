@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RailHexLib
 {
-    public class GraphNode<T> where T : IEquatable<T>, new()
+    public class GraphNode<T> where T : IEquatable<T>
     {
         public GraphNode(T v)
         {
@@ -59,21 +59,5 @@ namespace RailHexLib
         {
             return $"{Value} -> [{Children.Count}]";
         }
-        public GraphNode<T> Merge(GraphNode<T> a, GraphNode<T> b)
-        {
-            throw new NotImplementedException("");
-        }
-    }
-
-    public class HexNode<T> where T : IEquatable<T>
-    {
-        public T Value;
-        // links
-        public HexNode<T> Left;
-        public HexNode<T> UpLeft;
-        public HexNode<T> UpRight;
-        public HexNode<T> Right;
-        public HexNode<T> DownRight;
-        public HexNode<T> DownLeft;
     }
 }

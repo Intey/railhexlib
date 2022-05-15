@@ -24,7 +24,7 @@ namespace RailHexLib
         /// <returns>is road placed</returns>
         internal bool TryAddToRoad(GraphNode<Cell> newRoadCell)
         {
-            // find where newRoadChild placed in current structure road
+            // find where newRoadCell placed in current structure road
             return road.AddToChildrenBy(newRoadCell.Value, (roadNode, _) =>
             {
                 foreach (var newRoadChild in newRoadCell.Children)
