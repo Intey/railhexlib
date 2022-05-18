@@ -131,13 +131,17 @@ namespace RailHexLib
         {
             return new IdentityCell(PathTo(c)[0]);
         }
-        public List<Cell> PathTo(Cell c)
+
+        /// <summary/>
+        /// <param name="targetCell">target cell</param>
+        /// <returns>path from current cell to target, including current and target cells</returns>
+        public List<Cell> PathTo(Cell targetCell)
         {
             var result = new List<Cell>();
-            var distance = DistanceTo(c);
+            var distance = DistanceTo(targetCell);
             for (int i = 0; i <= distance; i++)
             {
-                result.Add(CellLerp(c, 1.0f / distance * i));
+                result.Add(CellLerp(targetCell, 1.0f / distance * i));
             }
             return result;
         }
