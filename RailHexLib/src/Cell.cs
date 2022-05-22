@@ -47,7 +47,7 @@ namespace RailHexLib
 
         public static Cell Rounded(float r, float q, float size = 1.15f)
         {
-            var qn = Math.Round(q+.0001);
+            var qn = Math.Round(q + .0001);
             var rn = Math.Round(r);
             var sn = Math.Round(-q - r);
 
@@ -62,11 +62,11 @@ namespace RailHexLib
                 qn = -rn - sn;
 
             }
-            else 
+            else
             {
                 rn = -qn - sn;
             }
-           
+
             return new Cell((int)Math.Ceiling(rn), (int)Math.Ceiling(qn), size);
         }
 
@@ -232,7 +232,6 @@ namespace RailHexLib
         public static readonly IdentityCell upLeftSide = new IdentityCell(1, -1);
         public static readonly IdentityCell upRightSide = new IdentityCell(1, 0);
         public static readonly IdentityCell rightSide = new IdentityCell(0, 1);
-        public static readonly IdentityCell downSide = new IdentityCell(-1, 1);
         public static readonly IdentityCell downRightSide = new IdentityCell(-1, 1);
         public static readonly IdentityCell downLeftSide = new IdentityCell(-1, 0);
     }

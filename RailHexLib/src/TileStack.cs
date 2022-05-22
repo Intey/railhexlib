@@ -15,6 +15,7 @@ namespace RailHexLib
         }
         public Tile PopTile()
         {
+            if (tiles.Count == 0) return null;
             return tiles.Dequeue();
         }
 

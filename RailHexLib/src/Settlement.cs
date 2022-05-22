@@ -21,6 +21,7 @@ namespace RailHexLib
         public override void Rotate60Clock()
         {
             base.Rotate60Clock();
+
             if (incomeRoadCell.Equals(IdentityCell.leftSide))
             {
                 incomeRoadCell = IdentityCell.upLeftSide;
@@ -45,7 +46,10 @@ namespace RailHexLib
             {
                 incomeRoadCell = IdentityCell.leftSide;
             }
-
+            foreach(var side in sides)
+            {
+                side.Value.Rotate60Clock();
+            }
         }
 
         public override string TileName()

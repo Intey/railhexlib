@@ -1,4 +1,4 @@
-﻿using RailHexLib.Grounds;
+﻿// using RailHexLib.Grounds;
 using System;
 using System.Collections.Generic;
 
@@ -8,12 +8,12 @@ namespace RailHexLib
     {
         public Cell Cell;
         // links
-        private HexNode left;
-        private HexNode upLeft;
-        private HexNode upRight;
-        private HexNode right;
-        private HexNode downRight;
-        private HexNode downLeft;
+        private HexNode left = null;
+        private HexNode upLeft = null;
+        private HexNode upRight = null;
+        private HexNode right = null;
+        private HexNode downRight = null;
+        private HexNode downLeft = null;
 
         public HexNode(Cell c)
         {
@@ -53,21 +53,48 @@ namespace RailHexLib
         /// </summary>
         /// <param name="newNode">The node to add</param>
         /// <returns>parent node that adopt newNode. If not adopted - return null</returns>
-        /// <exception cref="NotImplementedException"></exception>
         public HexNode Add(HexNode newNode)
         {
-            //check direction, and distance. 
-            // if distance == 1, than place by direction
-            // else - move in given direction
-            // return parent node in which we place newRoadCell
-            throw new NotImplementedException();
+
+            if (Cell.DistanceTo(newNode.Cell) == 1)
+            {
+                var direction = Cell.GetDirectionTo(newNode.Cell);
+                if (direction.Equals(IdentityCell.downLeftSide))
+                {
+                    DownLeft = newNode;
+                }
+                else if (direction.Equals(IdentityCell.downRightSide))
+                {
+                    DownRight = newNode;
+                }
+                else if (direction.Equals(IdentityCell.rightSide))
+                {
+                    Right = newNode;
+                }
+                else if (direction.Equals(IdentityCell.leftSide))
+                {
+                    Left = newNode;
+                }
+                else if (direction.Equals(IdentityCell.upLeftSide))
+                {
+                    UpLeft = newNode;
+                }
+                else if (direction.Equals(IdentityCell.upRightSide))
+                {
+                    UpRight = newNode;
+                }
+                return this;
+            }
+            else
+            {
+                throw new NotImplementedException("Can't add HexNode to the child node");
+            }
         }
 
         public HexNode FindCell(Cell node)
         {
-            throw new NotImplementedException();
+            return findCell(node, null);
         }
-
 
         public HexNode Right
         {
@@ -100,6 +127,38 @@ namespace RailHexLib
         internal List<Cell> PathTo(Cell joineryCell)
         {
             throw new NotImplementedException();
+        }
+
+        private HexNode findCell(Cell node, IdentityCell fromSide) {
+            if (Cell.Equals(node)) { return this; }
+            else {
+                HexNode found = null;
+                if ( Left != null && (fromSide == null || !fromSide.Equals(IdentityCell.leftSide))) {
+                    found = Left.findCell(node, IdentityCell.rightSide);
+                    if (found != null) return found;
+                }
+                if (UpLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.upLeftSide))) {
+                    found = UpLeft.findCell(node, IdentityCell.downRightSide);
+                    if (found != null) return found;
+                }
+                if (UpRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.upRightSide))) {
+                    found = UpRight.findCell(node, IdentityCell.downLeftSide);
+                    if (found != null) return found;
+                }
+                if (Right != null && (fromSide == null || !fromSide.Equals(IdentityCell.rightSide))) {
+                    found = Right.findCell(node, IdentityCell.leftSide);
+                    if (found != null) return found;
+                }
+                if (DownRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.downRightSide))) {
+                    found = DownRight.findCell(node, IdentityCell.upLeftSide);
+                    if (found != null) return found;
+                }
+                if (DownLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.downLeftSide))) {
+                    found = DownLeft.findCell(node, IdentityCell.upRightSide);
+                    if (found != null) return found;
+                }
+                return null;
+            }
         }
     }
 }

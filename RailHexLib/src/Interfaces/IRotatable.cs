@@ -39,6 +39,7 @@ namespace RailHexLib.Interfaces
             sides[IdentityCell.upRightSide] = sides[IdentityCell.upLeftSide];
             sides[IdentityCell.upLeftSide] = leftSide;
         }
+
         public void Rotate60Clock(int count)
         {
             for(int i =0; i< count; i++)
@@ -47,8 +48,6 @@ namespace RailHexLib.Interfaces
             }
         }
 
-
         protected Dictionary<IdentityCell, T> sides = new Dictionary<IdentityCell, T>(new IdentityCellEqualityComparer());
-
     }
 }
