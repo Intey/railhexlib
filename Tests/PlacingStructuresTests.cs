@@ -86,17 +86,19 @@ namespace RailHexLib.Test
             Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
             List<Cell> expectedRoad = new()
             {
-                structures[0].GetEnterCell(),
-                placedCell,
                 structures[1].GetEnterCell(),
+                placedCell,
+                structures[0].GetEnterCell(),
             };
             Assert.AreEqual(expectedRoad, r1.cells);
         }
         [Test]
         public void TestLongRoute()
         {
+            // replace one
             structures[1] = new Settlement(new Cell(0, -6));
             structures[1].Rotate60Clock(3); // 180
+
             game.AddStructures(structures);
 
             // we need 3 tiles
@@ -121,11 +123,11 @@ namespace RailHexLib.Test
             Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
             List<Cell> expectedRoad = new()
             {
-                new Cell(0, -1),
-                new Cell(0, -2),
-                new Cell(0, -3),
-                new Cell(0, -4),
                 new Cell(0, -5),
+                new Cell(0, -4),
+                new Cell(0, -3),
+                new Cell(0, -2),
+                new Cell(0, -1),
             };
             Assert.AreEqual(r1.cells, expectedRoad);
         }
@@ -166,11 +168,11 @@ namespace RailHexLib.Test
             Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
             List<Cell> expectedRoad = new()
             {
-                structures[0].GetEnterCell(),//0,-1
-                new Cell(0, -2),
-                new Cell(0, -3),
-                new Cell(0, -4),
                 structures[1].GetEnterCell(), //0, -5
+                new Cell(0, -4),
+                new Cell(0, -3),
+                new Cell(0, -2),
+                structures[0].GetEnterCell(),//0,-1
             };
             Assert.AreEqual(r1.cells, expectedRoad);
         }
@@ -178,13 +180,14 @@ namespace RailHexLib.Test
         public void TestLongRouteBuildFromOrphan()
         {
             /*
-             * /==S1==\            /==S0==\
+             * /==S1==\  2   1   3 /==S0==\
              *  / \ / \ / \ / \ / \ / \ / \
              * | -6| -5| -4| -3| -2| -1|  0|
              *  \ / \ / \ / \ / \ / \ / \ / 
              * 
              */
-            structures[1] = new Settlement(new Cell(0, -6));
+            structures[1] = new Settlement(new Cell(0, -6)); 
+            structures[1].Rotate60Clock(3); // rotate 180
             game.AddStructures(structures);
 
             for (int i = 0; i < 3; i++)
@@ -194,26 +197,30 @@ namespace RailHexLib.Test
             var isPlaced = game.PlaceCurrentTile(new Cell(0, -3));
             Assert.IsTrue(isPlaced && !isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 0);
+            Assert.AreEqual(1, isPlaced.NewOrphanRoads.Count);
             
             isPlaced = game.PlaceCurrentTile(new Cell(0, -4));
             Assert.IsTrue(isPlaced && !isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 0);
-            
+            Assert.AreEqual(1, isPlaced.NewStructureRoads.Count);
+            Assert.IsNotNull(isPlaced.NewStructureRoads[0].road.FindCell(new Cell(0, -3)), "should preserve orphan cell previosly added");
+
             // place center road
             isPlaced = game.PlaceCurrentTile(new Cell(0, -2));
-            Assert.IsTrue(isPlaced && !isPlaced.GameOver);
+            Assert.IsTrue(isPlaced && isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 1);
+
             
             var r1 = game.Routes[0];
             Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
             Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
             List<Cell> expectedRoad = new()
             {
-                structures[0].GetEnterCell(),//0,-1
-                new Cell(0, -2),
-                new Cell(0, -3),
-                new Cell(0, -4),
                 structures[1].GetEnterCell(), //0, -5
+                new Cell(0, -4),
+                new Cell(0, -3),
+                new Cell(0, -2),
+                structures[0].GetEnterCell(),//0,-1
             };
             Assert.AreEqual(r1.cells, expectedRoad);
         }

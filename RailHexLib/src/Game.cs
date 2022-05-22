@@ -83,25 +83,33 @@ namespace RailHexLib
             // make tree of current Hex
             var placedHexNodeRoads = new HexNode(placedCell);
 
-            List<Cell> hasChangedOrphan = new List<Cell>();
-            List<Cell> hasChangedRoads = new List<Cell>();
-            List<Cell> hasChangedTradeRoute = new List<Cell>();
-
-            // check orphans
+            HashSet<Cell> hasChangedOrphan = new HashSet<Cell>();
+            HashSet<Cell> hasChangedRoads = new HashSet<Cell>();
+            
+            // no joins, make new orphan
+            if (joinedRoads.Count() == 0 && currentTile.Sides.ContainsValue(Road.instance))
+            {
+                orphanRoads[placedCell] = placedHexNodeRoads;
+                placementResult.NewOrphanRoads.Add(orphanRoads[placedCell]);
+            }
+            // check joins
             foreach (var joinedRoadCell in joinedRoads)
             {
                 logger.Log($"Game.PlaceCurrentTile: process joinedCell {joinedRoadCell}");
-                hasChangedOrphan = AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, orphanRoads);
+                hasChangedOrphan.UnionWith(AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, orphanRoads));
 
-                placementResult.NewOrphanRoads = hasChangedOrphan.Select(k => orphanRoads[k]).ToList();
+                placementResult.NewOrphanRoads.AddRange(hasChangedOrphan.Select(k => orphanRoads[k]).ToList());
 
                 var roads = structureRoads.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.road);
                 // TODO: should return list of merged structures to join them in tradeRoute
 
-                hasChangedRoads = AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, roads);
-                // hasChangedTradeRoute = AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, tradeRoutes);
-                placementResult.NewStructureRoads = hasChangedRoads.Select(k => structureRoads[k]).ToList();
+                hasChangedRoads.UnionWith(AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, roads)); 
+                
             }
+
+            // hasChangedTradeRoute = AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, tradeRoutes);
+            placementResult.NewStructureRoads = hasChangedRoads.Select(k => structureRoads[k]).ToList();
+
             // promoted to structures. Remove from orphans
             if (hasChangedOrphan.Count >= 1 && hasChangedRoads.Count >= 1)
             {
@@ -113,8 +121,6 @@ namespace RailHexLib
             }
             if (hasChangedRoads.Count > 1)
             {
-                // clear old keys
-                foreach(var k in hasChangedRoads) structureRoads.Remove(k);
 
                 var changedStructureRoads = hasChangedRoads.Select(cell => structureRoads[cell]);
 
@@ -123,6 +129,8 @@ namespace RailHexLib
 
                 BuildTradeRoutes(items);
 
+                // clear old keys
+                foreach(var k in hasChangedRoads) structureRoads.Remove(k);
                 structureRoads.Remove(placedHexNodeRoads.Cell);
             }
 
@@ -150,13 +158,8 @@ namespace RailHexLib
             var result = new List<Cell>();
             foreach (var roadKey in roadsForMerge.Keys.ToList())
             {
-                // add the placedCell to an orphan graph 
-                // if the joined road cell in the orphan graph
-
-                logger.Log($"Game.AddToPlacedGraphs: process roadKey {roadKey}");
-
+                // joinery cell should be in one of all: orphan, road or trade route
                 HexNode roadJoineryOwner = roadsForMerge[roadKey].FindCell(joineryCell);
-                logger.Log($"found joinery {roadJoineryOwner} on key {roadKey}");
                 if (roadJoineryOwner != null)
                 {
                     result.Add(roadKey);
@@ -230,9 +233,9 @@ namespace RailHexLib
                     // ADD struct to newRoute
                     newRoute.tradePoints.Add(pair[0].StartPoint, pair[0].structure);
                     newRoute.tradePoints.Add(pair[1].StartPoint, pair[1].structure);
-                    newRoute.cells.AddRange(pair[0].road.PathTo(joineryCell).Reverse<Cell>()); // add income cell too
+                    newRoute.cells.AddRange(pair[0].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell))); // add income cell too
                     newRoute.cells.Add(joineryCell);
-                    newRoute.cells.AddRange(pair[1].road.PathTo(joineryCell));
+                    newRoute.cells.AddRange(pair[1].road.PathTo(joineryCell).Where<Cell>(i=> !i.Equals(joineryCell)).Reverse<Cell>());
                     // ADD points to Route
                     tradeRoutes.Add(newRoute);
                 }

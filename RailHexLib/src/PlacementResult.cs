@@ -5,6 +5,7 @@ namespace RailHexLib
 {
     public class PlacementResult
     {
+        // TODO: prevent changes in this fields with factory
         public bool isPlaced = true;
         public Dictionary<Cell, Ground> NewJoins;
         public List<HexNode> NewOrphanRoads;
@@ -17,6 +18,9 @@ namespace RailHexLib
             this.isPlaced = isPlaced;
             this.NewJoins = joins ?? new Dictionary<Cell, Ground>();
             this.GameOver = gameover;
+            this.NewOrphanRoads = new List<HexNode>();
+            this.NewStructureRoads = new List<StructureRoad>();
+            this.NewTradeRoutes = new List<TradeRoute>();
         }
 
         public static implicit operator bool(PlacementResult value)

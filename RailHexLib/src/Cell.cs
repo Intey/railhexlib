@@ -129,7 +129,9 @@ namespace RailHexLib
 
         public IdentityCell GetDirectionTo(Cell c)
         {
-            return new IdentityCell(PathTo(c)[0]);
+            Debug.Assert(DistanceTo(c) == 1);
+            var d = c - this;
+            return new IdentityCell(d);
         }
 
         /// <summary/>
@@ -150,7 +152,7 @@ namespace RailHexLib
         {
             return a + (b - a) * t;
         }
-        private Cell CellLerp(Cell b, float t)
+        public Cell CellLerp(Cell b, float t)
         {
             Debug.Assert(this.size == b.size);
 

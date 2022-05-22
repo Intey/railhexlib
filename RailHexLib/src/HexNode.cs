@@ -47,6 +47,34 @@ namespace RailHexLib
                 value.downLeft = this;
             }
         }
+        public HexNode Right
+        {
+            get => right;
+            set
+            {
+                right = value;
+                value.left = this;
+            }
+        }
+        public HexNode DownRight
+        {
+            get => downRight;
+            set
+            {
+                downRight = value;
+                value.upLeft = this;
+            }
+        }
+        public HexNode DownLeft
+        {
+            get => downLeft;
+            set
+            {
+                downLeft = value;
+                value.upRight = this;
+            }
+        }
+
         /// <summary>
         /// Adds a newNode to self if possible. 
         /// Changes the newNode related side link to the parent that adopts it.
@@ -91,74 +119,71 @@ namespace RailHexLib
             }
         }
 
-        public HexNode FindCell(Cell node)
+        public HexNode FindCell(Cell node, int searchDepth=-1)
         {
-            return findCell(node, null);
-        }
-
-        public HexNode Right
-        {
-            get => right;
-            set
-            {
-                right = value;
-                value.left = this;
-            }
-        }
-        public HexNode DownRight
-        {
-            get => downRight;
-            set
-            {
-                downRight = value;
-                value.upLeft = this;
-            }
-        }
-        public HexNode DownLeft
-        {
-            get => downLeft;
-            set
-            {
-                downLeft = value;
-                value.upRight = this;
-            }
+            return findCell(node, null, searchDepth);
         }
 
         internal List<Cell> PathTo(Cell joineryCell)
         {
-            throw new NotImplementedException();
+            var result = new List<Cell>
+            {
+                Cell
+            };
+
+            if (Cell.Equals(joineryCell))
+            {
+                return result;
+            }
+
+            var distance = Cell.DistanceTo(joineryCell);
+            var nextCell = Cell.CellLerp(joineryCell, 1.0f / distance);
+
+            var node = FindCell(nextCell, 1); // should check only children
+            if (node == null) throw new NotFiniteNumberException();
+
+            result.AddRange(node.PathTo(joineryCell));
+            return result;
         }
 
-        private HexNode findCell(Cell node, IdentityCell fromSide) {
+        private HexNode findCell(Cell node, IdentityCell fromSide, int searchDepth =-1)
+        {
             if (Cell.Equals(node)) { return this; }
-            else {
-                HexNode found = null;
-                if ( Left != null && (fromSide == null || !fromSide.Equals(IdentityCell.leftSide))) {
-                    found = Left.findCell(node, IdentityCell.rightSide);
-                    if (found != null) return found;
-                }
-                if (UpLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.upLeftSide))) {
-                    found = UpLeft.findCell(node, IdentityCell.downRightSide);
-                    if (found != null) return found;
-                }
-                if (UpRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.upRightSide))) {
-                    found = UpRight.findCell(node, IdentityCell.downLeftSide);
-                    if (found != null) return found;
-                }
-                if (Right != null && (fromSide == null || !fromSide.Equals(IdentityCell.rightSide))) {
-                    found = Right.findCell(node, IdentityCell.leftSide);
-                    if (found != null) return found;
-                }
-                if (DownRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.downRightSide))) {
-                    found = DownRight.findCell(node, IdentityCell.upLeftSide);
-                    if (found != null) return found;
-                }
-                if (DownLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.downLeftSide))) {
-                    found = DownLeft.findCell(node, IdentityCell.upRightSide);
-                    if (found != null) return found;
-                }
-                return null;
+            if (searchDepth == 0) return null;
+
+            HexNode found;
+            if (Left != null && (fromSide == null || !fromSide.Equals(IdentityCell.leftSide)))
+            {
+                found = Left.findCell(node, IdentityCell.rightSide, --searchDepth);
+                if (found != null) return found;
             }
+            if (UpLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.upLeftSide)))
+            {
+                found = UpLeft.findCell(node, IdentityCell.downRightSide, --searchDepth);
+                if (found != null) return found;
+            }
+            if (UpRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.upRightSide)))
+            {
+                found = UpRight.findCell(node, IdentityCell.downLeftSide, --searchDepth);
+                if (found != null) return found;
+            }
+            if (Right != null && (fromSide == null || !fromSide.Equals(IdentityCell.rightSide)))
+            {
+                found = Right.findCell(node, IdentityCell.leftSide, --searchDepth);
+                if (found != null) return found;
+            }
+            if (DownRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.downRightSide)))
+            {
+                found = DownRight.findCell(node, IdentityCell.upLeftSide, --searchDepth);
+                if (found != null) return found;
+            }
+            if (DownLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.downLeftSide)))
+            {
+                found = DownLeft.findCell(node, IdentityCell.upRightSide, --searchDepth);
+                if (found != null) return found;
+            }
+            return null;
+
         }
     }
 }

@@ -60,13 +60,13 @@ namespace RailHexLib.Test
         /**
          * 
          *                  |       |       |       |       |       |       |     
-         *                /-1?\   /-1 \   /-1?\   /-1 \   /   \   /-1 \   /-1 \    
-         *              |???-2??|   -1 |????0??|    0  |       |    3  |    4  |
-         *                \???/ 0 \   / 0 \???/ 0 \   / 0 \   /.0.\   / 0 \   / 0 \
+         *                /-1 \   /-1 \   /-1 \   /-1 \   /   \   /-1 \   /-1.\    
+         *              |   -2  |   -1 |    0  |    1  |       |    3  |  ...4..|
+         *                \   / 0 \   / 0 \   / 0 \   / 0 \   /.0.\   / 0 \.../ 0 \
          *                  |   -2  |   -1  |    0  |    1  |....2..|    3  |    4  |
-         *                /   \   /-1 \   / 1 \   / 1 \   / 1 \.../ 1 \   / 1 \   / 1.\
-         *                      |   -2  |   -1  |    0  |    1  |    2  |    3  |....4..|
-         *                \   /   \   /   \   /   \   / 2 \   / 2 \   / 2 \   / 2 \.../
+         *                /   \   /-1 \   / 1 \   / 1 \   / 1 \.../ 1 \   / 1 \   / 1 \
+         *                      |   -2  |   -1  |    0  |    1  |    2  |    3  |    4  |
+         *                \   /   \   /   \   /   \   / 2 \   / 2 \   / 2 \   / 2 \   /
          *                  |       |       |       |    0  |       |    2  |    3  |
          *                /   \   /   \   /   \   /   \   /   \   /   \   /   \   /
          *                      |       |       |       |       |       |       |
@@ -74,7 +74,7 @@ namespace RailHexLib.Test
          *  
          */
         [Test]
-        public void TestPathTo()
+        public void PathTo()
         {
             var c1 = new Cell(0, 2);
             var c2 = new Cell(-1, 4);
@@ -93,6 +93,21 @@ namespace RailHexLib.Test
             Assert.AreEqual(new Cell(1, 1), r1[2]);
             Assert.AreEqual(new Cell(1, 2), r1[3]);
             Assert.AreEqual(new Cell(2, 2), r1[4]);
+        }
+
+        [Test]
+        public void DirectionTo()
+        {
+            var cell = new Cell(0, 0);
+            Assert.AreEqual(new Cell(0, -1), cell.GetDirectionTo(new Cell(0, -1)));
+            Assert.AreEqual(new Cell(0, 1), cell.GetDirectionTo(new Cell(0, 1)));
+
+            cell = new Cell(0, -2);
+            Assert.AreEqual(new Cell(0, 1), cell.GetDirectionTo(new Cell(0, -1)));
+            Assert.AreEqual(new Cell(0, -1), cell.GetDirectionTo(new Cell(0, -3)));
+            cell = new Cell(0, -4);
+            Assert.AreEqual(new Cell(0, 1), cell.GetDirectionTo(new Cell(0, -3)));
+            Assert.AreEqual(new Cell(0, -1), cell.GetDirectionTo(new Cell(0, -5)));
         }
     }
 }

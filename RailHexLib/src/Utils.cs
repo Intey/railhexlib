@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace RailHexLib
@@ -8,6 +9,7 @@ namespace RailHexLib
 
         internal static List<List<T>> MakePairs<T>(List<T> list)
         {
+            Debug.Assert(list.Count > 1);
             List<List<T>> result = new List<List<T>>();
             for (int j = 0; j < list.Count() - 1; j++)
             {
