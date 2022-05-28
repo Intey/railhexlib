@@ -65,6 +65,7 @@ namespace RailHexLib
         /// <returns>false if tile is not placed</returns>
         public PlacementResult PlaceCurrentTile(Cell placedCell)
         {
+            Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile()?");
             if (!CanPlaceCurrentTile(placedCell))
             {
                 return PlacementResult.Fail;
@@ -250,7 +251,6 @@ namespace RailHexLib
         /// <returns>Dictionary of neighbors that joined by Ground(in Value) with `placedCell`</returns>
         private Dictionary<Cell, Ground> FindJoinedNeighbors(Cell placedCell)
         {
-            Debug.Assert(currentTile != null, "Current tile should exists when searching neighbors for placedCell");
             Dictionary<Cell, Ground> joinsOfPlacedCell = new Dictionary<Cell, Ground>();
             foreach (var neighbor in placedCell.Neighbours()) // structures.Boundaries()) // place struct: if "currentTile" will be the cell, then curentTile.Neighbours() may return complex boundary
             {

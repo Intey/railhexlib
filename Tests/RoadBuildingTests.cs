@@ -1,16 +1,52 @@
 using NUnit.Framework;
-using RailHexLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 using RailHexLib.Grounds;
-
 namespace RailHexLib.Test
 {
 
     [TestFixture]
-    public class RoadBuildingTests {
+    public class RoadBuildingTests
+    {
+        private string PathToString(List<Cell> list)
+        {
+            if (list == null) return "";
+            string result = "";
+            if (list.Count() < 2) return result;
+            int j = 1;
+            for (int i = 0; i < list.Count() - 1; i++)
+            {
+                result += "-";
+                var dir = list[i].GetDirectionTo(list[j]);
+                if (dir.Equals(IdentityCell.leftSide))
+                {
+                    result += "L";
+                }
+                else if (dir.Equals(IdentityCell.upLeftSide))
+                {
+                    result += "UL";
+                }
+                else if (dir.Equals(IdentityCell.upRightSide))
+                {
+                    result += "UR";
+                }
+                else if (dir.Equals(IdentityCell.rightSide))
+                {
+                    result += "R";
+                }
+                else if (dir.Equals(IdentityCell.downRightSide))
+                {
+                    result += "DR";
+                }
+                else if (dir.Equals(IdentityCell.downLeftSide))
+                {
+                    result += "DL";
+                }
+                j++;
+            }
+            return result;
+        }
+
         public TileStack stack = new();
         readonly List<Structure> structures = new();
         readonly DevTools.Logger logger = new();
@@ -47,14 +83,14 @@ namespace RailHexLib.Test
 
             Assert.IsTrue(isPlaced);
             var routes = game.Routes;
-            var expectedJoins = new Dictionary<Cell, Grounds.Ground>() {
+            var expectedJoins = new Dictionary<Cell, Grounds.Ground>()
+            {
                 [new Cell(0, -3)] = Grounds.Road.instance,
                 [new Cell(0, -1)] = Grounds.Road.instance,
             };
 
             Assert.AreEqual(expectedJoins, isPlaced.NewJoins);
-            Assert.AreEqual(2, isPlaced.NewStructureRoads.Count, "should return 2 changed structure roads");
-            Assert.AreEqual(1, routes.Count);
+            Assert.AreEqual(1, routes.Count());
             var r1 = routes[0];
             Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
             Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
@@ -91,6 +127,12 @@ namespace RailHexLib.Test
 
             isPlaced = game.PlaceCurrentTile(new Cell(0, -4));
             Assert.IsTrue(isPlaced && isPlaced.GameOver);
+            var expected = new Dictionary<Cell, Grounds.Ground>()
+            {
+                [new Cell(0, -3)] = Grounds.Road.instance,
+                [new Cell(0, -5)] = Grounds.Road.instance,
+            };
+            Assert.AreEqual(expected, isPlaced.NewJoins);
             Assert.AreEqual(game.Routes.Count, 1);
             var r1 = game.Routes[0];
             Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
@@ -128,11 +170,11 @@ namespace RailHexLib.Test
             var isPlaced = game.PlaceCurrentTile(new Cell(0, -2));
             Assert.IsTrue(isPlaced && !isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 0);
-            
+
             isPlaced = game.PlaceCurrentTile(new Cell(0, -4));
             Assert.IsTrue(isPlaced && !isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 0);
-            
+
             isPlaced = game.PlaceCurrentTile(new Cell(0, -3));
             Assert.IsTrue(isPlaced && isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 1);
@@ -160,19 +202,19 @@ namespace RailHexLib.Test
              *  \ / \ / \ / \ / \ / \ / \ / 
              * 
              */
-            structures[1] = new Settlement(new Cell(0, -6)); 
+            structures[1] = new Settlement(new Cell(0, -6));
             structures[1].Rotate60Clock(3); // rotate 180
             game.AddStructures(structures);
 
             for (int i = 0; i < 3; i++)
                 stack.PushTile(new ROAD_180Tile());
-            
+
             game.NextTile();
             var isPlaced = game.PlaceCurrentTile(new Cell(0, -3));
             Assert.IsTrue(isPlaced && !isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 0);
             Assert.AreEqual(1, isPlaced.NewOrphanRoads.Count);
-            
+
             isPlaced = game.PlaceCurrentTile(new Cell(0, -4));
             Assert.IsTrue(isPlaced && !isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 0);
@@ -184,7 +226,7 @@ namespace RailHexLib.Test
             Assert.IsTrue(isPlaced && isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 1);
 
-            
+
             var r1 = game.Routes[0];
             Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
             Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
@@ -200,11 +242,35 @@ namespace RailHexLib.Test
         }
 
         [Test]
-        public void TestRotatedTilesRoad() 
+        public void TestRotatedTilesRoad()
         {
-            structures[1] = new Settlement(new Cell(0, -6)); 
+            /*
+             * /==S1==\ r|r  |  /==S0==\
+             *  / \ / \r/r\r/r\ / \ / \
+             * | -5| -4|r-3| -2| -1|  0|
+             *  \ / \ / \ / \ / \ / \ / 
+             * 
+             */
+            structures[1] = new Settlement(new Cell(0, -5));
             structures[1].Rotate60Clock(3); // rotate 180
             game.AddStructures(structures);
+            game.PushTile(new ROAD_60Tile());
+            game.PushTile(new ROAD_60Tile());
+            game.PushTile(new ROAD_120Tile());
+            game.PushTile(new ROAD_120Tile());
+            game.NextTile();
+            var result = game.PlaceCurrentTile(new Cell(0, -3));
+            Assert.AreEqual(1, result.NewStructureRoads.Count());
+            game.RotateCurrentTile(3);
+            game.PlaceCurrentTile(new Cell(-1, -3));
+            Assert.AreEqual(1, result.NewStructureRoads.Count());
+            Assert.AreEqual("-R-UL", PathToString(result.NewStructureRoads[0].road.PathTo(new Cell(-1, -3))));
+            game.RotateCurrentTile(5);
+            game.PlaceCurrentTile(new Cell(-1, -2));
+            Assert.AreEqual(1, result.NewStructureRoads.Count());
+            game.RotateCurrentTile(1);
+            result = game.PlaceCurrentTile(new Cell(0, -2));
+            Assert.AreEqual(1, result.NewTradeRoutes.Count());
         }
 
     }

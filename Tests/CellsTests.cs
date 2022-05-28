@@ -24,7 +24,7 @@ namespace RailHexLib.Test
       *    
       */
     [TestFixture]
-    public class CellsTest
+    public class CellsTests
     {
         [Test]
         public void TestCompare()
@@ -74,7 +74,7 @@ namespace RailHexLib.Test
          *  
          */
         [Test]
-        public void PathTo()
+        public void TestPathTo()
         {
             var c1 = new Cell(0, 2);
             var c2 = new Cell(-1, 4);
@@ -96,18 +96,20 @@ namespace RailHexLib.Test
         }
 
         [Test]
-        public void DirectionTo()
+        public void TestDirectionTo()
         {
             var cell = new Cell(0, 0);
-            Assert.AreEqual(new Cell(0, -1), cell.GetDirectionTo(new Cell(0, -1)));
-            Assert.AreEqual(new Cell(0, 1), cell.GetDirectionTo(new Cell(0, 1)));
+            Assert.AreEqual(IdentityCell.leftSide, cell.GetDirectionTo(new Cell(0, -1)));
+            Assert.AreEqual(IdentityCell.rightSide, cell.GetDirectionTo(new Cell(0, 1)));
 
             cell = new Cell(0, -2);
-            Assert.AreEqual(new Cell(0, 1), cell.GetDirectionTo(new Cell(0, -1)));
-            Assert.AreEqual(new Cell(0, -1), cell.GetDirectionTo(new Cell(0, -3)));
+            Assert.AreEqual(IdentityCell.rightSide, cell.GetDirectionTo(new Cell(0, -1)));
+            Assert.AreEqual(IdentityCell.leftSide, cell.GetDirectionTo(new Cell(0, -3)));
             cell = new Cell(0, -4);
-            Assert.AreEqual(new Cell(0, 1), cell.GetDirectionTo(new Cell(0, -3)));
-            Assert.AreEqual(new Cell(0, -1), cell.GetDirectionTo(new Cell(0, -5)));
+            Assert.AreEqual(IdentityCell.rightSide, cell.GetDirectionTo(new Cell(0, -3)));
+            Assert.AreEqual(IdentityCell.leftSide, cell.GetDirectionTo(new Cell(0, -5)));
+            Assert.AreEqual(IdentityCell.upLeftSide, cell.GetDirectionTo(new Cell(-1, -4)));
+            Assert.AreEqual(IdentityCell.downRightSide, cell.GetDirectionTo(new Cell(1, -4)));
         }
     }
 }

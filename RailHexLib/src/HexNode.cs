@@ -124,7 +124,7 @@ namespace RailHexLib
             return findCell(node, null, searchDepth);
         }
 
-        internal List<Cell> PathTo(Cell joineryCell)
+        public List<Cell> PathTo(Cell joineryCell)
         {
             var result = new List<Cell>
             {
@@ -140,9 +140,11 @@ namespace RailHexLib
             var nextCell = Cell.CellLerp(joineryCell, 1.0f / distance);
 
             var node = FindCell(nextCell, 1); // should check only children
-            if (node == null) throw new NotFiniteNumberException();
+            if (node == null) return null;
 
-            result.AddRange(node.PathTo(joineryCell));
+            var nextNodes = node.PathTo(joineryCell);
+            if (nextNodes == null) return null;
+            result.AddRange(nextNodes);
             return result;
         }
 

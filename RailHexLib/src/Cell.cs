@@ -85,12 +85,12 @@ namespace RailHexLib
         {
             return new List<Cell>
             {
-                new Cell(r, q - 1, size),
-                new Cell(r - 1, q, size),
-                new Cell(r - 1, q + 1, size),
-                new Cell(r, q + 1, size),
-                new Cell(r + 1, q, size),
-                new Cell(r + 1, q - 1, size),
+                (this + IdentityCell.leftSide),
+                (this + IdentityCell.upLeftSide),
+                (this + IdentityCell.upRightSide),
+                (this + IdentityCell.rightSide),
+                (this + IdentityCell.downRightSide),
+                (this + IdentityCell.downLeftSide)
             };
         }
 
@@ -129,7 +129,7 @@ namespace RailHexLib
 
         public IdentityCell GetDirectionTo(Cell c)
         {
-            Debug.Assert(DistanceTo(c) == 1);
+            Debug.Assert(DistanceTo(c) == 1, "Can get direction only for neighbor currently");
             var d = c - this;
             return new IdentityCell(d);
         }
@@ -231,11 +231,11 @@ namespace RailHexLib
         }
 
         public static readonly IdentityCell leftSide = new IdentityCell(0, -1);
-        public static readonly IdentityCell upLeftSide = new IdentityCell(1, -1);
-        public static readonly IdentityCell upRightSide = new IdentityCell(1, 0);
+        public static readonly IdentityCell upLeftSide = new IdentityCell(-1, 0);
+        public static readonly IdentityCell upRightSide = new IdentityCell(1, -1);
         public static readonly IdentityCell rightSide = new IdentityCell(0, 1);
-        public static readonly IdentityCell downRightSide = new IdentityCell(-1, 1);
-        public static readonly IdentityCell downLeftSide = new IdentityCell(-1, 0);
+        public static readonly IdentityCell downRightSide = new IdentityCell(1, 0);
+        public static readonly IdentityCell downLeftSide = new IdentityCell(-1, 1);
     }
     internal class IdentityCellEqualityComparer : IEqualityComparer<IdentityCell>
     {
