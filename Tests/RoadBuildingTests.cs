@@ -89,7 +89,7 @@ namespace RailHexLib.Test
                 [new Cell(0, -1)] = Grounds.Road.instance,
             };
 
-            Assert.AreEqual(expectedJoins, isPlaced.NewJoins);
+            Assert.AreEqual(expectedJoins, isPlaced.NewJoins, $"{isPlaced.NewJoins.Keys.First()}");
             Assert.AreEqual(1, routes.Count());
             var r1 = routes[0];
             Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
@@ -259,17 +259,23 @@ namespace RailHexLib.Test
             game.PushTile(new ROAD_120Tile());
             game.PushTile(new ROAD_120Tile());
             game.NextTile();
+            
             var result = game.PlaceCurrentTile(new Cell(0, -3));
             Assert.AreEqual(1, result.NewStructureRoads.Count());
+            
             game.RotateCurrentTile(3);
             game.PlaceCurrentTile(new Cell(-1, -3));
+            Assert.AreEqual(1, result.NewJoins.Count());
             Assert.AreEqual(1, result.NewStructureRoads.Count());
-            Assert.AreEqual("-R-UL", PathToString(result.NewStructureRoads[0].road.PathTo(new Cell(-1, -3))));
-            game.RotateCurrentTile(5);
+
+            game.RotateCurrentTile(4);
             game.PlaceCurrentTile(new Cell(-1, -2));
+            Assert.AreEqual(1, result.NewJoins.Count());
             Assert.AreEqual(1, result.NewStructureRoads.Count());
+            
             game.RotateCurrentTile(1);
             result = game.PlaceCurrentTile(new Cell(0, -2));
+            Assert.AreEqual(2, result.NewJoins.Count());
             Assert.AreEqual(1, result.NewTradeRoutes.Count());
         }
 

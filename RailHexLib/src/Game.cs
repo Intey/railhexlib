@@ -79,8 +79,6 @@ namespace RailHexLib
             placementResult.NewJoins = joinedNeighbors;
             // each of the objects is exactly in one of the graphs: orphan roads, strcture roads or tradeRoutes
             var joinedRoads = from t in joinedNeighbors where t.Value is Road select t.Key;
-
-            logger.Log($"Game.PlaceCurrentTile: joins {joinedRoads}");
             // make tree of current Hex
             var placedHexNodeRoads = new HexNode(placedCell);
 
@@ -128,7 +126,9 @@ namespace RailHexLib
                 var items = new List<KeyValuePair<Cell, IEnumerable<StructureRoad>>>();
                 items.Add(new KeyValuePair<Cell, IEnumerable<StructureRoad>>(placedHexNodeRoads.Cell, changedStructureRoads));
 
-                BuildTradeRoutes(items);
+                var newRoutes = BuildTradeRoutes(items);
+                placementResult.NewTradeRoutes = newRoutes;
+                this.tradeRoutes.AddRange(newRoutes);
 
                 // clear old keys
                 foreach(var k in hasChangedRoads) structureRoads.Remove(k);
@@ -222,8 +222,9 @@ namespace RailHexLib
 
         */
 
-        private void BuildTradeRoutes(IEnumerable<KeyValuePair<Cell, IEnumerable<StructureRoad>>> RoadsToJoin)
+        private List<TradeRoute> BuildTradeRoutes(IEnumerable<KeyValuePair<Cell, IEnumerable<StructureRoad>>> RoadsToJoin)
         {
+            var result = new List<TradeRoute>();
             foreach (var group in RoadsToJoin)
             {
                 var joineryCell = group.Key;
@@ -238,10 +239,11 @@ namespace RailHexLib
                     newRoute.cells.Add(joineryCell);
                     newRoute.cells.AddRange(pair[1].road.PathTo(joineryCell).Where<Cell>(i=> !i.Equals(joineryCell)).Reverse<Cell>());
                     // ADD points to Route
-                    tradeRoutes.Add(newRoute);
+                    result.Add(newRoute);
                 }
 
             }
+            return result;
         }
 
         /// <summary>
@@ -256,7 +258,7 @@ namespace RailHexLib
             {
                 if (placedTiles.ContainsKey(neighbor))
                 {
-
+                    logger.Log($"FindJoined: check neighbor {neighbor} for {placedCell}");
                     IdentityCell currentTileSide = new IdentityCell(neighbor - placedCell);
 
                     var currentTileSideBiome = currentTile.GetSideBiome(currentTileSide);
