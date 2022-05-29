@@ -27,6 +27,7 @@ namespace RailHexLib.Tests
         }
 
         [Test]
+        [Ignore("Actually don't meet that case")]
         public void FindWithCycleInGraph()
         {
             Assert.IsTrue(
