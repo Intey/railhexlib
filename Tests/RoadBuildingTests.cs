@@ -92,15 +92,15 @@ namespace RailHexLib.Test
             Assert.AreEqual(expectedJoins, isPlaced.NewJoins, $"{isPlaced.NewJoins.Keys.First()}");
             Assert.AreEqual(1, routes.Count());
             var r1 = routes[0];
-            Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
-            Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
+            Assert.AreEqual(structures[0].Center, r1.TradePoints[structures[0].GetEnterCell()].Center);
+            Assert.AreEqual(structures[1].Center, r1.TradePoints[structures[1].GetEnterCell()].Center);
             List<Cell> expectedRoad = new()
             {
                 structures[1].GetEnterCell(),
                 placedCell,
                 structures[0].GetEnterCell(),
             };
-            Assert.AreEqual(expectedRoad, r1.cells);
+            Assert.AreEqual(expectedRoad, r1.Cells);
         }
         [Test]
         public void TestLongRoute()
@@ -135,8 +135,8 @@ namespace RailHexLib.Test
             Assert.AreEqual(expected, isPlaced.NewJoins);
             Assert.AreEqual(game.Routes.Count, 1);
             var r1 = game.Routes[0];
-            Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
-            Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
+            Assert.AreEqual(structures[0].Center, r1.TradePoints[structures[0].GetEnterCell()].Center);
+            Assert.AreEqual(structures[1].Center, r1.TradePoints[structures[1].GetEnterCell()].Center);
             List<Cell> expectedRoad = new()
             {
                 new Cell(0, -5),
@@ -145,7 +145,7 @@ namespace RailHexLib.Test
                 new Cell(0, -2),
                 new Cell(0, -1),
             };
-            Assert.AreEqual(r1.cells, expectedRoad);
+            Assert.AreEqual(r1.Cells, expectedRoad);
         }
         [Test]
         public void TestLongRouteConcurrentBuild()
@@ -180,8 +180,8 @@ namespace RailHexLib.Test
             Assert.AreEqual(game.Routes.Count, 1);
 
             var r1 = game.Routes[0];
-            Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
-            Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
+            Assert.AreEqual(structures[0].Center, r1.TradePoints[structures[0].GetEnterCell()].Center);
+            Assert.AreEqual(structures[1].Center, r1.TradePoints[structures[1].GetEnterCell()].Center);
             List<Cell> expectedRoad = new()
             {
                 structures[1].GetEnterCell(), //0, -5
@@ -190,7 +190,7 @@ namespace RailHexLib.Test
                 new Cell(0, -2),
                 structures[0].GetEnterCell(),//0,-1
             };
-            Assert.AreEqual(r1.cells, expectedRoad);
+            Assert.AreEqual(r1.Cells, expectedRoad);
         }
         [Test]
         public void TestLongRouteBuildFromOrphan()
@@ -228,8 +228,8 @@ namespace RailHexLib.Test
 
 
             var r1 = game.Routes[0];
-            Assert.AreEqual(structures[0].Center, r1.tradePoints[structures[0].GetEnterCell()].Center);
-            Assert.AreEqual(structures[1].Center, r1.tradePoints[structures[1].GetEnterCell()].Center);
+            Assert.AreEqual(structures[0].Center, r1.TradePoints[structures[0].GetEnterCell()].Center);
+            Assert.AreEqual(structures[1].Center, r1.TradePoints[structures[1].GetEnterCell()].Center);
             List<Cell> expectedRoad = new()
             {
                 structures[1].GetEnterCell(), //0, -5
@@ -238,7 +238,7 @@ namespace RailHexLib.Test
                 new Cell(0, -2),
                 structures[0].GetEnterCell(),//0,-1
             };
-            Assert.AreEqual(r1.cells, expectedRoad);
+            Assert.AreEqual(r1.Cells, expectedRoad);
         }
 
         [Test]

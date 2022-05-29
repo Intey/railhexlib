@@ -1,4 +1,3 @@
-using RailHexLib;
 using RailHexLib.Grounds;
 using System;
 using System.Diagnostics;
@@ -12,14 +11,13 @@ using RailHexLib.DevTools;
 namespace RailHexLib
 {
 
-    public class Game
+    public class Game : IUpdatable
     {
-        // task "place struct": IPlaceable
-        public Tile CurrentTile { get => currentTile; }
-
+        public Tile CurrentTile => currentTile;
         public Dictionary<Cell, Structure> Structures => structureRoads.ToDictionary(kv => kv.Key, kv => kv.Value.structure);
         public Dictionary<Cell, StructureRoad> StructureRoads => structureRoads;
-
+        public List<TradeRoute> Routes => tradeRoutes;
+        public int ScorePoints => scorePoints;
 
         public Game(TileStack stack = null, ILogger logger = null)
         {
@@ -37,7 +35,6 @@ namespace RailHexLib
             }
         }
 
-
         public void AddStructures(List<Structure> structures)
         {
             foreach (var structure in structures)
@@ -53,10 +50,6 @@ namespace RailHexLib
             stack.PushTile(newTile);
         }
 
-        public List<TradeRoute> Routes
-        {
-            get => tradeRoutes;
-        }
 
         /// <summary>
         /// Place tile on game board
@@ -84,7 +77,7 @@ namespace RailHexLib
 
             HashSet<Cell> hasChangedOrphan = new HashSet<Cell>();
             HashSet<Cell> hasChangedRoads = new HashSet<Cell>();
-            
+
             // no joins, make new orphan
             if (joinedRoads.Count() == 0 && currentTile.Sides.ContainsValue(Road.instance))
             {
@@ -102,8 +95,8 @@ namespace RailHexLib
                 var roads = structureRoads.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.road);
                 // TODO: should return list of merged structures to join them in tradeRoute
 
-                hasChangedRoads.UnionWith(AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, roads)); 
-                
+                hasChangedRoads.UnionWith(AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, roads));
+
             }
 
             // hasChangedTradeRoute = AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, tradeRoutes);
@@ -113,7 +106,7 @@ namespace RailHexLib
             if (hasChangedOrphan.Count >= 1 && hasChangedRoads.Count >= 1)
             {
                 // clear old keys
-                foreach(var k in hasChangedOrphan) orphanRoads.Remove(k);
+                foreach (var k in hasChangedOrphan) orphanRoads.Remove(k);
                 // remove created merged orphan - now it's in a structureRoad
                 orphanRoads.Remove(placedHexNodeRoads.Cell);
 
@@ -131,7 +124,7 @@ namespace RailHexLib
                 this.tradeRoutes.AddRange(newRoutes);
 
                 // clear old keys
-                foreach(var k in hasChangedRoads) structureRoads.Remove(k);
+                foreach (var k in hasChangedRoads) structureRoads.Remove(k);
                 structureRoads.Remove(placedHexNodeRoads.Cell);
             }
 
@@ -175,9 +168,10 @@ namespace RailHexLib
             return result.ToList();
         }
 
-        public void RotateCurrentTile(int count=1)
+        public void RotateCurrentTile(int count = 1)
         {
-            for(int i=0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 currentTile.Rotate60Clock();
             }
         }
@@ -195,32 +189,25 @@ namespace RailHexLib
             return true;
         }
 
-        /*
-        private bool BuildRoads(HexNode roadGraph)
+        public void Update(int ticks)
         {
-            bool result = false;
-            // StructureRoads paved by Key
-            Dictionary<Cell, List<StructureRoad>> roadsToJoin = new Dictionary<Cell, List<StructureRoad>>();
 
-            // TODO: check the order: if we try cell (0,-2) on graph (0,0) we fail.
-            // But in next iteration we can have (0,-1) which linked with (0,-2) and (0,0)
-            foreach (var structureGraph in structureRoads.Values)
+            foreach (var t in tradeRoutes)
             {
-                if (structureGraph.AddToRoad(roadGraph) != null)
-                {
-                    result = true;
-                    // is first and just create empty list
-                    if (!roadsToJoin.ContainsKey(roadGraph.Cell)) roadsToJoin[roadGraph.Cell] = new List<StructureRoad>();
-                    // add current struct to paved
-                    roadsToJoin[roadGraph.Cell].Add(structureGraph);
-                }
+                t.Update(ticks);
             }
-            // build trade route
-            BuildTradeRoutes(roadsToJoin.Where(g => g.Value.Count > 1));
-            return result;
-        }
 
-        */
+        }
+        internal void EmitTradePointReached()
+        {
+            scorePoints += Config.ScorePoints.ForTradePointReached;
+            // TODO: add tiles to stack
+            for (int i = 0; i < Config.Stack.TilesForTradePointReached; i++)
+            {
+                PushTile(MakeRandomTileType());
+            }
+
+        }
 
         private List<TradeRoute> BuildTradeRoutes(IEnumerable<KeyValuePair<Cell, IEnumerable<StructureRoad>>> RoadsToJoin)
         {
@@ -231,13 +218,16 @@ namespace RailHexLib
                 var pairs = Utils.MakePairs<StructureRoad>(group.Value.ToList());
                 foreach (var pair in pairs)
                 {
-                    TradeRoute newRoute = new TradeRoute();
+                    List<Cell> path = new List<Cell>();
                     // ADD struct to newRoute
-                    newRoute.tradePoints.Add(pair[0].StartPoint, pair[0].structure);
-                    newRoute.tradePoints.Add(pair[1].StartPoint, pair[1].structure);
-                    newRoute.cells.AddRange(pair[0].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell))); // add income cell too
-                    newRoute.cells.Add(joineryCell);
-                    newRoute.cells.AddRange(pair[1].road.PathTo(joineryCell).Where<Cell>(i=> !i.Equals(joineryCell)).Reverse<Cell>());
+                    Dictionary<Cell, Structure> points = new Dictionary<Cell, Structure>();
+                    points.Add(pair[0].StartPoint, pair[0].structure);
+                    points.Add(pair[1].StartPoint, pair[1].structure);
+
+                    path.AddRange(pair[0].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell))); // add income cell too
+                    path.Add(joineryCell);
+                    path.AddRange(pair[1].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
+                    TradeRoute newRoute = new TradeRoute(path, points, this);
                     // ADD points to Route
                     result.Add(newRoute);
                 }
@@ -325,17 +315,7 @@ namespace RailHexLib
         private Dictionary<Cell, HexNode> orphanRoads = new Dictionary<Cell, HexNode>();
         private List<TradeRoute> tradeRoutes = new List<TradeRoute>();
         private ILogger logger;
+        private int scorePoints;
 
-
-        /// <summary>
-        /// Cells where Player can place new one
-        /// </summary>
-        /// <returns></returns>
-        IEnumerable<Cell> PlacableCells()
-        {
-            // get neighbors for each cell in this list
-            //var source = orphanRoads.Keys.Concat(structureRoads.Keys);
-            return new List<Cell>();
-        }
     }
 }

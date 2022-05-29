@@ -4,5 +4,8 @@
         "logging": {
             "programOutput": true
         }
-    }
+    },
+    "explorer.compactFolders": false,
+    "explorer.copyRelativePathSeparator": "/",
+    "workbench.tree.indent": 24
 }
