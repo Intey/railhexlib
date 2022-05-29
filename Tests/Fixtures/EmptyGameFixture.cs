@@ -7,6 +7,11 @@ namespace RailHexLib.Tests
     internal class EmptyGameFixture
     {
         protected Game game;
+        public EmptyGameFixture()
+        {
+            game = new Game();
+        }
+
         [SetUp]
         public void SetUp()
         {

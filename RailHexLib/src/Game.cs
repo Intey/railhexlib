@@ -50,7 +50,6 @@ namespace RailHexLib
             stack.PushTile(newTile);
         }
 
-
         /// <summary>
         /// Place tile on game board
         /// </summary>
@@ -206,7 +205,6 @@ namespace RailHexLib
             {
                 PushTile(MakeRandomTileType());
             }
-
         }
 
         private List<TradeRoute> BuildTradeRoutes(IEnumerable<KeyValuePair<Cell, IEnumerable<StructureRoad>>> RoadsToJoin)
