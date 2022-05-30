@@ -6,7 +6,7 @@ using System.Linq;
 using System.Diagnostics;
 using RailHexLib.Grounds;
 
-namespace RailHexLib.Test
+namespace RailHexLib.Tests
 {
 
     [TestFixture]

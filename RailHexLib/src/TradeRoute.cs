@@ -4,18 +4,20 @@ namespace RailHexLib
 {
     public class TradeRoute : IUpdatable
     {
-        public TradeRoute(List<Cell> cells, Dictionary<Cell, Structure> tradePoints, Game game)
+
+        public TradeRoute(List<Cell> cells, Dictionary<Cell, Structure> tradePoints, Action tradePointReachedHandler)
         {
             Cells = cells;
             TradePoints = tradePoints;
             Direction = 1;
             CurrentPositionIndex = 0;
-            Game = game;
+            OnTradePointHandler = tradePointReachedHandler;
         }
+        
         public List<Cell> Cells;
         public Dictionary<Cell, Structure> TradePoints;
-        
 
+        public Cell CurrentTraderPosition => Cells[CurrentPositionIndex];
         public void Update(int ticks)
         {
             for (int i = 0; i < ticks; i++)
@@ -26,15 +28,14 @@ namespace RailHexLib
                 {
                     Direction = Direction * -1;
                     CurrentPositionIndex -= (Math.Abs(CurrentPositionIndex) % Cells.Count);
-                    Game.EmitTradePointReached();
+                    OnTradePointHandler();
                 }
 
             }
         }
-
         int CurrentPositionIndex;
         int Direction;
-        private Game Game;
+        private Action OnTradePointHandler;
     }
 
 }

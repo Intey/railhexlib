@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using RailHexLib.DevTools;
+using RailHexLib;
 
 namespace RailHexLib.Tests
 {

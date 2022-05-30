@@ -197,7 +197,7 @@ namespace RailHexLib
             }
 
         }
-        internal void EmitTradePointReached()
+        internal void TradePointReached()
         {
             scorePoints += Config.ScorePoints.ForTradePointReached;
             // TODO: add tiles to stack
@@ -225,7 +225,7 @@ namespace RailHexLib
                     path.AddRange(pair[0].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell))); // add income cell too
                     path.Add(joineryCell);
                     path.AddRange(pair[1].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
-                    TradeRoute newRoute = new TradeRoute(path, points, this);
+                    TradeRoute newRoute = new TradeRoute(path, points, this.TradePointReached);
                     // ADD points to Route
                     result.Add(newRoute);
                 }

@@ -1,14 +1,14 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using RailHexLib;
 using RailHexLib.Grounds;
 
-namespace RailHexLib.Test
+namespace RailHexLib.Tests
 {
 
-    [TestClass]
+    [TestFixture]
     public class TileRotationTest
     {
-        [TestMethod]
+        [Test]
         public void TestRotate30()
         {
             Tile t = new ROAD_60Tile();

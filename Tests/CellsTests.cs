@@ -2,7 +2,7 @@
 using RailHexLib;
 using System.Collections.Generic;
 
-namespace RailHexLib.Test
+namespace RailHexLib.Tests
 {
     /**
       * Grids
