@@ -229,13 +229,13 @@ namespace RailHexLib
         {
             return obj is IdentityCell && this.Equals((IdentityCell)obj);
         }
-
+        
         public static readonly IdentityCell leftSide = new IdentityCell(0, -1);
         public static readonly IdentityCell upLeftSide = new IdentityCell(-1, 0);
-        public static readonly IdentityCell upRightSide = new IdentityCell(1, -1);
+        public static readonly IdentityCell upRightSide = new IdentityCell(-1, 1);
         public static readonly IdentityCell rightSide = new IdentityCell(0, 1);
         public static readonly IdentityCell downRightSide = new IdentityCell(1, 0);
-        public static readonly IdentityCell downLeftSide = new IdentityCell(-1, 1);
+        public static readonly IdentityCell downLeftSide = new IdentityCell(1, -1);
     }
     internal class IdentityCellEqualityComparer : IEqualityComparer<IdentityCell>
     {
