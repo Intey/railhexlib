@@ -11,7 +11,7 @@ namespace RailHexLib
             sides = new Dictionary<IdentityCell, Tile>(new IdentityCellEqualityComparer());
             foreach (var neighbor in center.Neighbours())
             {
-                sides[new IdentityCell(neighbor -center)] = new GrassTile();
+                sides[new IdentityCell(neighbor - center)] = new GrassTile();
             }
             incomeRoadCell = IdentityCell.leftSide;
 

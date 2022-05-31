@@ -86,7 +86,6 @@ namespace RailHexLib
             // check joins
             foreach (var joinedRoadCell in joinedRoads)
             {
-                logger.Log($"Game.PlaceCurrentTile: process joinedCell {joinedRoadCell}");
                 hasChangedOrphan.UnionWith(AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, orphanRoads));
 
                 placementResult.NewOrphanRoads.AddRange(hasChangedOrphan.Select(k => orphanRoads[k]).ToList());
@@ -213,7 +212,7 @@ namespace RailHexLib
             foreach (var group in RoadsToJoin)
             {
                 var joineryCell = group.Key;
-                var pairs = Utils.MakePairs<StructureRoad>(group.Value.ToList());
+                var pairs = Utils.MakePairs(group.Value.ToList());
                 foreach (var pair in pairs)
                 {
                     List<Cell> path = new List<Cell>();
@@ -246,7 +245,6 @@ namespace RailHexLib
             {
                 if (placedTiles.ContainsKey(neighbor))
                 {
-                    logger.Log($"FindJoined: check neighbor {neighbor} for {placedCell}");
                     IdentityCell currentTileSide = new IdentityCell(neighbor - placedCell);
 
                     var currentTileSideBiome = currentTile.GetSideBiome(currentTileSide);
@@ -260,7 +258,6 @@ namespace RailHexLib
                     Tile neighborTile = placedTiles[neighbor];
                     var neighborSideBiome = neighborTile.GetSideBiome(currentTileSide.Inverted());
 
-                    logger.Log($"Compare side {currentTileSide} of currentTile {placedCell}+[{currentTile.Rotation}]({currentTileSideBiome}) with neighbors({neighbor}+[{neighborTile.Rotation}]) side {currentTileSide.Inverted()}({neighborSideBiome})");
 
                     if (currentTileSideBiome == neighborSideBiome)
                     {
@@ -276,7 +273,6 @@ namespace RailHexLib
         private bool CanPlaceCurrentTile(Cell cell)
         {
             bool exists = placedTiles.ContainsKey(cell);
-            logger.Log($"check placability on {cell} = {!exists}");
             return !exists;
         }
 
