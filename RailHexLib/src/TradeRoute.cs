@@ -13,21 +13,22 @@ namespace RailHexLib
             CurrentPositionIndex = 0;
             OnTradePointHandler = tradePointReachedHandler;
         }
-        
+
         public List<Cell> Cells;
         public Dictionary<Cell, Structure> TradePoints;
 
         public Cell CurrentTraderPosition => Cells[CurrentPositionIndex];
         public void Update(int ticks)
         {
+            int maxIndex = Cells.Count - 1;
             for (int i = 0; i < ticks; i++)
             {
                 CurrentPositionIndex += Config.Trader.moveTileTicks * Direction;
                 // when greater we get reminder, change direction and substruct from current position. It's overrun
-                if (CurrentPositionIndex >= Cells.Count || CurrentPositionIndex <= 0)
+                if (CurrentPositionIndex >= maxIndex || CurrentPositionIndex < 0)
                 {
                     Direction = Direction * -1;
-                    CurrentPositionIndex -= (Math.Abs(CurrentPositionIndex) % Cells.Count);
+                    CurrentPositionIndex -= (Math.Abs(CurrentPositionIndex) % maxIndex);
                     OnTradePointHandler();
                 }
 
