@@ -14,7 +14,7 @@ namespace RailHexLib
     public class Game : IUpdatable
     {
         public Tile CurrentTile => currentTile;
-        public Dictionary<Cell, Structure> Structures => structureRoads.ToDictionary(kv => kv.Key, kv => kv.Value.structure);
+        public Dictionary<Cell, Structure> Structures => structureRoads.ToDictionary(kv => kv.Value.structure.Center, kv => kv.Value.structure);
         public Dictionary<Cell, StructureRoad> StructureRoads => structureRoads;
         public List<TradeRoute> Routes => tradeRoutes;
         public int ScorePoints => scorePoints;
