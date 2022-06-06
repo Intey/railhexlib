@@ -236,6 +236,7 @@ namespace RailHexLib
         public static readonly IdentityCell rightSide = new IdentityCell(0, 1);
         public static readonly IdentityCell downRightSide = new IdentityCell(1, 0);
         public static readonly IdentityCell downLeftSide = new IdentityCell(1, -1);
+        internal static IdentityCell self = new IdentityCell(0, 0);
     }
     internal class IdentityCellEqualityComparer : IEqualityComparer<IdentityCell>
     {

@@ -61,5 +61,13 @@ namespace RailHexLib.Tests
             node3.Right = new HexNode(new(0, -3));
             Assert.AreSame(node3.Right, node3.FindCell(new Cell(0, -3)));
         }
+        [Test]
+        public void EnumerationTest()
+        {
+            var node = new HexNode(new Cell(0, 0));
+            var nodesList = from n in node select n;
+            Assert.AreEqual(new Cell(0, 0), nodesList.First());
+        }
+
     }
 }

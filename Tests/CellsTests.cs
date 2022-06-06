@@ -111,5 +111,15 @@ namespace RailHexLib.Tests
             Assert.AreEqual(IdentityCell.upLeftSide, cell.GetDirectionTo(new Cell(-1, -4)));
             Assert.AreEqual(IdentityCell.downRightSide, cell.GetDirectionTo(new Cell(1, -4)));
         }
+
+        [Test]
+        public void InvertedTest()
+        {
+            Assert.AreEqual(IdentityCell.leftSide, IdentityCell.rightSide.Inverted());
+            Assert.AreEqual(IdentityCell.rightSide, IdentityCell.leftSide);
+
+            Assert.AreEqual(IdentityCell.upLeftSide, IdentityCell.downRightSide.Inverted());
+            Assert.AreEqual(IdentityCell.downRightSide, IdentityCell.upRightSide.Inverted());
+        }
     }
 }

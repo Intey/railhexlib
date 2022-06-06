@@ -1,10 +1,11 @@
 ﻿// using RailHexLib.Grounds;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace RailHexLib
 {
-    public class HexNode
+    public class HexNode : IEnumerable<HexNode>
     {
         public Cell Cell;
         // links
@@ -119,9 +120,14 @@ namespace RailHexLib
             }
         }
 
-        public HexNode FindCell(Cell node, int searchDepth=-1)
+        public HexNode FindCell(Cell node, int searchDepth = -1)
         {
             return findCell(node, null, searchDepth);
+        }
+
+        public IEnumerator<Cell> GetEnumerator()
+        {
+            throw new NotImplementedException();
         }
 
         public List<Cell> PathTo(Cell joineryCell)
@@ -148,7 +154,7 @@ namespace RailHexLib
             return result;
         }
 
-        private HexNode findCell(Cell node, IdentityCell fromSide, int searchDepth =-1)
+        private HexNode findCell(Cell node, IdentityCell fromSide, int searchDepth = -1)
         {
             if (Cell.Equals(node)) { return this; }
             if (searchDepth == 0) return null;
@@ -186,6 +192,82 @@ namespace RailHexLib
             }
             return null;
 
+        }
+
+
+
+        IEnumerator<HexNode> IEnumerable<HexNode>.GetEnumerator()
+        {
+            return new HexNodeEnumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal HexNode GetSide(IdentityCell side)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class HexNodeEnumerator : IEnumerator<HexNode>
+    {
+        HexNode StartPoint;
+        HexNode current;
+        IdentityCell previous = IdentityCell.self;
+        HashSet<HexNode> visited = new HashSet<HexNode>();
+        public HexNodeEnumerator(HexNode startPoint)
+        {
+            StartPoint = startPoint;
+            current = startPoint;
+        }
+        public HexNode Current => current;
+
+        object IEnumerator.Current => current;
+
+        public bool MoveNext()
+        {
+            return (
+                   MoveToSide(IdentityCell.leftSide)
+                || MoveToSide(IdentityCell.upLeftSide)
+                || MoveToSide(IdentityCell.upRightSide)
+                || MoveToSide(IdentityCell.rightSide)
+                || MoveToSide(IdentityCell.downRightSide)
+                || MoveToSide(IdentityCell.downLeftSide)
+                );
+
+
+            if (current.Left != null && !previous.Equals(IdentityCell.leftSide) && !visited.Contains(current.Left))
+            {
+                visited.Add(current);
+                current = current.Left;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool MoveToSide(IdentityCell side)
+        {
+
+            if (current.Left != null && !previous.Equals(side.Inverted()) && !visited.Contains(current.Left))
+            {
+                visited.Add(current);
+                current = current.GetSide(side);
+                return true;
+            }
+            return false;
+        }
+
+        public void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
