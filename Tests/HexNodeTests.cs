@@ -62,12 +62,37 @@ namespace RailHexLib.Tests
             Assert.AreSame(node3.Right, node3.FindCell(new Cell(0, -3)));
         }
         [Test]
-        public void EnumerationTest()
-        {
-            var node = new HexNode(new Cell(0, 0));
-            var nodesList = from n in node select n;
-            Assert.AreEqual(new Cell(0, 0), nodesList.First());
-        }
+        public void findCellUnexistTest() {
+            
+            var node = new HexNode(new(0, 0));
+            node.Left = new HexNode(new(0, -1));
+            node.Right = new HexNode(new(0, 1));
+            node.Right.DownLeft = node.Left;
+            // node.Right.DownRight = node;
+            Assert.AreEqual(null, node.FindCell(new(-1, -2)));
 
+            // node.Left.Left = new HexNode(new(0, -2));
+            // node.Left.UpRight = new HexNode(new(-1, -1));
+            // node.Left.UpRight.DownRight = node.Left;
+            // node.Left.UpRight.Right = new HexNode(new(-1, 0));
+            // node.Left.UpRight.Right.DownLeft = node.Left;
+            // node.Left.UpRight.Right.DownRight = node;
+        }
+        [Test]
+        public void findCellCycleTest() {
+            var node = new HexNode(new(0, 0));
+            // node.Left = new HexNode(new(0, -1));
+            // node.Right = new HexNode(new(0, 1));
+            // node.Right.DownLeft = node.Left;
+            // node.Right.DownRight = node;
+            node.Left.Left = new HexNode(new(0, -2));
+            node.Left.UpRight = new HexNode(new(-1, -1));
+            node.Left.UpRight.DownRight = node.Left;
+            node.Left.UpRight.Right = new HexNode(new(-1, 0));
+            node.Left.UpRight.Right.DownLeft = node.Left;
+            node.Left.UpRight.Right.DownRight = node;
+
+            Assert.AreEqual(null, node.FindCell(new(-1, -2)));
+        }
     }
 }

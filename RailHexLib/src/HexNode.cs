@@ -122,7 +122,8 @@ namespace RailHexLib
 
         public HexNode FindCell(Cell node, int searchDepth = -1)
         {
-            return findCell(node, null, searchDepth);
+            HashSet<HexNode> visited = new HashSet<HexNode>();
+            return findCell(node, null, visited);
         }
 
         public IEnumerator<Cell> GetEnumerator()
@@ -154,40 +155,43 @@ namespace RailHexLib
             return result;
         }
 
-        private HexNode findCell(Cell node, IdentityCell fromSide, int searchDepth = -1)
+        private HexNode findCell(Cell node, IdentityCell fromSide, HashSet<HexNode> visited)
         {
+            if (visited.Contains(this)) return null;
+
             if (Cell.Equals(node)) { return this; }
-            if (searchDepth == 0) return null;
+            
+            visited.Add(this);
 
             HexNode found;
             if (Left != null && (fromSide == null || !fromSide.Equals(IdentityCell.leftSide)))
             {
-                found = Left.findCell(node, IdentityCell.rightSide, --searchDepth);
+                found = Left.findCell(node, IdentityCell.rightSide, visited);
                 if (found != null) return found;
             }
             if (UpLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.upLeftSide)))
             {
-                found = UpLeft.findCell(node, IdentityCell.downRightSide, --searchDepth);
+                found = UpLeft.findCell(node, IdentityCell.downRightSide, visited);
                 if (found != null) return found;
             }
             if (UpRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.upRightSide)))
             {
-                found = UpRight.findCell(node, IdentityCell.downLeftSide, --searchDepth);
+                found = UpRight.findCell(node, IdentityCell.downLeftSide, visited);
                 if (found != null) return found;
             }
             if (Right != null && (fromSide == null || !fromSide.Equals(IdentityCell.rightSide)))
             {
-                found = Right.findCell(node, IdentityCell.leftSide, --searchDepth);
+                found = Right.findCell(node, IdentityCell.leftSide, visited);
                 if (found != null) return found;
             }
             if (DownRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.downRightSide)))
             {
-                found = DownRight.findCell(node, IdentityCell.upLeftSide, --searchDepth);
+                found = DownRight.findCell(node, IdentityCell.upLeftSide, visited);
                 if (found != null) return found;
             }
             if (DownLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.downLeftSide)))
             {
-                found = DownLeft.findCell(node, IdentityCell.upRightSide, --searchDepth);
+                found = DownLeft.findCell(node, IdentityCell.upRightSide, visited);
                 if (found != null) return found;
             }
             return null;

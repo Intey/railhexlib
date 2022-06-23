@@ -116,10 +116,10 @@ namespace RailHexLib.Tests
         public void InvertedTest()
         {
             Assert.AreEqual(IdentityCell.leftSide, IdentityCell.rightSide.Inverted());
-            Assert.AreEqual(IdentityCell.rightSide, IdentityCell.leftSide);
+            Assert.AreEqual(IdentityCell.rightSide, IdentityCell.leftSide.Inverted());
 
             Assert.AreEqual(IdentityCell.upLeftSide, IdentityCell.downRightSide.Inverted());
-            Assert.AreEqual(IdentityCell.downRightSide, IdentityCell.upRightSide.Inverted());
+            Assert.AreEqual(IdentityCell.downLeftSide, IdentityCell.upRightSide.Inverted());
         }
     }
 }
