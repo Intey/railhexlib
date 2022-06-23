@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace RailHexLib
 {
@@ -126,11 +127,6 @@ namespace RailHexLib
             return findCell(node, null, visited);
         }
 
-        public IEnumerator<Cell> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
         public List<Cell> PathTo(Cell joineryCell)
         {
             var result = new List<Cell>
@@ -160,7 +156,7 @@ namespace RailHexLib
             if (visited.Contains(this)) return null;
 
             if (Cell.Equals(node)) { return this; }
-            
+
             visited.Add(this);
 
             HexNode found;
@@ -198,21 +194,26 @@ namespace RailHexLib
 
         }
 
-
-
-        IEnumerator<HexNode> IEnumerable<HexNode>.GetEnumerator()
-        {
-            return new HexNodeEnumerator(this);
-        }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return (IEnumerator)GetEnumerator();
         }
 
         internal HexNode GetSide(IdentityCell side)
         {
-            throw new NotImplementedException();
+            if (side == IdentityCell.leftSide) return left;
+            if (side == IdentityCell.upLeftSide) return upLeft;
+            if (side == IdentityCell.upRightSide) return upRight;
+            if (side == IdentityCell.rightSide) return right;
+            if (side == IdentityCell.downRightSide) return downRight;
+            if (side == IdentityCell.downLeftSide) return downLeft;
+            Debug.Assert(false, "impossible side");
+            return null;
+        }
+
+        public IEnumerator<HexNode> GetEnumerator()
+        {
+            return new HexNodeEnumerator(this);
         }
     }
 
@@ -225,7 +226,7 @@ namespace RailHexLib
         public HexNodeEnumerator(HexNode startPoint)
         {
             StartPoint = startPoint;
-            current = startPoint;
+            current = null;
         }
         public HexNode Current => current;
 
@@ -233,30 +234,26 @@ namespace RailHexLib
 
         public bool MoveNext()
         {
-            return (
+            // move to first
+            if (current == null)
+            {
+                current = StartPoint;
+                return true;
+            }
+            return
                    MoveToSide(IdentityCell.leftSide)
                 || MoveToSide(IdentityCell.upLeftSide)
                 || MoveToSide(IdentityCell.upRightSide)
                 || MoveToSide(IdentityCell.rightSide)
                 || MoveToSide(IdentityCell.downRightSide)
                 || MoveToSide(IdentityCell.downLeftSide)
-                );
-
-
-            if (current.Left != null && !previous.Equals(IdentityCell.leftSide) && !visited.Contains(current.Left))
-            {
-                visited.Add(current);
-                current = current.Left;
-                return true;
-            }
-
-            return false;
+                ;
         }
 
         private bool MoveToSide(IdentityCell side)
         {
 
-            if (current.Left != null && !previous.Equals(side.Inverted()) && !visited.Contains(current.Left))
+            if (current.GetSide(side) != null && !previous.Equals(side.Inverted()) && !visited.Contains(current.GetSide(side)))
             {
                 visited.Add(current);
                 current = current.GetSide(side);
@@ -267,7 +264,8 @@ namespace RailHexLib
 
         public void Reset()
         {
-            throw new NotImplementedException();
+            current = null;
+            visited.Clear();
         }
 
         public void Dispose()

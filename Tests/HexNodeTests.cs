@@ -61,38 +61,80 @@ namespace RailHexLib.Tests
             node3.Right = new HexNode(new(0, -3));
             Assert.AreSame(node3.Right, node3.FindCell(new Cell(0, -3)));
         }
+        
         [Test]
-        public void findCellUnexistTest() {
-            
+        public void EnumerationTest()
+        {
+            var node = new HexNode(new Cell(0, 0))
+            {
+                Right = new HexNode(new Cell(0, 1))
+            };
+
+            var nodesList = (from n in node select n.Cell).ToArray();
+            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
+            Assert.AreEqual(new Cell(0, 1), nodesList[1]);
+        }
+        [Test]
+        public void EnumeratorCycleTest()
+        {
+            var node = new HexNode(new Cell(0, 0));
+            node.Right = new HexNode(new Cell(0, 1));
+            node.Right.UpLeft = new HexNode(new Cell(-1, 1));
+            node.UpRight = node.Right.UpLeft;
+
+            var nodesList = (from n in node select n.Cell).ToArray();
+            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
+            Assert.AreEqual(new Cell(-1, 1), nodesList[1]);
+            Assert.AreEqual(new Cell(0, 1), nodesList[2]);
+        }
+
+        [Test]
+        public void FindCellLongCycleTest()
+        {
+            var node = new HexNode(new Cell(0, 0));
+            node.Right = new HexNode(new Cell(0, 1));
+            node.Right.Right = new HexNode(new Cell(0, 2));
+            node.Right.Right.UpLeft = new(new(-1, 2));
+            node.Right.Right.UpLeft.UpLeft = new(new(-2, 2));
+            node.Right.Right.UpLeft.UpLeft.Left = new(new(-2, 1));
+            node.Right.Right.UpLeft.UpLeft.Left.DownLeft = new(new(-1, 0));
+            node.Right.Right.UpLeft.UpLeft.Left.DownLeft.DownRight = node;
+
+            Assert.AreEqual(node.Right.Right.UpLeft.UpLeft.Left, node.FindCell(new Cell(-2, 1)));
+            Assert.AreEqual(null, node.FindCell(new Cell(-3, 1)));
+
+        }
+        [Test]
+        public void nodeSideBecomesNullOnSetInconsistentCell() {
+            var node = new HexNode(new(0, 0));
+            node.Left = new HexNode(new(0, -1));
+            node.Left.Left = new HexNode(new(0, -2));
+            node.Left.UpRight = new HexNode(new(-1, -1));
+            node.Left.UpRight.DownRight = node.Left;
+            node.Left.UpRight.Right = new HexNode(new(-1, 0));
+            node.Left.UpRight.Right.DownLeft = node.Left;
+            Assert.IsNull(node.Left.UpRight.Right);
+        }
+        [Test]
+        public void findCellUnexistTest()
+        {
             var node = new HexNode(new(0, 0));
             node.Left = new HexNode(new(0, -1));
             node.Right = new HexNode(new(0, 1));
             node.Right.DownLeft = node.Left;
             // node.Right.DownRight = node;
             Assert.AreEqual(null, node.FindCell(new(-1, -2)));
-
-            // node.Left.Left = new HexNode(new(0, -2));
-            // node.Left.UpRight = new HexNode(new(-1, -1));
-            // node.Left.UpRight.DownRight = node.Left;
-            // node.Left.UpRight.Right = new HexNode(new(-1, 0));
-            // node.Left.UpRight.Right.DownLeft = node.Left;
-            // node.Left.UpRight.Right.DownRight = node;
         }
         [Test]
-        public void findCellCycleTest() {
-            var node = new HexNode(new(0, 0));
-            // node.Left = new HexNode(new(0, -1));
-            // node.Right = new HexNode(new(0, 1));
-            // node.Right.DownLeft = node.Left;
-            // node.Right.DownRight = node;
-            node.Left.Left = new HexNode(new(0, -2));
-            node.Left.UpRight = new HexNode(new(-1, -1));
-            node.Left.UpRight.DownRight = node.Left;
-            node.Left.UpRight.Right = new HexNode(new(-1, 0));
-            node.Left.UpRight.Right.DownLeft = node.Left;
-            node.Left.UpRight.Right.DownRight = node;
+        public void FindCellCycleTest()
+        {
+            var node = new HexNode(new Cell(0, 0));
+            node.Right = new HexNode(new Cell(0, 1));
+            node.Right.UpLeft = new HexNode(new Cell(-1, 1));
+            node.UpRight = node.Right.UpLeft;
 
-            Assert.AreEqual(null, node.FindCell(new(-1, -2)));
+            Assert.AreEqual(node.UpRight, node.FindCell(new Cell(-1, 1)));
         }
+
     }
 }
