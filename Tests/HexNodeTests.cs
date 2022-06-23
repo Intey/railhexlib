@@ -61,7 +61,7 @@ namespace RailHexLib.Tests
             node3.Right = new HexNode(new(0, -3));
             Assert.AreSame(node3.Right, node3.FindCell(new Cell(0, -3)));
         }
-        
+
         [Test]
         public void EnumerationTest()
         {
@@ -74,19 +74,7 @@ namespace RailHexLib.Tests
             Assert.AreEqual(new Cell(0, 0), nodesList[0]);
             Assert.AreEqual(new Cell(0, 1), nodesList[1]);
         }
-        [Test]
-        public void EnumeratorCycleTest()
-        {
-            var node = new HexNode(new Cell(0, 0));
-            node.Right = new HexNode(new Cell(0, 1));
-            node.Right.UpLeft = new HexNode(new Cell(-1, 1));
-            node.UpRight = node.Right.UpLeft;
 
-            var nodesList = (from n in node select n.Cell).ToArray();
-            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
-            Assert.AreEqual(new Cell(-1, 1), nodesList[1]);
-            Assert.AreEqual(new Cell(0, 1), nodesList[2]);
-        }
 
         [Test]
         public void FindCellLongCycleTest()
@@ -105,7 +93,8 @@ namespace RailHexLib.Tests
 
         }
         [Test]
-        public void nodeSideBecomesNullOnSetInconsistentCell() {
+        public void nodeSideBecomesNullOnSetInconsistentCell()
+        {
             var node = new HexNode(new(0, 0));
             node.Left = new HexNode(new(0, -1));
             node.Left.Left = new HexNode(new(0, -2));
@@ -122,7 +111,6 @@ namespace RailHexLib.Tests
             node.Left = new HexNode(new(0, -1));
             node.Right = new HexNode(new(0, 1));
             node.Right.DownLeft = node.Left;
-            // node.Right.DownRight = node;
             Assert.AreEqual(null, node.FindCell(new(-1, -2)));
         }
         [Test]
@@ -135,6 +123,38 @@ namespace RailHexLib.Tests
 
             Assert.AreEqual(node.UpRight, node.FindCell(new Cell(-1, 1)));
         }
+        [Test]
+        public void EnumeratorCycleTest()
+        {
+            var node = new HexNode(new Cell(0, 0));
+            node.Right = new HexNode(new Cell(0, 1));
+            node.Right.UpLeft = new HexNode(new Cell(-1, 1));
+            node.UpRight = node.Right.UpLeft;
 
+            var nodesList = (from n in node select n.Cell).ToArray();
+            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
+            Assert.AreEqual(new Cell(-1, 1), nodesList[1]);
+            Assert.AreEqual(new Cell(0, 1), nodesList[2]);
+        }
+
+        [Test]
+        public void EnumeratorMultiwayTest()
+        {
+            var node = new HexNode(new Cell(0, 0));
+            node.UpRight = new HexNode(new Cell(-1, 1));
+            node.UpRight.Left = new HexNode(new Cell(-1, 0));
+            node.Left = new HexNode(new Cell(0, -1));
+            node.UpRight.UpRight = new HexNode(new Cell(-2, 2));
+            node.UpRight.UpRight.UpRight = new HexNode(new Cell(-3, 3));
+
+            var nodesList = (from n in node select n.Cell).ToArray();
+            Assert.AreEqual(6, nodesList.Length);
+            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
+            Assert.AreEqual(new Cell(-1, 1), nodesList[1]);
+            Assert.AreEqual(new Cell(-1, 0), nodesList[2]);
+            Assert.AreEqual(new Cell(0, -1), nodesList[4]);
+            Assert.AreEqual(new Cell(-2, 2), nodesList[3]);
+            Assert.AreEqual(new Cell(-3, 3), nodesList[4]);
+        }
     }
 }

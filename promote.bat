@@ -1,3 +1,4 @@
-echo %CD%
-cp bin/Debug/netstandard2.0/RailHexLib.dll ../../RailHex/Assets/Scripts/Plugins/RailHexLib.dll
-cp bin/Debug/netstandard2.0/RailHexLib.pdb ../../RailHex/Assets/Scripts/Plugins/RailHexLib.pdb
+echo "promote.bat: %CD%"
+echo "promote.bat: copy %1 dll to %2/RailHexLib.dll"
+cp bin/%1/netstandard2.0/RailHexLib.dll %2/RailHexLib.dll
+cp bin/%1/netstandard2.0/RailHexLib.pdb %2/RailHexLib.pdb

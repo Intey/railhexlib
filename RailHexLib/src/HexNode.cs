@@ -220,15 +220,15 @@ namespace RailHexLib
     class HexNodeEnumerator : IEnumerator<HexNode>
     {
         HexNode StartPoint;
-        HexNode current;
         IdentityCell previous = IdentityCell.self;
         HashSet<HexNode> visited = new HashSet<HexNode>();
+        Stack<HexNode> current = new Stack<HexNode>();
         public HexNodeEnumerator(HexNode startPoint)
         {
             StartPoint = startPoint;
             current = null;
         }
-        public HexNode Current => current;
+        public HexNode Current => current.Peek();
 
         object IEnumerator.Current => current;
 
@@ -237,26 +237,32 @@ namespace RailHexLib
             // move to first
             if (current == null)
             {
-                current = StartPoint;
+                current.Push(StartPoint);
                 return true;
             }
-            return
-                   MoveToSide(IdentityCell.leftSide)
-                || MoveToSide(IdentityCell.upLeftSide)
-                || MoveToSide(IdentityCell.upRightSide)
-                || MoveToSide(IdentityCell.rightSide)
-                || MoveToSide(IdentityCell.downRightSide)
-                || MoveToSide(IdentityCell.downLeftSide)
-                ;
+            // try all sides
+            if (MoveToSide(IdentityCell.leftSide))
+            {
+
+                return true;
+            }
+            if (MoveToSide(IdentityCell.upLeftSide)) return true;
+            if (MoveToSide(IdentityCell.upRightSide)) return true;
+            if (MoveToSide(IdentityCell.rightSide)) return true;
+            if (MoveToSide(IdentityCell.downRightSide)) return true;
+            if (MoveToSide(IdentityCell.downLeftSide)) return true;
+
+            return false;
         }
 
         private bool MoveToSide(IdentityCell side)
         {
 
-            if (current.GetSide(side) != null && !previous.Equals(side.Inverted()) && !visited.Contains(current.GetSide(side)))
+            var _current = current.Peek();
+            if (_current.GetSide(side) != null && !previous.Equals(side.Inverted()) && !visited.Contains(_current.GetSide(side)))
             {
-                visited.Add(current);
-                current = current.GetSide(side);
+                visited.Add(_current);
+                current.Push(_current.GetSide(side));
                 return true;
             }
             return false;
