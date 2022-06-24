@@ -8,7 +8,7 @@
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
   </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Platform)'=='Win32'">
     <Exec Command="call $(SolutionDir)\promote.bat $(Configuration) ../../RailHex/Assets/Scripts/Plugins" WorkingDirectory="$(pwd)" />
   </Target>
 </Project>
