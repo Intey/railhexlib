@@ -238,21 +238,33 @@ namespace RailHexLib
             if (current == null)
             {
                 current.Push(StartPoint);
+                visited.Add(StartPoint);
                 return true;
             }
-            // try all sides
-            if (MoveToSide(IdentityCell.leftSide))
+            // if current node doesn't have any children, go to previous
+            Func<IdentityCell, bool> isSideDone = side => Current.GetSide(side) == null || visited.Contains(Current.GetSide(side));
+            if (
+                   isSideDone(IdentityCell.leftSide)
+                && isSideDone(IdentityCell.upLeftSide)
+                && isSideDone(IdentityCell.upRightSide)
+                && isSideDone(IdentityCell.rightSide)
+                && isSideDone(IdentityCell.downRightSide)
+                && isSideDone(IdentityCell.downLeftSide)
+            )
             {
-
-                return true;
+                current.Pop();
             }
+    
+            // Go Deep
+            if (MoveToSide(IdentityCell.leftSide)) return true;
             if (MoveToSide(IdentityCell.upLeftSide)) return true;
             if (MoveToSide(IdentityCell.upRightSide)) return true;
             if (MoveToSide(IdentityCell.rightSide)) return true;
             if (MoveToSide(IdentityCell.downRightSide)) return true;
             if (MoveToSide(IdentityCell.downLeftSide)) return true;
+            
+            return false; // TODO: pop & continue move
 
-            return false;
         }
 
         private bool MoveToSide(IdentityCell side)
