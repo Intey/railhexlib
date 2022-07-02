@@ -226,55 +226,56 @@ namespace RailHexLib
         public HexNodeEnumerator(HexNode startPoint)
         {
             StartPoint = startPoint;
-            current = null;
+            current = new Stack<HexNode>();
         }
         public HexNode Current => current.Peek();
 
-        object IEnumerator.Current => current;
+        object IEnumerator.Current => current.Peek();
 
         public bool MoveNext()
         {
+            const bool HAS_NEXT = true;
+
             // move to first
-            if (current == null)
+            if (current.Count == 0)
             {
                 current.Push(StartPoint);
                 visited.Add(StartPoint);
-                return true;
+                return HAS_NEXT;
             }
+
             // if current node doesn't have any children, go to previous
-            Func<IdentityCell, bool> isSideDone = side => Current.GetSide(side) == null || visited.Contains(Current.GetSide(side));
-            if (
-                   isSideDone(IdentityCell.leftSide)
-                && isSideDone(IdentityCell.upLeftSide)
-                && isSideDone(IdentityCell.upRightSide)
-                && isSideDone(IdentityCell.rightSide)
-                && isSideDone(IdentityCell.downRightSide)
-                && isSideDone(IdentityCell.downLeftSide)
-            )
-            {
+            while (current.Count > 1) { 
+                if (moveNext()) { return HAS_NEXT; }
                 current.Pop();
             }
-    
-            // Go Deep
-            if (MoveToSide(IdentityCell.leftSide)) return true;
-            if (MoveToSide(IdentityCell.upLeftSide)) return true;
-            if (MoveToSide(IdentityCell.upRightSide)) return true;
-            if (MoveToSide(IdentityCell.rightSide)) return true;
-            if (MoveToSide(IdentityCell.downRightSide)) return true;
-            if (MoveToSide(IdentityCell.downLeftSide)) return true;
-            
-            return false; // TODO: pop & continue move
 
+            return !HAS_NEXT; // TODO: pop & continue move
+
+        }
+        bool isSideDone(IdentityCell side)
+        {
+            return Current.GetSide(side) == null || visited.Contains(Current.GetSide(side));
+        }
+
+        bool moveNext()
+        {
+            var moved = MoveToSide(IdentityCell.leftSide)
+                || MoveToSide(IdentityCell.upLeftSide)
+                || MoveToSide(IdentityCell.upRightSide)
+                || MoveToSide(IdentityCell.rightSide)
+                || MoveToSide(IdentityCell.downRightSide)
+                || MoveToSide(IdentityCell.downLeftSide);
+            return !moved;
         }
 
         private bool MoveToSide(IdentityCell side)
         {
-
-            var _current = current.Peek();
-            if (_current.GetSide(side) != null && !previous.Equals(side.Inverted()) && !visited.Contains(_current.GetSide(side)))
+            var sideNode = Current.GetSide(side);
+            if (sideNode != null && !visited.Contains(sideNode))
             {
-                visited.Add(_current);
-                current.Push(_current.GetSide(side));
+                visited.Add(sideNode);
+                current.Push(sideNode);
                 return true;
             }
             return false;
@@ -288,6 +289,7 @@ namespace RailHexLib
 
         public void Dispose()
         {
+            Reset();
         }
     }
 }
