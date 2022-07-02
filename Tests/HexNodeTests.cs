@@ -60,19 +60,6 @@ namespace RailHexLib.Tests
             Assert.AreSame(node3.Right, node3.FindCell(new Cell(0, -3)));
         }
 
-        [Test]
-        public void EnumerationTest()
-        {
-            var node = new HexNode(new Cell(0, 0))
-            {
-                Right = new HexNode(new Cell(0, 1))
-            };
-
-            var nodesList = (from n in node select n.Cell).ToArray();
-            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
-            Assert.AreEqual(new Cell(0, 1), nodesList[1]);
-        }
-
 
         [Test]
         public void FindCellLongCycleTest()
@@ -121,6 +108,20 @@ namespace RailHexLib.Tests
 
             Assert.AreEqual(node.UpRight, node.FindCell(new Cell(-1, 1)));
         }
+
+        [Test]
+        public void EnumerationTest()
+        {
+            var node = new HexNode(new Cell(0, 0))
+            {
+                Right = new HexNode(new Cell(0, 1))
+            };
+
+            var nodesList = (from n in node select n.Cell).ToArray();
+            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
+            Assert.AreEqual(new Cell(0, 1), nodesList[1]);
+        }
+
         [Test]
         public void EnumeratorCycleTest()
         {
@@ -129,7 +130,7 @@ namespace RailHexLib.Tests
             node.Right.UpLeft = new HexNode(new Cell(-1, 1));
             node.UpRight = node.Right.UpLeft;
 
-            var nodesList = node.ToList();
+            var nodesList = (from n in node select n.Cell).ToArray();
             Assert.AreEqual(new Cell(0, 0), nodesList[0]);
             Assert.AreEqual(new Cell(-1, 1), nodesList[1]);
             Assert.AreEqual(new Cell(0, 1), nodesList[2]);
@@ -145,14 +146,14 @@ namespace RailHexLib.Tests
             node.UpRight.UpRight = new HexNode(new Cell(-2, 2));
             node.UpRight.UpRight.UpRight = new HexNode(new Cell(-3, 3));
 
-            List<HexNode> nodesList = node.ToList();
-            Assert.AreEqual(6, nodesList.Count);
-            Assert.AreEqual(new Cell(0, 0), nodesList[0].Cell);
-            Assert.AreEqual(new Cell(0, -1), nodesList[1].Cell);
-            Assert.AreEqual(new Cell(-1, 1), nodesList[2].Cell);
-            Assert.AreEqual(new Cell(-1, 0), nodesList[3].Cell);
-            Assert.AreEqual(new Cell(-2, 2), nodesList[4].Cell);
-            Assert.AreEqual(new Cell(-3, 3), nodesList[5].Cell);
+            var nodesList = (from n in node select n.Cell).ToArray();
+            Assert.AreEqual(6, nodesList.Length);
+            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
+            Assert.AreEqual(new Cell(0, -1), nodesList[1]);
+            Assert.AreEqual(new Cell(-1, 1), nodesList[2]);
+            Assert.AreEqual(new Cell(-1, 0), nodesList[3]);
+            Assert.AreEqual(new Cell(-2, 2), nodesList[4]);
+            Assert.AreEqual(new Cell(-3, 3), nodesList[5]);
         }
     }
 }

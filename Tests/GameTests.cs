@@ -37,8 +37,8 @@ namespace RailHexLib.Tests
             var result = game.PlaceCurrentTile(new Cell(0, -2));
             game.RotateCurrentTile();
             result = game.PlaceCurrentTile(new Cell(-1, -2));   
-            var list = result.NewStructureRoads[0].road.ToList();
-            Assert.AreEqual(new List<Cell>(), list);
+            var list = (from c in result.NewStructureRoads[0].road select c.Cell).ToArray();
+            Assert.AreEqual(new List<Cell>() {new(0, -1), new(0, -2), new (-1, -2) }, list);
         }
     }
 }

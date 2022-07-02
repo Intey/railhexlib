@@ -245,8 +245,16 @@ namespace RailHexLib
             }
 
             // if current node doesn't have any children, go to previous
-            while (current.Count > 1) { 
-                if (moveNext()) { return HAS_NEXT; }
+            while (current.Count > 0) { 
+                var moved = MoveToSide(IdentityCell.leftSide)
+                || MoveToSide(IdentityCell.upLeftSide)
+                || MoveToSide(IdentityCell.upRightSide)
+                || MoveToSide(IdentityCell.rightSide)
+                || MoveToSide(IdentityCell.downRightSide)
+                || MoveToSide(IdentityCell.downLeftSide);
+                if (moved) { return HAS_NEXT; }
+
+                // if we can't move to a current node side, check previos until possible
                 current.Pop();
             }
 
@@ -258,21 +266,10 @@ namespace RailHexLib
             return Current.GetSide(side) == null || visited.Contains(Current.GetSide(side));
         }
 
-        bool moveNext()
-        {
-            var moved = MoveToSide(IdentityCell.leftSide)
-                || MoveToSide(IdentityCell.upLeftSide)
-                || MoveToSide(IdentityCell.upRightSide)
-                || MoveToSide(IdentityCell.rightSide)
-                || MoveToSide(IdentityCell.downRightSide)
-                || MoveToSide(IdentityCell.downLeftSide);
-            return !moved;
-        }
-
         private bool MoveToSide(IdentityCell side)
         {
             var sideNode = Current.GetSide(side);
-            if (sideNode != null && !visited.Contains(sideNode))
+            if (!isSideDone(side))
             {
                 visited.Add(sideNode);
                 current.Push(sideNode);
