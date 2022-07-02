@@ -168,6 +168,8 @@ namespace RailHexLib
 
         public void RotateCurrentTile(int count = 1)
         {
+            Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile()?");
+            
             for (int i = 0; i < count; i++)
             {
                 currentTile.Rotate60Clock();

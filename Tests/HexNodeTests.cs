@@ -3,8 +3,6 @@ using RailHexLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RailHexLib.Tests
 {
@@ -131,7 +129,7 @@ namespace RailHexLib.Tests
             node.Right.UpLeft = new HexNode(new Cell(-1, 1));
             node.UpRight = node.Right.UpLeft;
 
-            var nodesList = (from n in node select n.Cell).ToArray();
+            var nodesList = node.ToList();
             Assert.AreEqual(new Cell(0, 0), nodesList[0]);
             Assert.AreEqual(new Cell(-1, 1), nodesList[1]);
             Assert.AreEqual(new Cell(0, 1), nodesList[2]);
@@ -141,20 +139,20 @@ namespace RailHexLib.Tests
         public void EnumeratorMultiwayTest()
         {
             var node = new HexNode(new Cell(0, 0));
+            node.Left = new HexNode(new Cell(0, -1));
             node.UpRight = new HexNode(new Cell(-1, 1));
             node.UpRight.Left = new HexNode(new Cell(-1, 0));
-            node.Left = new HexNode(new Cell(0, -1));
             node.UpRight.UpRight = new HexNode(new Cell(-2, 2));
             node.UpRight.UpRight.UpRight = new HexNode(new Cell(-3, 3));
 
-            var nodesList = (from n in node select n.Cell).ToArray();
-            Assert.AreEqual(6, nodesList.Length);
-            Assert.AreEqual(new Cell(0, 0), nodesList[0]);
-            Assert.AreEqual(new Cell(-1, 1), nodesList[1]);
-            Assert.AreEqual(new Cell(-1, 0), nodesList[2]);
-            Assert.AreEqual(new Cell(0, -1), nodesList[4]);
-            Assert.AreEqual(new Cell(-2, 2), nodesList[3]);
-            Assert.AreEqual(new Cell(-3, 3), nodesList[4]);
+            List<HexNode> nodesList = node.ToList();
+            Assert.AreEqual(6, nodesList.Count);
+            Assert.AreEqual(new Cell(0, 0), nodesList[0].Cell);
+            Assert.AreEqual(new Cell(0, -1), nodesList[1].Cell);
+            Assert.AreEqual(new Cell(-1, 1), nodesList[2].Cell);
+            Assert.AreEqual(new Cell(-1, 0), nodesList[3].Cell);
+            Assert.AreEqual(new Cell(-2, 2), nodesList[4].Cell);
+            Assert.AreEqual(new Cell(-3, 3), nodesList[5].Cell);
         }
     }
 }
