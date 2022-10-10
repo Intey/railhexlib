@@ -38,14 +38,14 @@ namespace RailHexLib
 
         public int S => -R - Q;
 
-        public Cell(int r, int q, float size = 1.15f)
+        public Cell(int r, int q, float size)
         {
             this.r = r;
             this.q = q;
             this.size = size;
         }
 
-        public static Cell Rounded(float r, float q, float size = 1.15f)
+        public static Cell Rounded(float r, float q, float size)
         {
             var qn = Math.Round(q + .0001);
             var rn = Math.Round(r);
@@ -125,6 +125,11 @@ namespace RailHexLib
             Debug.Assert(l.size == r.size);
             return new Cell(l.R + r.R, l.Q + r.Q, l.size);
         }
+        
+        public static Cell operator +(Cell l, IdentityCell r)
+        {
+            return new Cell(l.R + r.R, l.Q + r.Q, l.size);
+        }
 
 
         public IdentityCell GetDirectionTo(Cell c)
@@ -158,7 +163,7 @@ namespace RailHexLib
 
             float r = Lerp(R, b.R, t);
             float q = Lerp(Q, b.Q, t);
-            return Rounded(r, q);
+            return Rounded(r, q, this.size);
         }
 
 
@@ -179,11 +184,11 @@ namespace RailHexLib
 
     public class IdentityCell : Cell
     {
-        public IdentityCell(int R, int Q, float size = 1.15f)
-            : base(Math.Sign(R), Math.Sign(Q), size)
+        public IdentityCell(int R, int Q)
+            : base(Math.Sign(R), Math.Sign(Q), 0)
         {
         }
-        public IdentityCell(Cell source) : this(source.R, source.Q, source.size)
+        public IdentityCell(Cell source) : this(source.R, source.Q)
         {
         }
         public IdentityCell Inverted()
@@ -205,14 +210,13 @@ namespace RailHexLib
                 newR = 0;
                 newQ = S;
             }
-            return new IdentityCell(newR, newQ, size);
+            return new IdentityCell(newR, newQ);
         }
 
 
         public override int GetHashCode()
         {
             int hashCode = -243245557;
-            hashCode = hashCode * -1521134295 + size.GetHashCode();
             hashCode = hashCode * -1521134295 + R.GetHashCode();
             hashCode = hashCode * -1521134295 + Q.GetHashCode();
             return hashCode;
