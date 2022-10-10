@@ -12,10 +12,12 @@ namespace RailHexLib
         public List<StructureRoad> NewStructureRoads;
         public List<TradeRoute> NewTradeRoutes;
         public bool GameOver = false;
+        public Tile PlacedTile = null;
 
-        public PlacementResult(bool isPlaced, Dictionary<Cell, Ground> joins = null, bool gameover=false)
+        public PlacementResult(Tile placedTile, Dictionary<Cell, Ground> joins = null, bool gameover=false)
         {
-            this.isPlaced = isPlaced;
+            this.PlacedTile = placedTile;
+            this.isPlaced = placedTile != null;
             this.NewJoins = joins ?? new Dictionary<Cell, Ground>();
             this.GameOver = gameover;
             this.NewOrphanRoads = new List<HexNode>();
@@ -27,7 +29,6 @@ namespace RailHexLib
         {
             return value.isPlaced;
         }
-        public static readonly PlacementResult Fail = new PlacementResult(false, null, false);
-        public static readonly PlacementResult Success = new PlacementResult(false, null, false);
+        public static readonly PlacementResult Fail = new PlacementResult(null, null, false);
     }
 }

@@ -19,11 +19,21 @@ namespace RailHexLib
         public List<TradeRoute> Routes => tradeRoutes;
         public int ScorePoints => scorePoints;
 
+        private List<Type> availableTiles;
         public Game(TileStack stack = null, ILogger logger = null)
         {
             this.logger = logger ?? new DefaultSilentLogger();
             placedTiles = new Dictionary<Cell, Tile>(new CellEqualityComparer());
             structureRoads = new Dictionary<Cell, StructureRoad>();
+
+            availableTiles = new List<Type>(){ 
+                typeof(ROAD_180Tile),
+                typeof(ROAD_60Tile),
+                typeof(GrassTile),
+                typeof(WaterTile),
+                // new ROAD_3T_60_120Tile()
+            };
+
             if (stack == null)
             {
                 this.rnd = new Random(1);
@@ -65,7 +75,7 @@ namespace RailHexLib
             logger.Log($"place tile {currentTile} on {placedCell}");
             placedTiles[placedCell] = currentTile;
 
-            var placementResult = new PlacementResult(true);
+            var placementResult = new PlacementResult(currentTile);
 
             Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(placedCell);
             placementResult.NewJoins = joinedNeighbors;
@@ -272,7 +282,7 @@ namespace RailHexLib
             return joinsOfPlacedCell;
         }
 
-        private bool CanPlaceCurrentTile(Cell cell)
+        public bool CanPlaceCurrentTile(Cell cell)
         {
             bool exists = placedTiles.ContainsKey(cell);
             return !exists;
@@ -280,10 +290,23 @@ namespace RailHexLib
 
         private Tile MakeRandomTileType()
         {
-            var tilesTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsSubclassOf(typeof(Tile))).ToArray();
-            var randomValue = rnd.Next(tilesTypes.Length);
-            var newType = tilesTypes[randomValue];
-            return (Tile)Activator.CreateInstance(newType);
+            var randomValue = availableTiles[rnd.Next(availableTiles.Count)];
+            
+            if (randomValue == typeof(ROAD_60Tile))
+            {
+                return new ROAD_60Tile();
+            } else if (randomValue == typeof(ROAD_180Tile))
+            {
+                return new ROAD_120Tile();
+            } else if (randomValue == typeof(GrassTile))
+            {
+                return new GrassTile();
+            } else if (randomValue == typeof(WaterTile))
+            {
+                return new WaterTile();
+            } else {
+                throw new NotImplementedException("Make a normal factory method, bitch");
+            }
         }
 
         private void InitializeDefaultStack()
