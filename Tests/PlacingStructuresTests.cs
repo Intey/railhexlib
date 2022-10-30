@@ -12,12 +12,13 @@ namespace RailHexLib.Tests
     [TestFixture]
     public class PlacingStructuresTests
     {
+        const float CELL_SIZE = 1f;
         public TileStack stack = new();
         readonly List<Structure> structures = new();
         readonly DevTools.Logger logger = new();
         private Game game = new Game();
-        private readonly Cell settle1Position = new(0, 0);
-        private readonly Cell settle2Position = new(0, -4);
+        private readonly Cell settle1Position = new(0, 0, CELL_SIZE);
+        private readonly Cell settle2Position = new(0, -4, CELL_SIZE);
 
         [SetUp]
         public void Prepare()
@@ -44,8 +45,8 @@ namespace RailHexLib.Tests
             var structs = game.Structures.ToList();
             Assert.AreEqual(settle1Position, structs[0].Key);
             Assert.AreEqual(settle2Position, structs[1].Key);
-            Assert.AreEqual(new Cell(0, -1), structs[0].Value.GetEnterCell());
-            Assert.AreEqual(new Cell(0, -3), structs[1].Value.GetEnterCell());
+            Assert.AreEqual(new Cell(0, -1, CELL_SIZE), structs[0].Value.GetEnterCell());
+            Assert.AreEqual(new Cell(0, -3, CELL_SIZE), structs[1].Value.GetEnterCell());
 
             game.NextTile();
 
@@ -58,8 +59,8 @@ namespace RailHexLib.Tests
             }
 
             Assert.AreEqual(2, game.StructureRoads.Count);
-            Assert.AreEqual(new Cell(0, -1), game.StructureRoads[new Cell(0, -1)].road.FindCell(new Cell(0, -1))?.Cell);
-            Assert.AreEqual(new Cell(0, -3), game.StructureRoads[new Cell(0, -3)].road.FindCell(new Cell(0, -3))?.Cell);
+            Assert.AreEqual(new Cell(0, -1, CELL_SIZE), game.StructureRoads[new Cell(0, -1, CELL_SIZE)].road.FindCell(new Cell(0, -1, CELL_SIZE))?.Cell);
+            Assert.AreEqual(new Cell(0, -3, CELL_SIZE), game.StructureRoads[new Cell(0, -3, CELL_SIZE)].road.FindCell(new Cell(0, -3, CELL_SIZE))?.Cell);
         }
     }
 }

@@ -8,6 +8,7 @@ namespace RailHexLib.Tests
     [TestFixture]
     internal class JoiningHexesTests : EmptyGameFixture
     {
+        const float CELL_SIZE = 1f;
         [Test]
         public void join2Tiles()
         {
@@ -16,15 +17,15 @@ namespace RailHexLib.Tests
 
             game.NextTile();
 
-            var placeResult = game.PlaceCurrentTile(new Cell(0, 0));
+            var placeResult = game.PlaceCurrentTile(new Cell(0, 0, CELL_SIZE));
             Assert.IsTrue(placeResult);
             Assert.AreEqual(placeResult.NewJoins.Count, 0);
 
-            placeResult = game.PlaceCurrentTile(new Cell(0, -1));
+            placeResult = game.PlaceCurrentTile(new Cell(0, -1, CELL_SIZE));
             Assert.IsTrue(placeResult);
             Assert.AreEqual(placeResult.NewJoins.Count, 1);
-            Assert.IsTrue(placeResult.NewJoins.ContainsKey(new Cell(0, 0)));
-            Assert.AreEqual(placeResult.NewJoins[new Cell(0, 0)], Road.instance);
+            Assert.IsTrue(placeResult.NewJoins.ContainsKey(new Cell(0, 0, CELL_SIZE)));
+            Assert.AreEqual(placeResult.NewJoins[new Cell(0, 0, CELL_SIZE)], Road.instance);
         }
 
         [Test]
@@ -39,16 +40,16 @@ namespace RailHexLib.Tests
             game.NextTile();
 
             game.RotateCurrentTile();
-            game.PlaceCurrentTile(new Cell(0, 1));
+            game.PlaceCurrentTile(new Cell(0, 1, CELL_SIZE));
 
             game.RotateCurrentTile();
-            game.PlaceCurrentTile(new Cell(-1, 1));
+            game.PlaceCurrentTile(new Cell(-1, 1, CELL_SIZE));
 
             game.RotateCurrentTile(2);
-            game.PlaceCurrentTile(new Cell(0, 0));
+            game.PlaceCurrentTile(new Cell(0, 0, CELL_SIZE));
 
             game.RotateCurrentTile(4);
-            var result = game.PlaceCurrentTile(new Cell(1, 0));
+            var result = game.PlaceCurrentTile(new Cell(1, 0, CELL_SIZE));
 
             Assert.IsTrue(false);
             /**

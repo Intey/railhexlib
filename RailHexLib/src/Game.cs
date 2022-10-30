@@ -206,6 +206,14 @@ namespace RailHexLib
             {
                 t.Update(ticks);
             }
+            foreach (var (_, tile) in placedTiles)
+            {
+                tile.Update(ticks);
+            }
+            foreach (var (_, structure) in Structures)
+            {
+                structure.Update(ticks);
+            }
 
         }
         internal void TradePointReached()

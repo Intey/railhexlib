@@ -50,5 +50,7 @@ namespace RailHexLib
         {
             return $"Structure ${name}";
         }
+
+        public void Update(int ticks) {}
     }
 }
