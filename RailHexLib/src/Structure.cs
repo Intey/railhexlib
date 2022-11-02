@@ -79,6 +79,7 @@ namespace RailHexLib
             return false;
         }
         public event EventHandler OnStructureAbandon;
+        public int LifeTime {get => lifeTime;}
         private int lifeTime = Config.Settlements.InitialTicksToDie; 
         private bool abandoned = false;
 

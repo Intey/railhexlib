@@ -19,6 +19,9 @@ namespace RailHexLib
         public List<TradeRoute> Routes => tradeRoutes;
         public int ScorePoints => scorePoints;
 
+
+        public event EventHandler OnStructureAbandon; 
+
         private List<Type> availableTiles;
         public Game(TileStack stack = null, ILogger logger = null)
         {
@@ -57,6 +60,7 @@ namespace RailHexLib
                 structure.OnStructureAbandon += (object s, EventArgs e) => {
                     this.structureRoads.Remove(((Structure)s).GetEnterCell());                
                     logger.Log("Structure abandoned");
+                    OnStructureAbandon(s, e);
                 };
             }
         }
@@ -223,7 +227,7 @@ namespace RailHexLib
             }
 
         }
-        internal void TradePointReached()
+        private void TradePointReached()
         {
             scorePoints += Config.ScorePoints.ForTradePointReached;
             // TODO: add tiles to stack
