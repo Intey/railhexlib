@@ -11,7 +11,7 @@ namespace RailHexLib
         }
 
         public abstract string tileName();
-        public void Update(int ticks) {}
+        public virtual void Tick(int ticks) {}
     }
     public class GrassTile : Tile
     {

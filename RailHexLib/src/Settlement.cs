@@ -17,6 +17,15 @@ namespace RailHexLib
 
             sides[incomeRoadCell] = new ROAD_180Tile();
         }
+ 
+        public override void Tick(int ticks) {
+            // count down the lifetime of settlement
+            // when is zero - abandon or remove settlement
+            // for remove - all container of settlement should remove it
+
+            // pass callback "onDie" to the settlement object - don't work when settlement contained in multiple objects
+            // 
+        }
 
         public override void Rotate60Clock()
         {
@@ -72,6 +81,7 @@ namespace RailHexLib
             }
             return result;
         }
+        
         public override string ToString()
         {
             return $"{name} Settlement";

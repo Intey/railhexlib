@@ -51,6 +51,6 @@ namespace RailHexLib
             return $"Structure ${name}";
         }
 
-        public void Update(int ticks) {}
+        public virtual void Tick(int ticks) {}
     }
 }

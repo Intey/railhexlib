@@ -18,7 +18,7 @@ namespace RailHexLib
         public Dictionary<Cell, Structure> TradePoints;
 
         public Cell CurrentTraderPosition => Cells[CurrentPositionIndex];
-        public void Update(int ticks)
+        public void Tick(int ticks)
         {
             int maxIndex = Cells.Count - 1;
             for (int i = 0; i < ticks; i++)

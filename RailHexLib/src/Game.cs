@@ -199,20 +199,20 @@ namespace RailHexLib
             return true;
         }
 
-        public void Update(int ticks)
+        public void Tick(int ticks)
         {
 
             foreach (var t in tradeRoutes)
             {
-                t.Update(ticks);
+                t.Tick(ticks);
             }
             foreach (var (_, tile) in placedTiles)
             {
-                tile.Update(ticks);
+                tile.Tick(ticks);
             }
             foreach (var (_, structure) in Structures)
             {
-                structure.Update(ticks);
+                structure.Tick(ticks);
             }
 
         }
