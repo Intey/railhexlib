@@ -52,6 +52,12 @@ namespace RailHexLib
                 this.structureRoads[structure.GetEnterCell()] = new StructureRoad(structure);
                 foreach (var cell in structure.GetHexes())
                     placedTiles[cell.Key] = cell.Value;
+
+                logger.Log("subscribe");
+                structure.OnStructureAbandon += (object s, EventArgs e) => {
+                    this.structureRoads.Remove(((Structure)s).GetEnterCell());                
+                    logger.Log("Structure abandoned");
+                };
             }
         }
 
@@ -134,6 +140,7 @@ namespace RailHexLib
                 // clear old keys
                 foreach (var k in hasChangedRoads) structureRoads.Remove(k);
                 structureRoads.Remove(placedHexNodeRoads.Cell);
+                
             }
 
 

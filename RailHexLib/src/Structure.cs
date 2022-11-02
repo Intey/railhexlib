@@ -51,6 +51,37 @@ namespace RailHexLib
             return $"Structure ${name}";
         }
 
-        public virtual void Tick(int ticks) {}
+        public virtual void Tick(int ticks) 
+        {
+            if (WillAbandon(ticks))
+            {
+                EventHandler handler = OnStructureAbandon;
+                if (handler != null)
+                {
+                    handler(this, EventArgs.Empty);
+                }            
+            }
+        }
+
+        private bool WillAbandon(int ticks)
+        {
+            if (abandoned) return true;
+
+            if (!abandoned && lifeTime > 0)
+            {
+                lifeTime -= ticks;
+                if (lifeTime <= 0)
+                {
+                    abandoned = true;
+                    return true;
+                }
+            }
+            return false;
+        }
+        public event EventHandler OnStructureAbandon;
+        private int lifeTime = Config.Settlements.InitialTicksToDie; 
+        private bool abandoned = false;
+
     }
+
 }

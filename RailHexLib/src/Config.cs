@@ -10,5 +10,9 @@ namespace RailHexLib {
         public static class Stack {
             public static int TilesForTradePointReached = 1;
         }
+
+        public static class Settlements {
+            public static int InitialTicksToDie = 20;
+        }
     }
 }
