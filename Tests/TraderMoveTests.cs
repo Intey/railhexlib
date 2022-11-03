@@ -17,16 +17,15 @@ namespace RailHexLib.Tests
                 s2
             };
             var cells = new List<Cell>() { new Cell(0, -3, CELL_SIZE), new Cell(0, -2, CELL_SIZE), new Cell(0, -1, CELL_SIZE) };
-            var sampleData = new Dictionary<Cell, Structure>() { 
-                [structs[0].GetEnterCell()] = structs[0], 
-                [structs[1].GetEnterCell()] = structs[1] };
-            var traderReachThePointHandler = () => {};
-            route = new TradeRoute(cells,
-                sampleData,
-                traderReachThePointHandler
-            );
+            var sampleData = new Dictionary<Cell, Structure>()
+            {
+                [structs[0].GetEnterCell()] = structs[0],
+                [structs[1].GetEnterCell()] = structs[1]
+            };
+            route = new Trader(cells,
+                sampleData);
         }
-        private TradeRoute route;
+        private Trader route;
 
         [Test]
         public void TestMoveTrader()
@@ -43,6 +42,39 @@ namespace RailHexLib.Tests
             Assert.AreEqual(new Cell(0, -3, CELL_SIZE), route.CurrentTraderPosition);
             route.Tick(3);
             Assert.AreEqual(new Cell(0, -2, CELL_SIZE), route.CurrentTraderPosition);
+        }
+
+        [Test]
+        public void TestTraderArrives()
+        {
+            var result = new List<Structure>();
+            route.OnTraderArrivesToAStructure += (sender, args) =>
+            {
+                result.AddRange(args.ReachedStructures);
+            };
+            route.Tick(2);
+
+            Assert.AreEqual(new List<Structure>() { route.TradePoints[new Cell(0, -1, CELL_SIZE)] }, result);
+            
+            result = new List<Structure>();
+            route.Tick(6);
+            Assert.AreEqual(
+              new List<Structure>() { route.TradePoints[new Cell(0, -3, CELL_SIZE)]
+                                    , route.TradePoints[new Cell(0, -1, CELL_SIZE)]
+                                    , route.TradePoints[new Cell(0, -3, CELL_SIZE)]
+                                    }
+            , result);
+        }
+        [Test]
+        public void TestTraderArrivesIncreaseLifeTime()
+        {
+             route.Tick(2);
+             var expectedLife = 
+             Config.Structure.InitialTicksToDie
+             + Config.Structure.LifeTimeIncreaseOnTraderVisit;
+
+             Assert.AreEqual(expectedLife, route.TradePoints[new Cell(0, -1, CELL_SIZE)].LifeTime);
+
         }
     }
 }

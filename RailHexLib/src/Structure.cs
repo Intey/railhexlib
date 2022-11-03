@@ -78,9 +78,14 @@ namespace RailHexLib
             }
             return false;
         }
+
+        public virtual void VisitTrader(Trader visitor) {
+            lifeTime += Config.Structure.LifeTimeIncreaseOnTraderVisit;
+        }
+        
         public event EventHandler OnStructureAbandon;
         public int LifeTime {get => lifeTime;}
-        private int lifeTime = Config.Settlements.InitialTicksToDie; 
+        private int lifeTime = Config.Structure.InitialTicksToDie; 
         private bool abandoned = false;
 
     }

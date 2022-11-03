@@ -2,16 +2,25 @@
 using System;
 namespace RailHexLib
 {
-    public class TradeRoute : IUpdatable
+    public class Trader : IUpdatable
     {
+        // use list for possible batching/optimization
+        public class PointReachedArgs: System.EventArgs {
+            public PointReachedArgs(List<Structure> structures) {
+                ReachedStructures = structures;
+            }
 
-        public TradeRoute(List<Cell> cells, Dictionary<Cell, Structure> tradePoints, Action tradePointReachedHandler)
+            public readonly List<Structure> ReachedStructures;
+        }
+
+        public event EventHandler<Trader.PointReachedArgs> OnTraderArrivesToAStructure;
+
+        public Trader(List<Cell> cells, Dictionary<Cell, Structure> tradePoints)
         {
             Cells = cells;
             TradePoints = tradePoints;
             Direction = 1;
             CurrentPositionIndex = 0;
-            OnTradePointHandler = tradePointReachedHandler;
         }
 
         public List<Cell> Cells;
@@ -20,23 +29,37 @@ namespace RailHexLib
         public Cell CurrentTraderPosition => Cells[CurrentPositionIndex];
         public void Tick(int ticks)
         {
+            
+            // calc that trader go over the settlement
             int maxIndex = Cells.Count - 1;
             for (int i = 0; i < ticks; i++)
             {
-                CurrentPositionIndex += Config.Trader.moveTileTicks * Direction;
-                // when greater we get reminder, change direction and substruct from current position. It's overrun
-                if (CurrentPositionIndex >= maxIndex || CurrentPositionIndex < 0)
+                CurrentPositionIndex += Direction;  
+
+                // Switch direction
+                var onTheEdge = CurrentPositionIndex == maxIndex || CurrentPositionIndex == 0;
+                if (onTheEdge)
                 {
                     Direction = Direction * -1;
-                    CurrentPositionIndex -= (Math.Abs(CurrentPositionIndex) % maxIndex);
-                    OnTradePointHandler();
                 }
 
+                if (TradePoints.ContainsKey(CurrentTraderPosition))
+                {
+                    var ReachedStructures = new List<Structure>(){TradePoints[CurrentTraderPosition]};
+                    TradePoints[CurrentTraderPosition].VisitTrader(this);
+                    var tmp_event = OnTraderArrivesToAStructure;
+                    if (tmp_event != null)
+                    {
+                        tmp_event(this, new Trader.PointReachedArgs(ReachedStructures));
+                    }
+                }
             }
         }
+
+
         int CurrentPositionIndex;
-        int Direction;
-        private Action OnTradePointHandler;
+        int Direction; // positive - forward, negative - backward
+
     }
 
 }

@@ -29,10 +29,17 @@ namespace RailHexLib.Tests
         }
 
         [Test]
+        public void TestStructureWillDie()
+        {
+            var s = new Settlement(new Cell(0, 0, CELL_SIZE), "Unknown");
+            s.Tick(4);
+            Assert.AreEqual(Config.Structure.InitialTicksToDie - 4, s.LifeTime);
+        }
+        [Test]
         public void TestAbandonEventRemoveStructureRoad()
         {
             game.AddStructures(new List<Structure>(){settlement});
-            game.Tick(Config.Settlements.InitialTicksToDie);
+            game.Tick(Config.Structure.InitialTicksToDie);
             Assert.True(game.Structures.Count == 0);
         }
 
@@ -40,7 +47,7 @@ namespace RailHexLib.Tests
         public void TestAbandonEventRemoveTradeRoute()
         {
             game.AddStructures(new List<Structure>(){settlement});
-            game.Tick(Config.Settlements.InitialTicksToDie);
+            game.Tick(Config.Structure.InitialTicksToDie);
             Assert.True(game.Structures.Count == 0);
         }
     }

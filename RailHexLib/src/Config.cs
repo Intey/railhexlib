@@ -2,7 +2,8 @@ namespace RailHexLib {
 
     public static class Config {
         public static class Trader {
-            public static int moveTileTicks = 1;
+            /// how many tiles move a trader in one tick
+            public static int moveTilesPerTick = 1;
         }
         public static class ScorePoints {
             public static int ForTradePointReached = 1;
@@ -11,7 +12,8 @@ namespace RailHexLib {
             public static int TilesForTradePointReached = 1;
         }
 
-        public static class Settlements {
+        public static class Structure {
+            public static int LifeTimeIncreaseOnTraderVisit = 5;
             public static int InitialTicksToDie = 20;
         }
     }

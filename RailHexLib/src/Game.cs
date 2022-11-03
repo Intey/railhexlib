@@ -16,11 +16,12 @@ namespace RailHexLib
         public Tile CurrentTile => currentTile;
         public Dictionary<Cell, Structure> Structures => structureRoads.ToDictionary(kv => kv.Value.structure.Center, kv => kv.Value.structure);
         public Dictionary<Cell, StructureRoad> StructureRoads => structureRoads;
-        public List<TradeRoute> Routes => tradeRoutes;
+        public List<Trader> Routes => tradeRoutes;
         public int ScorePoints => scorePoints;
 
-
-        public event EventHandler OnStructureAbandon; 
+        // Events
+        public event EventHandler StructureAbandonEvent;
+        public event EventHandler TraderArrivesToStructureEvent;
 
         private List<Type> availableTiles;
         public Game(TileStack stack = null, ILogger logger = null)
@@ -60,7 +61,13 @@ namespace RailHexLib
                 structure.OnStructureAbandon += (object s, EventArgs e) => {
                     this.structureRoads.Remove(((Structure)s).GetEnterCell());                
                     logger.Log("Structure abandoned");
-                    OnStructureAbandon(s, e);
+                    
+                    // race conditions about unsubscribe after the null check
+                    var tmp_event = StructureAbandonEvent;
+                    if (tmp_event != null)
+                    {
+                        tmp_event(s, e);
+                    }
                 };
             }
         }
@@ -227,19 +234,23 @@ namespace RailHexLib
             }
 
         }
-        private void TradePointReached()
+        
+        private void TradeArrivesToAStructure(object r, Trader.PointReachedArgs e)
         {
+            Trader route = (Trader)r;
+
+            // TODO: move resources from trader to the settlement
             scorePoints += Config.ScorePoints.ForTradePointReached;
-            // TODO: add tiles to stack
+
             for (int i = 0; i < Config.Stack.TilesForTradePointReached; i++)
             {
                 PushTile(MakeRandomTileType());
             }
         }
 
-        private List<TradeRoute> BuildTradeRoutes(IEnumerable<KeyValuePair<Cell, IEnumerable<StructureRoad>>> RoadsToJoin)
+        private List<Trader> BuildTradeRoutes(IEnumerable<KeyValuePair<Cell, IEnumerable<StructureRoad>>> RoadsToJoin)
         {
-            var result = new List<TradeRoute>();
+            var result = new List<Trader>();
             foreach (var group in RoadsToJoin)
             {
                 var joineryCell = group.Key;
@@ -255,7 +266,8 @@ namespace RailHexLib
                     path.AddRange(pair[0].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell))); // add income cell too
                     path.Add(joineryCell);
                     path.AddRange(pair[1].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
-                    TradeRoute newRoute = new TradeRoute(path, points, this.TradePointReached);
+                    Trader newRoute = new Trader(path, points);
+                    newRoute.OnTraderArrivesToAStructure += this.TradeArrivesToAStructure;
                     // ADD points to Route
                     result.Add(newRoute);
                 }
@@ -351,7 +363,7 @@ namespace RailHexLib
         /// Contains orphan roads where Key is root Node
         /// </summary>
         private Dictionary<Cell, HexNode> orphanRoads = new Dictionary<Cell, HexNode>();
-        private List<TradeRoute> tradeRoutes = new List<TradeRoute>();
+        private List<Trader> tradeRoutes = new List<Trader>();
         private ILogger logger;
         private int scorePoints;
 

@@ -29,7 +29,7 @@ namespace RailHexLib.Tests
         }
 
         [Test]
-        [Ignore("Doesn't had not such case becase")]
+        [Ignore("Doesn't had such case becase")]
         public void joinBy2siblingsOfOneRoad() {
 
             game.PushTile(new ROAD_60Tile());
