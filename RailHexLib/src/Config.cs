@@ -14,7 +14,7 @@ namespace RailHexLib {
 
         public static class Structure {
             public static int LifeTimeIncreaseOnTraderVisit = 5;
-            public static int InitialTicksToDie = 20;
+            public static int InitialTicksToDie = 60;
         }
     }
 }

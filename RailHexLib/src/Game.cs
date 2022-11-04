@@ -30,11 +30,12 @@ namespace RailHexLib
             placedTiles = new Dictionary<Cell, Tile>(new CellEqualityComparer());
             structureRoads = new Dictionary<Cell, StructureRoad>();
 
-            availableTiles = new List<Type>(){ 
+            availableTiles = new List<Type>(){
                 typeof(ROAD_180Tile),
-                typeof(ROAD_60Tile),
-                typeof(GrassTile),
-                typeof(WaterTile),
+                typeof(ROAD_120Tile),
+                // typeof(ROAD_60Tile),
+                // typeof(GrassTile),
+                //typeof(WaterTile),
                 // new ROAD_3T_60_120Tile()
             };
 
@@ -58,10 +59,11 @@ namespace RailHexLib
                     placedTiles[cell.Key] = cell.Value;
 
                 logger.Log("subscribe");
-                structure.OnStructureAbandon += (object s, EventArgs e) => {
-                    this.structureRoads.Remove(((Structure)s).GetEnterCell());                
+                structure.OnStructureAbandon += (object s, EventArgs e) =>
+                {
+                    this.structureRoads.Remove(((Structure)s).GetEnterCell());
                     logger.Log("Structure abandoned");
-                    
+
                     // race conditions about unsubscribe after the null check
                     var tmp_event = StructureAbandonEvent;
                     if (tmp_event != null)
@@ -101,8 +103,8 @@ namespace RailHexLib
             // make tree of current Hex
             var placedHexNodeRoads = new HexNode(placedCell);
 
-            HashSet<Cell> hasChangedOrphan = new HashSet<Cell>();
-            HashSet<Cell> hasChangedRoads = new HashSet<Cell>();
+            HashSet<Cell> changedOrphanRoads = new HashSet<Cell>();
+            HashSet<Cell> changedStructureRoads = new HashSet<Cell>();
 
             // no joins, make new orphan
             if (joinedRoads.Count() == 0 && currentTile.Sides.ContainsValue(Road.instance))
@@ -113,50 +115,63 @@ namespace RailHexLib
             // check joins
             foreach (var joinedRoadCell in joinedRoads)
             {
-                hasChangedOrphan.UnionWith(AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, orphanRoads));
+                foreach (var (roadCell, road) in orphanRoads)
+                {
+                    if (JoinWithExistRoads(placedHexNodeRoads, joinedRoadCell, road))
+                    {
+                        changedOrphanRoads.Add(roadCell);
+                    }
+                    // orphanRoads[placedHexNodeRoads.Cell] = placedHexNodeRoads;
+                }
+                placementResult.NewOrphanRoads.AddRange(changedOrphanRoads.Select(k => orphanRoads[k]).ToList());
 
-                placementResult.NewOrphanRoads.AddRange(hasChangedOrphan.Select(k => orphanRoads[k]).ToList());
-
-                var roads = structureRoads.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.road);
+                var structureRoads = this.structureRoads.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.road);
                 // TODO: should return list of merged structures to join them in tradeRoute
+                foreach (var (roadCell, road) in structureRoads)
+                {
+                    if (JoinWithExistRoads(placedHexNodeRoads, joinedRoadCell, road))
+                    {
+                        changedStructureRoads.Add(roadCell);
+                    }
+                    // roads[placedHexNodeRoads.Cell] = placedHexNodeRoads;
+                }
 
-                hasChangedRoads.UnionWith(AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, roads));
 
             }
 
             // hasChangedTradeRoute = AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, tradeRoutes);
-            placementResult.NewStructureRoads = hasChangedRoads.Select(k => structureRoads[k]).ToList();
+            placementResult.NewStructureRoads = changedStructureRoads.Select(k => structureRoads[k]).ToList();
 
             // promoted to structures. Remove from orphans
-            if (hasChangedOrphan.Count >= 1 && hasChangedRoads.Count >= 1)
+            if (changedOrphanRoads.Count >= 1 && changedStructureRoads.Count >= 1)
             {
                 // clear old keys
-                foreach (var k in hasChangedOrphan) orphanRoads.Remove(k);
+                foreach (var k in changedOrphanRoads) orphanRoads.Remove(k);
                 // remove created merged orphan - now it's in a structureRoad
                 orphanRoads.Remove(placedHexNodeRoads.Cell);
 
             }
-            if (hasChangedRoads.Count > 1)
+            if (changedStructureRoads.Count > 1)
             {
 
-                var changedStructureRoads = hasChangedRoads.Select(cell => structureRoads[cell]);
+                var changedStructureRoads_ = changedStructureRoads.Select(cell => structureRoads[cell]);
+                var roadsToJoin = new Dictionary<Cell, IEnumerable<StructureRoad>>(){
+                    [placedHexNodeRoads.Cell] = changedStructureRoads_,
+                };
 
-                var items = new List<KeyValuePair<Cell, IEnumerable<StructureRoad>>>();
-                items.Add(new KeyValuePair<Cell, IEnumerable<StructureRoad>>(placedHexNodeRoads.Cell, changedStructureRoads));
-
-                var newRoutes = BuildTradeRoutes(items);
+                var newRoutes = BuildTradeRoutes(roadsToJoin);
                 placementResult.NewTradeRoutes = newRoutes;
                 this.tradeRoutes.AddRange(newRoutes);
 
                 // clear old keys
-                foreach (var k in hasChangedRoads) structureRoads.Remove(k);
+                foreach (var k in changedStructureRoads) structureRoads.Remove(k);
                 structureRoads.Remove(placedHexNodeRoads.Cell);
-                
+
             }
 
 
             // check structures
-            // if tile added to orphan (or merge multiple of them)
+            // if tile added to (orphan) (or merge multiple of them)
             //  - add to structure road whole orphan with current tile as parent and drop from orphans
             // if tile added to multiple structures, merge them in trade road
             // BuildRoads(placedHexNodeRoads);
@@ -166,38 +181,29 @@ namespace RailHexLib
         }
 
         /// <summary>
-        /// 
+        /// Try to emplace the placedHexNodeRoad in the targetRoad on the joineryCell position
         /// </summary>
-        /// <param name="placedHexNodeRoads"></param>
+        /// <param name="placedHexNodeRoad"></param>
         /// <param name="joineryCell"></param>
-        /// <param name="roadsForMerge"></param>
-        /// <param name="alreadyMergedRoads">Roads with it's merge joinery</param>
+        /// <param name="targetRoad"></param>
         /// <returns></returns>
-        private List<Cell> AddToPlacedGraphs(HexNode placedHexNodeRoads, Cell joineryCell, Dictionary<Cell, HexNode> roadsForMerge)
+        private bool JoinWithExistRoads(HexNode placedHexNodeRoad, Cell joineryCell, HexNode targetRoad)
         {
-            var result = new List<Cell>();
-            foreach (var roadKey in roadsForMerge.Keys.ToList())
+            // joinery cell should be in one of all: orphan, road or trade route
+            HexNode roadJoineryOwner = targetRoad.FindCell(joineryCell);
+            if (roadJoineryOwner != null)
             {
-                // joinery cell should be in one of all: orphan, road or trade route
-                HexNode roadJoineryOwner = roadsForMerge[roadKey].FindCell(joineryCell);
-                if (roadJoineryOwner != null)
-                {
-                    result.Add(roadKey);
-
-                    HexNode parentForPlacedNode = roadJoineryOwner.Add(placedHexNodeRoads);
-
-                    Debug.Assert(parentForPlacedNode.Cell.Equals(joineryCell), "possibly incosistence");
-
-                    roadsForMerge[placedHexNodeRoads.Cell] = placedHexNodeRoads;
-                }
+                HexNode parentForPlacedNode = roadJoineryOwner.Add(placedHexNodeRoad);
+                Debug.Assert(parentForPlacedNode.Cell.Equals(joineryCell), "possibly incosistence");
+                return true;
             }
-            return result.ToList();
+            return false;
         }
 
         public void RotateCurrentTile(int count = 1)
         {
             Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile()?");
-            
+
             for (int i = 0; i < count; i++)
             {
                 currentTile.Rotate60Clock();
@@ -234,7 +240,7 @@ namespace RailHexLib
             }
 
         }
-        
+
         private void TradeArrivesToAStructure(object r, Trader.PointReachedArgs e)
         {
             Trader route = (Trader)r;
@@ -322,20 +328,29 @@ namespace RailHexLib
         private Tile MakeRandomTileType()
         {
             var randomValue = availableTiles[rnd.Next(availableTiles.Count)];
-            
+
             if (randomValue == typeof(ROAD_60Tile))
             {
                 return new ROAD_60Tile();
-            } else if (randomValue == typeof(ROAD_180Tile))
+            }
+            else if (randomValue == typeof(ROAD_180Tile))
             {
-                return new ROAD_120Tile();
-            } else if (randomValue == typeof(GrassTile))
+                return new ROAD_180Tile();
+            }
+            else if (randomValue == typeof(GrassTile))
             {
                 return new GrassTile();
-            } else if (randomValue == typeof(WaterTile))
+            }
+            else if (randomValue == typeof(WaterTile))
             {
                 return new WaterTile();
-            } else {
+            }
+            else if (randomValue == typeof(ROAD_120Tile))
+            {
+                return new ROAD_120Tile();
+            }
+            else
+            {
                 throw new NotImplementedException("Make a normal factory method, bitch");
             }
         }
@@ -362,7 +377,7 @@ namespace RailHexLib
         /// <summary>
         /// Contains orphan roads where Key is root Node
         /// </summary>
-        private Dictionary<Cell, HexNode> orphanRoads = new Dictionary<Cell, HexNode>();
+        public Dictionary<Cell, HexNode> orphanRoads = new Dictionary<Cell, HexNode>();
         private List<Trader> tradeRoutes = new List<Trader>();
         private ILogger logger;
         private int scorePoints;

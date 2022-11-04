@@ -121,7 +121,7 @@ namespace RailHexLib.Tests
 
             game.NextTile(); // initial start
 
-        var isPlaced = game.PlaceCurrentTile(new Cell(0, -2, CELL_SIZE));
+            var isPlaced = game.PlaceCurrentTile(new Cell(0, -2, CELL_SIZE));
             Assert.IsTrue(isPlaced);
             Assert.AreEqual(game.Routes.Count, 0);
 
@@ -218,6 +218,7 @@ namespace RailHexLib.Tests
             Assert.IsTrue(isPlaced && !isPlaced.GameOver);
             Assert.AreEqual(game.Routes.Count, 0);
             Assert.AreEqual(1, isPlaced.NewOrphanRoads.Count);
+            Assert.AreEqual(1, game.orphanRoads.Count);
 
             isPlaced = game.PlaceCurrentTile(new Cell(0, -4, CELL_SIZE));
             Assert.IsTrue(isPlaced && !isPlaced.GameOver);
