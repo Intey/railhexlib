@@ -30,18 +30,18 @@ namespace RailHexLib.Tests
         [Test]
         public void TestMoveTrader()
         {
-            Assert.AreEqual(new Cell(0, -3, CELL_SIZE), route.CurrentTraderPosition);
+            Assert.AreEqual(new Cell(0, -3, CELL_SIZE), route.CurrentPosition);
             route.Tick(1);
-            Assert.AreEqual(new Cell(0, -2, CELL_SIZE), route.CurrentTraderPosition);
+            Assert.AreEqual(new Cell(0, -2, CELL_SIZE), route.CurrentPosition);
             route.Tick(1);
-            Assert.AreEqual(new Cell(0, -1, CELL_SIZE), route.CurrentTraderPosition);
+            Assert.AreEqual(new Cell(0, -1, CELL_SIZE), route.CurrentPosition);
         }
         [Test]
         public void TestMoveTraderReversing()
         {
-            Assert.AreEqual(new Cell(0, -3, CELL_SIZE), route.CurrentTraderPosition);
+            Assert.AreEqual(new Cell(0, -3, CELL_SIZE), route.CurrentPosition);
             route.Tick(3);
-            Assert.AreEqual(new Cell(0, -2, CELL_SIZE), route.CurrentTraderPosition);
+            Assert.AreEqual(new Cell(0, -2, CELL_SIZE), route.CurrentPosition);
         }
 
         [Test]
