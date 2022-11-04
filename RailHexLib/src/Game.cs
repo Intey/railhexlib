@@ -85,7 +85,9 @@ namespace RailHexLib
                 logger.Log("subscribe");
                 structure.OnStructureAbandon += (object s, EventArgs e) =>
                 {
-                    this.structureRoads.Remove(((Structure)s).GetEnterCell());
+                    Structure structure = s as Structure;
+                    this.structureRoads.Remove(structure.GetEnterCell());
+                    this.Traders.RemoveAll(t => t.TradePoints.ContainsKey(structure.GetEnterCell()));
                     logger.Log("Structure abandoned");
 
                     // race conditions about unsubscribe after the null check
