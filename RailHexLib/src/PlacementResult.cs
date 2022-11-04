@@ -10,7 +10,7 @@ namespace RailHexLib
         public Dictionary<Cell, Ground> NewJoins;
         public List<HexNode> NewOrphanRoads;
         public List<StructureRoad> NewStructureRoads;
-        public List<Trader> NewTradeRoutes;
+        public List<Trader> NewTraders;
         public bool GameOver = false;
         public Tile PlacedTile = null;
 
@@ -22,7 +22,7 @@ namespace RailHexLib
             this.GameOver = gameover;
             this.NewOrphanRoads = new List<HexNode>();
             this.NewStructureRoads = new List<StructureRoad>();
-            this.NewTradeRoutes = new List<Trader>();
+            this.NewTraders = new List<Trader>();
         }
 
         public static implicit operator bool(PlacementResult value)

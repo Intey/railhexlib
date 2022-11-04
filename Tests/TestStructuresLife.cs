@@ -40,7 +40,7 @@ namespace RailHexLib.Tests
         {
             game.AddStructures(new List<Structure>(){settlement});
             game.Tick(Config.Structure.InitialTicksToDie);
-            Assert.True(game.Structures.Count == 0);
+            Assert.AreEqual(0, game.StructureRoads.Count);
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace RailHexLib.Tests
         {
             game.AddStructures(new List<Structure>(){settlement});
             game.Tick(Config.Structure.InitialTicksToDie);
-            Assert.True(game.Structures.Count == 0);
+            Assert.AreEqual(0, game.StructureRoads.Count);
         }
     }
 }

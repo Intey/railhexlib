@@ -43,16 +43,14 @@ namespace RailHexLib.Tests
             game.PushTile(new GrassTile());
             game.AddStructures(structures);
             var structs = game.Structures.ToList();
-            Assert.AreEqual(settle1Position, structs[0].Key);
-            Assert.AreEqual(settle2Position, structs[1].Key);
-            Assert.AreEqual(new Cell(0, -1, CELL_SIZE), structs[0].Value.GetEnterCell());
-            Assert.AreEqual(new Cell(0, -3, CELL_SIZE), structs[1].Value.GetEnterCell());
+            Assert.AreEqual(new Cell(0, -1, CELL_SIZE), structs[0].GetEnterCell());
+            Assert.AreEqual(new Cell(0, -3, CELL_SIZE), structs[1].GetEnterCell());
 
             game.NextTile();
 
             foreach (var structure in structs)
             {
-                foreach (var cell in structure.Value.GetHexes())
+                foreach (var cell in structure.GetHexes())
                 {
                     Assert.IsFalse(game.PlaceCurrentTile(cell.Key), $"structure tiles should be taken {cell.Key}({structure}");
                 }
