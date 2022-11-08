@@ -44,11 +44,11 @@ namespace RailHexLib.Tests
         }
 
         [Test]
-        public void TestAbandonEventRemoveTradeRoute()
+        public void TestAbandonEventRemoveTrader()
         {
             game.AddStructures(new List<Structure>(){settlement});
             game.Tick(Config.Structure.InitialTicksToDie);
-            Assert.AreEqual(0, game.StructureRoads.Count);
+            Assert.AreEqual(0, game.Traders.Count);
         }
     }
 }
