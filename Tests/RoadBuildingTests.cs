@@ -54,7 +54,7 @@ namespace RailHexLib.Tests
         public TileStack stack = new();
         readonly List<Structure> structures = new();
         readonly DevTools.Logger logger = new();
-        private Game game = new Game();
+        private Game game;
         private readonly Cell settle1Position = new(0, 0, CELL_SIZE);
         private readonly Cell settle2Position = new(0, -4, CELL_SIZE);
 
@@ -72,7 +72,8 @@ namespace RailHexLib.Tests
             structures.Add(settlement1);
             structures.Add(settlement2);
 
-            game = new Game(stack, logger);
+            Game.Reset(stack, logger);
+            game = Game.GetInstance();
         }
 
         [Test]

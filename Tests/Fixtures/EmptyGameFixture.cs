@@ -8,16 +8,12 @@ namespace RailHexLib.Tests
     internal class EmptyGameFixture
     {
         protected Game game;
-        public EmptyGameFixture()
-        {
-            game = new Game();
-        }
 
         [SetUp]
         public void SetUp()
         {
-            game = new Game(stack: new TileStack(), logger: new Logger());
-
+            Game.Reset(stack: new TileStack(), logger: new Logger());
+            game = Game.GetInstance();
         }
     }
 }

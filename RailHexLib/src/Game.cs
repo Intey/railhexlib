@@ -13,6 +13,20 @@ namespace RailHexLib
 
     public class Game : IUpdatable
     {
+        private static Game instance;
+        public static Game GetInstance(TileStack stack = null, ILogger logger = null)
+        {
+            if (instance == null)
+            {
+                instance = new Game();
+            }
+            return instance;
+        }
+        public static void Reset(TileStack stack = null, ILogger logger = null)
+        {
+            instance = null;
+            instance = new Game(stack, logger);
+        }
         public Tile CurrentTile => currentTile;
         public List<Structure> Structures => structures;
         public Dictionary<Cell, StructureRoad> StructureRoads => structureRoads;
@@ -45,7 +59,7 @@ namespace RailHexLib
         private ILogger logger;
         private int scorePoints;
 
-        public Game(TileStack stack = null, ILogger logger = null)
+        private Game(TileStack stack = null, ILogger logger = null)
         {
             this.logger = logger ?? new DefaultSilentLogger();
             placedTiles = new Dictionary<Cell, Tile>(new CellEqualityComparer());
@@ -77,7 +91,7 @@ namespace RailHexLib
 
             foreach (var structure in structures)
             {
-                
+
                 this.structureRoads[structure.GetEnterCell()] = new StructureRoad(structure);
                 foreach (var cell in structure.GetHexes())
                     placedTiles[cell.Key] = cell.Value;

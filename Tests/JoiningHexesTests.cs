@@ -18,7 +18,7 @@ namespace RailHexLib.Tests
             game.NextTile();
 
             var placeResult = game.PlaceCurrentTile(new Cell(0, 0, CELL_SIZE));
-            Assert.IsTrue(placeResult);
+            Assert.IsTrue(placeResult,  $"{placeResult}");
             Assert.AreEqual(placeResult.NewJoins.Count, 0);
 
             placeResult = game.PlaceCurrentTile(new Cell(0, -1, CELL_SIZE));

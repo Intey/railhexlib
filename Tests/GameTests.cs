@@ -10,7 +10,7 @@ namespace RailHexLib.Tests
     public class GameTests
     {
         const float CELL_SIZE = 1f;
-        Game game = new();
+        Game game; 
         TileStack stack = new();
 
         [SetUp]
@@ -19,7 +19,8 @@ namespace RailHexLib.Tests
             stack = new TileStack();
             stack.PushTile(new ROAD_120Tile());
             stack.PushTile(new ROAD_180Tile());
-            game = new Game(stack);
+            Game.Reset(stack);
+            game = Game.GetInstance();
             Settlement settlement1 = new(new Cell(0, 0, CELL_SIZE), "settlement1");
             // settlement size is 3tiles on R, so from center we have 2 tiles.
             // -10 -9 ...  -3  -2  -1   0

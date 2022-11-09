@@ -16,7 +16,7 @@ namespace RailHexLib.Tests
         public TileStack stack = new();
         Structure settlement;
         readonly DevTools.Logger logger = new();
-        private Game game = new Game();
+        private Game game = Game.GetInstance();
         private readonly Cell settle1Position = new(0, 0, CELL_SIZE);
         
         [SetUp]
@@ -24,8 +24,8 @@ namespace RailHexLib.Tests
         {
             Trace.Listeners.Add(new ConsoleTraceListener());
             settlement = new Settlement(settle1Position, "settlement1");
-
-            game = new Game(stack, logger);
+            Game.Reset(stack, logger);
+            game = Game.GetInstance();
         }
 
         [Test]
