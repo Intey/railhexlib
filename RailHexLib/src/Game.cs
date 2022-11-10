@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Random = System.Random;
 using RailHexLib.Interfaces;
 using RailHexLib.DevTools;
@@ -45,8 +44,7 @@ namespace RailHexLib
         private Dictionary<Cell, Tile> placedTiles;
         private Tile currentTile;
         /// <summary>
-        /// Key is center of structure
-        /// Value is Structures placed in Cell and it's 
+        /// Key is the enter cell of the structure because it's the begin of the road
         /// </summary>
         private Dictionary<Cell, StructureRoad> structureRoads;
 
@@ -138,63 +136,70 @@ namespace RailHexLib
 
             Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(placedCell);
             placementResult.NewJoins = joinedNeighbors;
-            // each of the objects is exactly in one of the graphs: orphan roads, strcture roads or tradeRoutes
+
+            buildRoads(joinedNeighbors, placedCell, placementResult);
+            
+            placementResult.GameOver = !NextTile();
+            return placementResult;
+        }
+
+        private void buildRoads(Dictionary<Cell, Ground> joinedNeighbors, Cell placedCell, PlacementResult placementResult)
+        {
+            // prepare
             var joinedRoads = from t in joinedNeighbors where t.Value is Road select t.Key;
-            // make tree of current Hex
             var placedHexNodeRoads = new HexNode(placedCell);
 
             HashSet<Cell> changedOrphanRoads = new HashSet<Cell>();
             HashSet<Cell> changedStructureRoads = new HashSet<Cell>();
 
+            // if not, so what the point of the value in the joinedNeighbors?
+            Debug.Assert(currentTile.Sides.ContainsValue(Road.instance));
+
             // no joins, make new orphan
-            if (joinedRoads.Count() == 0 && currentTile.Sides.ContainsValue(Road.instance))
+            if (joinedRoads.Count() == 0)
             {
                 OrphanRoads[placedCell] = placedHexNodeRoads;
                 placementResult.NewOrphanRoads.Add(OrphanRoads[placedCell]);
             }
-            // check joins
+
+            // now add joins to exist roads or create orphans
             foreach (var joinedRoadCell in joinedRoads)
             {
                 foreach (var (roadCell, road) in OrphanRoads)
                 {
                     if (JoinWithExistRoads(placedHexNodeRoads, joinedRoadCell, road))
                     {
+                        // collect cells of the exist orphan road on which we have the connection
                         changedOrphanRoads.Add(roadCell);
                     }
-                    // orphanRoads[placedHexNodeRoads.Cell] = placedHexNodeRoads;
                 }
-                placementResult.NewOrphanRoads.AddRange(changedOrphanRoads.Select(k => OrphanRoads[k]).ToList());
 
-                var structureRoads = this.structureRoads.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.road);
-                // TODO: should return list of merged structures to join them in tradeRoute
-                foreach (var (roadCell, road) in structureRoads)
+                foreach (var (structureEnterCell, structRoad) in structureRoads)
                 {
-                    if (JoinWithExistRoads(placedHexNodeRoads, joinedRoadCell, road))
+                    if (JoinWithExistRoads(placedHexNodeRoads, joinedRoadCell, structRoad.road))
                     {
-                        changedStructureRoads.Add(roadCell);
+                        // collect cells of the exist structure road on which we have the connection
+                        changedStructureRoads.Add(structureEnterCell);
                     }
-                    // roads[placedHexNodeRoads.Cell] = placedHexNodeRoads;
                 }
-
-
             }
-
-            // hasChangedTradeRoute = AddToPlacedGraphs(placedHexNodeRoads, joinedRoadCell, tradeRoutes);
+            placementResult.NewOrphanRoads.AddRange(changedOrphanRoads.Select(k => OrphanRoads[k]).ToList());
             placementResult.NewStructureRoads = changedStructureRoads.Select(k => structureRoads[k]).ToList();
 
-            // promoted to structures. Remove from orphans
+            // if placed tile joins orphan and structure roads then we promote it to structures. 
             if (changedOrphanRoads.Count >= 1 && changedStructureRoads.Count >= 1)
             {
                 // clear old keys
                 foreach (var k in changedOrphanRoads) OrphanRoads.Remove(k);
                 // remove created merged orphan - now it's in a structureRoad
                 OrphanRoads.Remove(placedHexNodeRoads.Cell);
-
             }
+
+            // if placed tile joins two or more structure roads then we create a trader between those structures
             if (changedStructureRoads.Count > 1)
             {
-
                 var changedStructureRoads_ = changedStructureRoads.Select(cell => structureRoads[cell]);
+
                 var roadsToJoin = new Dictionary<Cell, IEnumerable<StructureRoad>>()
                 {
                     [placedHexNodeRoads.Cell] = changedStructureRoads_,
@@ -207,18 +212,7 @@ namespace RailHexLib
                 // All structure roads from the changedStructureRoads become new trade route, so we can safely remove them
                 foreach (var k in changedStructureRoads) structureRoads.Remove(k);
                 structureRoads.Remove(placedHexNodeRoads.Cell);
-
             }
-
-
-            // check structures
-            // if tile added to (orphan) (or merge multiple of them)
-            //  - add to structure road whole orphan with current tile as parent and drop from orphans
-            // if tile added to multiple structures, merge them in trade road
-            // BuildRoads(placedHexNodeRoads);
-
-            placementResult.GameOver = !NextTile();
-            return placementResult;
         }
 
         /// <summary>
@@ -266,7 +260,6 @@ namespace RailHexLib
 
         public void Tick(int ticks)
         {
-
             foreach (var t in traders)
             {
                 t.Tick(ticks);
@@ -324,7 +317,7 @@ namespace RailHexLib
         }
 
         /// <summary>
-        /// find hexes with wich newly placed tile has joins
+        /// find hexes with which newly placed tile has joins by a ground type
         /// </summary>
         /// <param name="placedCell"></param>
         /// <returns>Dictionary of neighbors that joined by Ground(in Value) with `placedCell`</returns>
