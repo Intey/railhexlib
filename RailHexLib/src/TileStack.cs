@@ -18,6 +18,12 @@ namespace RailHexLib
             if (tiles.Count == 0) return null;
             return tiles.Dequeue();
         }
-
+        public IEnumerable<string> GetTiles()
+        {
+            foreach (var tile in tiles)
+            {
+                yield return tile.tileName();
+            }
+        }
     }
 }

@@ -40,7 +40,7 @@ namespace RailHexLib
         public event EventHandler TraderArrivesToStructureEvent;
 
         private List<Type> availableTiles;
-        private TileStack stack;
+        public TileStack stack;
         private Random rnd;
         private Dictionary<Cell, Tile> placedTiles;
         private Tile currentTile;

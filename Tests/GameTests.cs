@@ -14,11 +14,12 @@ namespace RailHexLib.Tests
         TileStack stack = new();
 
         [SetUp]
-        public void prepare()
+        public void SetUp()
         {
             stack = new TileStack();
             stack.PushTile(new ROAD_120Tile());
             stack.PushTile(new ROAD_180Tile());
+            
             Game.Reset(stack);
             game = Game.GetInstance();
             Settlement settlement1 = new(new Cell(0, 0, CELL_SIZE), "settlement1");
