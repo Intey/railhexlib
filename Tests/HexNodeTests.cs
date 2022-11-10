@@ -10,8 +10,9 @@ namespace RailHexLib.Tests
     public class HexNodeTests
     {
         const float CELL_SIZE = 1f;
+        
         [Test]
-        public void Link2HexNodeReference()
+        public void TestLink2HexNodeReference()
         {
             var node1 = new HexNode(new Cell(0, 0, CELL_SIZE));
             var node2 = new HexNode(new Cell(0, 1, CELL_SIZE));
@@ -27,14 +28,14 @@ namespace RailHexLib.Tests
 
         [Test]
         [Ignore("Actually don't meet that case")]
-        public void FindWithCycleInGraph()
+        public void TestFindWithCycleInGraph()
         {
             Assert.IsTrue(
                 false, "check that FindNode detects cycles and stop processing them");
         }
 
         [Test]
-        public void FindCellTest()
+        public void TestFindCell()
         {
             var node1 = new HexNode(new  Cell(0, 0, CELL_SIZE));
             var node2 = new HexNode(new Cell(0, 1, CELL_SIZE));
@@ -63,7 +64,7 @@ namespace RailHexLib.Tests
 
 
         [Test]
-        public void FindCellLongCycleTest()
+        public void TestFindCellLongCycle()
         {
             var node = new HexNode(new Cell(0, 0, CELL_SIZE));
             node.Right = new HexNode(new Cell(0, 1, CELL_SIZE));
@@ -79,7 +80,7 @@ namespace RailHexLib.Tests
 
         }
         [Test]
-        public void nodeSideBecomesNullOnSetInconsistentCell()
+        public void TestNodeSideBecomesNullOnSetInconsistentCell()
         {
             var node = new HexNode(new(0, 0, CELL_SIZE));
             node.Left = new HexNode(new(0, -1, CELL_SIZE));
@@ -91,7 +92,7 @@ namespace RailHexLib.Tests
             Assert.IsNull(node.Left.UpRight.Right);
         }
         [Test]
-        public void findCellUnexistTest()
+        public void TestFindCellUnexist()
         {
             var node = new HexNode(new(0, 0, CELL_SIZE));
             node.Left = new HexNode(new(0, -1, CELL_SIZE));
@@ -100,7 +101,7 @@ namespace RailHexLib.Tests
             Assert.AreEqual(null, node.FindCell(new(-1, -2, CELL_SIZE)));
         }
         [Test]
-        public void FindCellCycleTest()
+        public void TestFindCellCycle()
         {
             var node = new HexNode(new Cell(0, 0, CELL_SIZE));
             node.Right = new HexNode(new Cell(0, 1, CELL_SIZE));
@@ -111,7 +112,7 @@ namespace RailHexLib.Tests
         }
 
         [Test]
-        public void EnumerationTest()
+        public void TestEnumeration()
         {
             var node = new HexNode(new Cell(0, 0, CELL_SIZE))
             {
@@ -124,7 +125,7 @@ namespace RailHexLib.Tests
         }
 
         [Test]
-        public void EnumeratorCycleTest()
+        public void TestEnumeratorCycle()
         {
             var node = new HexNode(new Cell(0, 0, CELL_SIZE));
             node.Right = new HexNode(new Cell(0, 1, CELL_SIZE));
@@ -138,7 +139,7 @@ namespace RailHexLib.Tests
         }
 
         [Test]
-        public void EnumeratorMultiwayTest()
+        public void TestEnumeratorMultiway()
         {
             var node = new HexNode(new Cell(0, 0, CELL_SIZE));
             node.Left = new HexNode(new Cell(0, -1, CELL_SIZE));

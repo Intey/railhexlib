@@ -114,7 +114,7 @@ namespace RailHexLib.Tests
         }
 
         [Test]
-        public void InvertedTest()
+        public void TestInversionOfSides()
         {
             Assert.AreEqual(IdentityCell.leftSide, IdentityCell.rightSide.Inverted());
             Assert.AreEqual(IdentityCell.rightSide, IdentityCell.leftSide.Inverted());

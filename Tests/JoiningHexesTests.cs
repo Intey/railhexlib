@@ -10,7 +10,7 @@ namespace RailHexLib.Tests
     {
         const float CELL_SIZE = 1f;
         [Test]
-        public void join2Tiles()
+        public void TestJoin2Tiles()
         {
             game.PushTile(new ROAD_180Tile());
             game.PushTile(new ROAD_180Tile());
@@ -30,7 +30,7 @@ namespace RailHexLib.Tests
 
         [Test]
         [Ignore("Doesn't had such case becase")]
-        public void joinBy2siblingsOfOneRoad() {
+        public void TestJoinBy2siblingsOfOneRoad() {
 
             game.PushTile(new ROAD_60Tile());
             game.PushTile(new ROAD_120Tile());

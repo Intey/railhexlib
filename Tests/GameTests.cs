@@ -32,7 +32,7 @@ namespace RailHexLib.Tests
         }
 
         [Test]
-        public void GameTest()
+        public void TestPlaceOfStructureRoad()
         {
             game.NextTile();
             game.RotateCurrentTile();
