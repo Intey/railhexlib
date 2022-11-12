@@ -25,5 +25,6 @@ namespace RailHexLib
                 yield return tile.tileName();
             }
         }
+        public bool Empty() => tiles.Count == 0;
     }
 }

@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 namespace RailHexLib
 {
     public abstract class Tile : Interfaces.IRotatable<Grounds.Ground>
@@ -10,8 +11,10 @@ namespace RailHexLib
             return sides[side];
         }
 
+        internal bool HasBiome(Grounds.Ground expected) => sides.ContainsValue(expected);
+
         public abstract string tileName();
-        public virtual void Tick(int ticks) {}
+        public virtual void Tick(int ticks) { }
     }
     public class GrassTile : Tile
     {

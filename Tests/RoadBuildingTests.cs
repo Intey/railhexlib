@@ -181,7 +181,7 @@ namespace RailHexLib.Tests
             Assert.AreEqual(game.Traders.Count, 0);
 
             isPlaced = game.PlaceCurrentTile(new Cell(0, -3, CELL_SIZE));
-            Assert.IsTrue(isPlaced && isPlaced.GameOver);
+            Assert.IsTrue(isPlaced && isPlaced.GameOver, $"{isPlaced}, {isPlaced.GameOver}");
             Assert.AreEqual(game.Traders.Count, 1);
 
             var r1 = game.Traders[0];

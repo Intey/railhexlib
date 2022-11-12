@@ -12,6 +12,14 @@ namespace RailHexLib
         public Cell Center { get => center; }
         protected Cell center;
         protected string name = "Unnamed";
+
+        public event EventHandler OnStructureAbandon;
+        public int LifeTime {get => lifeTime;}
+        private int lifeTime = Config.Structure.InitialTicksToDie; 
+        private bool abandoned = false;
+
+        public List<Zone> ConnectedZones { get; } = new List<Zone>();
+        
         public string Name
         {
             get => name;
@@ -83,11 +91,6 @@ namespace RailHexLib
             lifeTime += Config.Structure.LifeTimeIncreaseOnTraderVisit;
         }
         
-        public event EventHandler OnStructureAbandon;
-        public int LifeTime {get => lifeTime;}
-        private int lifeTime = Config.Structure.InitialTicksToDie; 
-        private bool abandoned = false;
-
     }
 
 }

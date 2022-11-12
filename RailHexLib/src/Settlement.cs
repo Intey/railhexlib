@@ -17,7 +17,6 @@ namespace RailHexLib
 
             sides[incomeRoadCell] = new ROAD_180Tile();
         }
- 
         
         public override void Rotate60Clock()
         {

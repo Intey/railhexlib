@@ -33,7 +33,7 @@ namespace RailHexLib
 
         public List<Trader> Traders => traders;
         public int ScorePoints => scorePoints;
-
+        public List<Zone> Zones { get; } = new List<Zone>();
         // Events
         public event EventHandler StructureAbandonEvent;
         public event EventHandler TraderArrivesToStructureEvent;
@@ -124,7 +124,11 @@ namespace RailHexLib
         /// <returns>false if tile is not placed</returns>
         public PlacementResult PlaceCurrentTile(Cell placedCell)
         {
-            Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile()?");
+            // if (stack.Empty()) {
+            //     return PlacementResult.Fail;
+            // }
+            Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile() or maybe stack is empty");
+
             if (!CanPlaceCurrentTile(placedCell))
             {
                 return PlacementResult.Fail;
@@ -136,24 +140,38 @@ namespace RailHexLib
 
             Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(placedCell);
             placementResult.NewJoins = joinedNeighbors;
+            
+            if (currentTile.HasBiome(Grounds.Road.instance))
+            {
+                var joinedRoads = (from t in joinedNeighbors where t.Value is Road select t.Key).ToList();
+                buildRoads(joinedRoads, placedCell, placementResult);            
+            }
 
-            buildRoads(joinedNeighbors, placedCell, placementResult);
+            logger.Log($"tile type {currentTile.GetType()}");
+            if (currentTile.HasBiome(Grounds.Water.instance))//.GetSideBiome(IdentityCell.leftSide) == Grounds.Water.instance)
+            {
+                var newZone = new WaterZone(1);
+                Zones.Add(newZone);
+                if (joinedNeighbors.Count == 0)
+                {
+
+                }
+            }
             
             placementResult.GameOver = !NextTile();
             return placementResult;
         }
 
-        private void buildRoads(Dictionary<Cell, Ground> joinedNeighbors, Cell placedCell, PlacementResult placementResult)
+        private void buildRoads(List<Cell> joinedRoads, Cell placedCell, PlacementResult placementResult)
         {
             // prepare
-            var joinedRoads = from t in joinedNeighbors where t.Value is Road select t.Key;
             var placedHexNodeRoads = new HexNode(placedCell);
 
             HashSet<Cell> changedOrphanRoads = new HashSet<Cell>();
             HashSet<Cell> changedStructureRoads = new HashSet<Cell>();
 
             // if not, so what the point of the value in the joinedNeighbors?
-            Debug.Assert(currentTile.Sides.ContainsValue(Road.instance));
+            Debug.Assert(currentTile.HasBiome(Grounds.Road.instance), "Joined tile should contain the road");
 
             // no joins, make new orphan
             if (joinedRoads.Count() == 0)
@@ -183,6 +201,7 @@ namespace RailHexLib
                     }
                 }
             }
+            
             placementResult.NewOrphanRoads.AddRange(changedOrphanRoads.Select(k => OrphanRoads[k]).ToList());
             placementResult.NewStructureRoads = changedStructureRoads.Select(k => structureRoads[k]).ToList();
 
@@ -340,7 +359,6 @@ namespace RailHexLib
 
                     Tile neighborTile = placedTiles[neighbor];
                     var neighborSideBiome = neighborTile.GetSideBiome(currentTileSide.Inverted());
-
 
                     if (currentTileSideBiome == neighborSideBiome)
                     {
