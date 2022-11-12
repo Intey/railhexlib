@@ -25,7 +25,7 @@ namespace RailHexLib.Tests
             Assert.IsTrue(placeResult);
             Assert.AreEqual(placeResult.NewJoins.Count, 1);
             Assert.IsTrue(placeResult.NewJoins.ContainsKey(new Cell(0, 0, CELL_SIZE)));
-            Assert.AreEqual(placeResult.NewJoins[new Cell(0, 0, CELL_SIZE)], Road.instance);
+            Assert.AreEqual(placeResult.NewJoins[new Cell(0, 0, CELL_SIZE)], Ground.Road);
         }
 
         [Test]

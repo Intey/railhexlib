@@ -13,12 +13,12 @@ namespace RailHexLib.Tests
         {
             Tile t = new ROAD_60Tile();
             t.Rotate60Clock();
-            Assert.AreEqual(t.Sides[IdentityCell.leftSide], Grass.instance);
-            Assert.AreEqual(t.Sides[IdentityCell.upLeftSide], Road.instance);
-            Assert.AreEqual(t.Sides[IdentityCell.upRightSide], Road.instance);
-            Assert.AreEqual(t.Sides[IdentityCell.rightSide], Grass.instance);
-            Assert.AreEqual(t.Sides[IdentityCell.downRightSide], Grass.instance);
-            Assert.AreEqual(t.Sides[IdentityCell.downLeftSide], Grass.instance);
+            Assert.AreEqual(t.Sides[IdentityCell.leftSide], Ground.Grass);
+            Assert.AreEqual(t.Sides[IdentityCell.upLeftSide], Ground.Road);
+            Assert.AreEqual(t.Sides[IdentityCell.upRightSide], Ground.Road);
+            Assert.AreEqual(t.Sides[IdentityCell.rightSide], Ground.Grass);
+            Assert.AreEqual(t.Sides[IdentityCell.downRightSide], Ground.Grass);
+            Assert.AreEqual(t.Sides[IdentityCell.downLeftSide], Ground.Grass);
         }
     }
 }

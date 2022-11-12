@@ -90,8 +90,8 @@ namespace RailHexLib.Tests
             var routes = game.Traders;
             var expectedJoins = new Dictionary<Cell, Grounds.Ground>()
             {
-                [new Cell(0, -3, CELL_SIZE)] = Grounds.Road.instance,
-                [new Cell(0, -1, CELL_SIZE)] = Grounds.Road.instance,
+                [new Cell(0, -3, CELL_SIZE)] = Grounds.Ground.Road,
+                [new Cell(0, -1, CELL_SIZE)] = Grounds.Ground.Road,
             };
 
             Assert.AreEqual(expectedJoins, isPlaced.NewJoins, $"{isPlaced.NewJoins.Keys.First()}");
@@ -132,8 +132,8 @@ namespace RailHexLib.Tests
             Assert.IsTrue(isPlaced && isPlaced.GameOver);
             var expected = new Dictionary<Cell, Grounds.Ground>()
             {
-                [new Cell(0, -3, CELL_SIZE)] = Grounds.Road.instance,
-                [new Cell(0, -5, CELL_SIZE)] = Grounds.Road.instance,
+                [new Cell(0, -3, CELL_SIZE)] = Grounds.Ground.Road,
+                [new Cell(0, -5, CELL_SIZE)] = Grounds.Ground.Road,
             };
             Assert.AreEqual(expected, isPlaced.NewJoins);
             Assert.AreEqual(game.Traders.Count, 1);

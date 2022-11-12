@@ -27,12 +27,12 @@ namespace RailHexLib
         {
             sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
             {
-                [IdentityCell.leftSide] = Grounds.Grass.instance,
-                [IdentityCell.upLeftSide] = Grounds.Grass.instance,
-                [IdentityCell.upRightSide] = Grounds.Grass.instance,
-                [IdentityCell.rightSide] = Grounds.Grass.instance,
-                [IdentityCell.downRightSide] = Grounds.Grass.instance,
-                [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+                [IdentityCell.leftSide] = Grounds.Ground.Grass,
+                [IdentityCell.upLeftSide] = Grounds.Ground.Grass,
+                [IdentityCell.upRightSide] = Grounds.Ground.Grass,
+                [IdentityCell.rightSide] = Grounds.Ground.Grass,
+                [IdentityCell.downRightSide] = Grounds.Ground.Grass,
+                [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
             };
         }
     }
@@ -45,12 +45,12 @@ namespace RailHexLib
         {
             sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
             {
-                [IdentityCell.leftSide] = Grounds.Water.instance,
-                [IdentityCell.upLeftSide] = Grounds.Water.instance,
-                [IdentityCell.upRightSide] = Grounds.Water.instance,
-                [IdentityCell.rightSide] = Grounds.Water.instance,
-                [IdentityCell.downRightSide] = Grounds.Water.instance,
-                [IdentityCell.downLeftSide] = Grounds.Water.instance,
+                [IdentityCell.leftSide] = Grounds.Ground.Water,
+                [IdentityCell.upLeftSide] = Grounds.Ground.Water,
+                [IdentityCell.upRightSide] = Grounds.Ground.Water,
+                [IdentityCell.rightSide] = Grounds.Ground.Water,
+                [IdentityCell.downRightSide] = Grounds.Ground.Water,
+                [IdentityCell.downLeftSide] = Grounds.Ground.Water,
             };
         }
         public override string ToString()
@@ -67,12 +67,12 @@ namespace RailHexLib
         {
             sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
             {
-                [IdentityCell.leftSide] = Grounds.Road.instance,
-                [IdentityCell.upLeftSide] = Grounds.Road.instance,
-                [IdentityCell.upRightSide] = Grounds.Grass.instance,
-                [IdentityCell.rightSide] = Grounds.Grass.instance,
-                [IdentityCell.downRightSide] = Grounds.Grass.instance,
-                [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+                [IdentityCell.leftSide] = Grounds.Ground.Road,
+                [IdentityCell.upLeftSide] = Grounds.Ground.Road,
+                [IdentityCell.upRightSide] = Grounds.Ground.Grass,
+                [IdentityCell.rightSide] = Grounds.Ground.Grass,
+                [IdentityCell.downRightSide] = Grounds.Ground.Grass,
+                [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
             };
         }
         public override string ToString()
@@ -89,12 +89,12 @@ namespace RailHexLib
         {
             sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
             {
-                [IdentityCell.leftSide] = Grounds.Road.instance,
-                [IdentityCell.upLeftSide] = Grounds.Grass.instance,
-                [IdentityCell.upRightSide] = Grounds.Road.instance,
-                [IdentityCell.rightSide] = Grounds.Grass.instance,
-                [IdentityCell.downRightSide] = Grounds.Grass.instance,
-                [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+                [IdentityCell.leftSide] = Grounds.Ground.Road,
+                [IdentityCell.upLeftSide] = Grounds.Ground.Grass,
+                [IdentityCell.upRightSide] = Grounds.Ground.Road,
+                [IdentityCell.rightSide] = Grounds.Ground.Grass,
+                [IdentityCell.downRightSide] = Grounds.Ground.Grass,
+                [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
             };
         }
         public override string ToString()
@@ -111,12 +111,12 @@ namespace RailHexLib
         {
             sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
             {
-                [IdentityCell.leftSide] = Grounds.Road.instance,
-                [IdentityCell.upLeftSide] = Grounds.Grass.instance,
-                [IdentityCell.upRightSide] = Grounds.Grass.instance,
-                [IdentityCell.rightSide] = Grounds.Road.instance,
-                [IdentityCell.downRightSide] = Grounds.Grass.instance,
-                [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+                [IdentityCell.leftSide] = Grounds.Ground.Road,
+                [IdentityCell.upLeftSide] = Grounds.Ground.Grass,
+                [IdentityCell.upRightSide] = Grounds.Ground.Grass,
+                [IdentityCell.rightSide] = Grounds.Ground.Road,
+                [IdentityCell.downRightSide] = Grounds.Ground.Grass,
+                [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
             };
         }
         public override string ToString()
@@ -133,12 +133,12 @@ namespace RailHexLib
     //     {
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.rightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
     //         };
     //     }
     //     public override string ToString()
@@ -155,12 +155,12 @@ namespace RailHexLib
     //     {
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.rightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Grass.instance
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Grass
     //         };
     //     }
     //     public override string ToString()
@@ -177,12 +177,12 @@ namespace RailHexLib
     //     {
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Grass.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.rightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Grass.instance
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Grass
     //         };
     //     }
     //     public override string ToString()
@@ -199,12 +199,12 @@ namespace RailHexLib
     //     {
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Grass.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.rightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Road.instance,
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Road,
     //         };
     //     }
     //     public override string ToString()
@@ -221,12 +221,12 @@ namespace RailHexLib
     //     {
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.rightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
     //         };
     //     }
     //     public override string ToString()
@@ -243,12 +243,12 @@ namespace RailHexLib
     //     {
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.rightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
     //         };
     //     }
     //     public override string ToString()
@@ -265,12 +265,12 @@ namespace RailHexLib
     //     {
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Grass.instance,
-    //             [IdentityCell.rightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Grass,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
     //         };
     //     }
     //     public override string ToString()
@@ -287,12 +287,12 @@ namespace RailHexLib
     //     {
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.rightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Grass.instance,
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Grass,
     //         };
     //     }
     //     public override string ToString()
@@ -309,12 +309,12 @@ namespace RailHexLib
 
     //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
     //         {
-    //             [IdentityCell.leftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upLeftSide] = Grounds.Road.instance,
-    //             [IdentityCell.upRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.rightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downRightSide] = Grounds.Road.instance,
-    //             [IdentityCell.downLeftSide] = Grounds.Road.instance,
+    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
+    //             [IdentityCell.upRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.rightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downRightSide] = Grounds.Ground.Road,
+    //             [IdentityCell.downLeftSide] = Grounds.Ground.Road,
     //         };
     //     }
     //     public override string ToString()

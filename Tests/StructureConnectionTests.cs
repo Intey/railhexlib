@@ -1,5 +1,6 @@
 using NUnit.Framework;
 // using System;
+using RailHexLib.DevTools;
 
 namespace RailHexLib.Tests
 {
@@ -15,7 +16,7 @@ namespace RailHexLib.Tests
             stack.PushTile(new WaterTile());
 
             var settlement = new Settlement(new Cell(0, 0, 1));
-            Game.Reset(stack);
+            Game.Reset(stack, new Logger());
             var game = Game.GetInstance();
             game.AddStructures(new(){settlement});
             Assert.IsTrue(game.NextTile());

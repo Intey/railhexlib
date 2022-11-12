@@ -33,7 +33,7 @@ namespace RailHexLib
 
         public List<Trader> Traders => traders;
         public int ScorePoints => scorePoints;
-        public List<Zone> Zones { get; } = new List<Zone>();
+        public List<Zone> Zones { get; set; } = new List<Zone>();
         // Events
         public event EventHandler StructureAbandonEvent;
         public event EventHandler TraderArrivesToStructureEvent;
@@ -140,29 +140,60 @@ namespace RailHexLib
 
             Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(placedCell);
             placementResult.NewJoins = joinedNeighbors;
-            
-            if (currentTile.HasBiome(Grounds.Road.instance))
+
+            Dictionary<Ground, List<Cell>>
+                            joinsByGround = joinedNeighbors
+                                .GroupBy(b => b.Value)
+                                .ToDictionary(i => i.Key, i => i.Select(k => k.Key).ToList());
+
+            if (currentTile.HasBiome(Grounds.Ground.Road))
             {
-                var joinedRoads = (from t in joinedNeighbors where t.Value is Road select t.Key).ToList();
-                buildRoads(joinedRoads, placedCell, placementResult);            
+                var joinedRoads = joinsByGround.GetValueOrDefault(Grounds.Ground.Road, new List<Cell>());
+                buildRoads(joinedRoads.ToList(), placedCell, placementResult);
             }
 
-            logger.Log($"tile type {currentTile.GetType()}");
-            if (currentTile.HasBiome(Grounds.Water.instance))//.GetSideBiome(IdentityCell.leftSide) == Grounds.Water.instance)
+            // zones processing
+            var joinableGround = Enum.GetValues(typeof(Ground)).OfType<Ground>().Where(g => g.IsJoinable());
+            foreach (Ground groundType in joinableGround)
             {
-                var newZone = new WaterZone(1);
-                Zones.Add(newZone);
-                if (joinedNeighbors.Count == 0)
-                {
+                logger.Log($"Process ground {groundType}");
 
+                if (currentTile.HasBiome(groundType))
+                {
+                    if (joinsByGround.ContainsKey(groundType))
+                    {
+                        var joinsOfGround = joinsByGround[groundType];
+                        var hasJoins = joinsOfGround.Count != 0;
+                        // we are interested in zones that are of groundType 
+                        // and contains one of joinedNeighbors
+                        var JoinedZoneCells = joinsOfGround;
+                        bool ZoneContainsJoinedCell(Zone z) => JoinedZoneCells.Any(c => z.Contains(c));
+
+                        var zones = Zones
+                            .Where(z => z.ZoneType == groundType && ZoneContainsJoinedCell(z));
+
+                        // merge zones
+                        var resourcesSumm = zones.Aggregate(0, (acc, z) => acc + z.ResourceCount);
+                        var mergedZone = new Zone(resourcesSumm, groundType);
+                        Zones = Zones.Where(z => z.ZoneType != groundType).Append(mergedZone).ToList();
+                    }
+                    else
+                    {
+                        var newZone = new Zone(1, groundType);
+                        Zones.Add(newZone);
+                    }
+                }
+                else
+                {
+                    logger.Log($"has no biome {groundType}");
                 }
             }
-            
+
             placementResult.GameOver = !NextTile();
             return placementResult;
         }
 
-        private void buildRoads(List<Cell> joinedRoads, Cell placedCell, PlacementResult placementResult)
+        private void buildRoads(IEnumerable<Cell> joinedRoads, Cell placedCell, PlacementResult placementResult)
         {
             // prepare
             var placedHexNodeRoads = new HexNode(placedCell);
@@ -171,7 +202,7 @@ namespace RailHexLib
             HashSet<Cell> changedStructureRoads = new HashSet<Cell>();
 
             // if not, so what the point of the value in the joinedNeighbors?
-            Debug.Assert(currentTile.HasBiome(Grounds.Road.instance), "Joined tile should contain the road");
+            Debug.Assert(currentTile.HasBiome(Grounds.Ground.Road), "Joined tile should contain the road");
 
             // no joins, make new orphan
             if (joinedRoads.Count() == 0)
@@ -201,7 +232,7 @@ namespace RailHexLib
                     }
                 }
             }
-            
+
             placementResult.NewOrphanRoads.AddRange(changedOrphanRoads.Select(k => OrphanRoads[k]).ToList());
             placementResult.NewStructureRoads = changedStructureRoads.Select(k => structureRoads[k]).ToList();
 
@@ -416,7 +447,5 @@ namespace RailHexLib
                 stack.PushTile(tile);
             }
         }
-
-
     }
 }
