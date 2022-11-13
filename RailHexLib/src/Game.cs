@@ -82,7 +82,7 @@ namespace RailHexLib
                 this.stack = stack;
             }
         }
-
+        
         public void AddStructures(List<Structure> structures)
         {
             this.structures.AddRange(structures);
@@ -145,15 +145,12 @@ namespace RailHexLib
                                 .GroupBy(b => b.Value)
                                 .ToDictionary(pair => pair.Key, pair => pair.Select(k => k.Key).ToList());
 
-            if (currentTile.HasBiome(Grounds.Ground.Road))
-            {
-                var joinedRoads = joinsByGround.GetValueOrDefault(Grounds.Ground.Road, new List<Cell>());
-                buildRoads(joinedRoads.ToList(), placedCell, placementResult);
-            }
+            buildRoads(joinsByGround, placedCell, placementResult);
 
             // zones processing
             buildZones(joinsByGround, placedCell, placementResult);
 
+            
             placementResult.GameOver = !NextTile();
             return placementResult;
         }
@@ -197,6 +194,7 @@ namespace RailHexLib
                         newZone.Extend(placedCell);
                         Zones.Add(newZone);
                         placementResult.NewZones.Add(newZone);
+                        Structures.ForEach(s => s.ConnectZone(newZone));
                     }
                 }
                 else
@@ -206,16 +204,16 @@ namespace RailHexLib
             }
         }
 
-        private void buildRoads(IEnumerable<Cell> joinedRoads, Cell placedCell, PlacementResult placementResult)
+        private void buildRoads(Dictionary<Ground, List<Cell>> joinsByGround, Cell placedCell, PlacementResult placementResult)
         {
+            var joinedRoads = joinsByGround.GetValueOrDefault(Grounds.Ground.Road, new List<Cell>());
+
             // prepare
             var placedHexNodeRoads = new HexNode(placedCell);
 
             HashSet<Cell> changedOrphanRoads = new HashSet<Cell>();
             HashSet<Cell> changedStructureRoads = new HashSet<Cell>();
 
-            // if not, so what the point of the value in the joinedNeighbors?
-            Debug.Assert(currentTile.HasBiome(Grounds.Ground.Road), "Joined tile should contain the road");
 
             // no joins, make new orphan
             if (joinedRoads.Count() == 0)

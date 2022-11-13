@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace RailHexLib
 {
@@ -17,9 +18,26 @@ namespace RailHexLib
         public int LifeTime {get => lifeTime;}
         private int lifeTime = Config.Structure.InitialTicksToDie; 
         private bool abandoned = false;
-
-        public List<Zone> ConnectedZones { get; } = new List<Zone>();
+        // cell is connection point
+        public Dictionary<Cell, Zone> ConnectedZones { get; } = new Dictionary<Cell, Zone>();
         
+        public void ConnectZone(Zone zone)
+        {
+            foreach (var zoneCell in zone.Cells)
+            {
+                Debug.WriteLine("check {zone} {zoneCell}...");
+                foreach(var (c, _) in GetHexes())
+                {
+                    Debug.WriteLine("... with {c}");
+                    if (zoneCell.DistanceTo(c) == 1)
+                    {
+                        ConnectedZones.Add(zoneCell, zone);
+                        // TODO: subscibe zone actions
+                    }
+                }
+            }
+        }
+
         public string Name
         {
             get => name;
