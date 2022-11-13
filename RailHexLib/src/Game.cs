@@ -152,6 +152,13 @@ namespace RailHexLib
             }
 
             // zones processing
+            buildZones(joinsByGround, placedCell, placementResult);
+
+            placementResult.GameOver = !NextTile();
+            return placementResult;
+        }
+        private void buildZones(Dictionary<Ground, List<Cell>> joinsByGround, Cell placedCell, PlacementResult placementResult)
+        {
             var joinableGround = Enum.GetValues(typeof(Ground)).OfType<Ground>().Where(g => g.IsJoinable());
             foreach (Ground groundType in joinableGround)
             {
@@ -189,6 +196,7 @@ namespace RailHexLib
                         var newZone = new Zone(1, groundType);
                         newZone.Extend(placedCell);
                         Zones.Add(newZone);
+                        placementResult.NewZones.Add(newZone);
                     }
                 }
                 else
@@ -196,9 +204,6 @@ namespace RailHexLib
                     logger.Log($"has no biome {groundType}");
                 }
             }
-
-            placementResult.GameOver = !NextTile();
-            return placementResult;
         }
 
         private void buildRoads(IEnumerable<Cell> joinedRoads, Cell placedCell, PlacementResult placementResult)

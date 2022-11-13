@@ -7,10 +7,12 @@ namespace RailHexLib
     {
         // TODO: prevent changes in this fields with factory
         public bool isPlaced = true;
-        public Dictionary<Cell, Ground> NewJoins;
-        public List<HexNode> NewOrphanRoads;
-        public List<StructureRoad> NewStructureRoads;
-        public List<Trader> NewTraders;
+        public Dictionary<Cell, Ground> NewJoins = new Dictionary<Cell, Ground>();
+        public List<HexNode> NewOrphanRoads = new List<HexNode>();
+        public List<StructureRoad> NewStructureRoads = new List<StructureRoad>();
+        public List<Trader> NewTraders = new List<Trader>();
+
+        public List<Zone> NewZones = new List<Zone>();
         public bool GameOver = false;
         public Tile PlacedTile = null;
 
@@ -20,9 +22,6 @@ namespace RailHexLib
             this.isPlaced = placedTile != null;
             this.NewJoins = joins ?? new Dictionary<Cell, Ground>();
             this.GameOver = gameover;
-            this.NewOrphanRoads = new List<HexNode>();
-            this.NewStructureRoads = new List<StructureRoad>();
-            this.NewTraders = new List<Trader>();
         }
 
         public static implicit operator bool(PlacementResult value)
