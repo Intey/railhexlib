@@ -6,7 +6,7 @@ namespace RailHexLib
     public class Zone
     {
 
-        public List<Cell> Cells { get; }
+        public List<Cell> Cells { get; } = new List<Cell>();
 
         public int ResourceCount { get; }
         public Ground ZoneType { get; }
@@ -21,10 +21,14 @@ namespace RailHexLib
         {
             Cells.Add(newCell);
         }
+        public void Extend(IEnumerable<Cell> cells)
+        {
+            Cells.AddRange(cells);
+        }
 
         public bool Contains(Cell cell)
         {
-            return false;
+            return Cells.Contains(cell);
         }
 
     }

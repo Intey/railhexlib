@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 using RailHexLib.Grounds;
 
 
@@ -61,6 +62,7 @@ namespace RailHexLib.Tests
         [SetUp]
         public void Prepare()
         {
+            Trace.Listeners.Add(new ConsoleTraceListener());
             Settlement settlement1 = new(settle1Position, "settlement1");
             // settlement size is 3tiles on R, so from center we have 2 tiles.
             // -4  -3  -2  -1   0
@@ -283,7 +285,10 @@ namespace RailHexLib.Tests
             
             game.RotateCurrentTile(1);
             result = game.PlaceCurrentTile(new Cell(0, -2, CELL_SIZE));
-            Assert.AreEqual(2, result.NewJoins.Count());
+
+            // there we can have non road joins, so check only the appropriate cells
+            Assert.AreEqual(Ground.Road, result.NewJoins[new Cell(-1, -2, CELL_SIZE)]);
+            Assert.AreEqual(Ground.Road, result.NewJoins[new Cell(0, -1, CELL_SIZE)]);
             Assert.AreEqual(1, result.NewTraders.Count());
         }
 

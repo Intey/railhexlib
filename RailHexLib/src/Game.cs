@@ -94,7 +94,6 @@ namespace RailHexLib
                 foreach (var cell in structure.GetHexes())
                     placedTiles[cell.Key] = cell.Value;
 
-                logger.Log("subscribe");
                 structure.OnStructureAbandon += (object s, EventArgs e) =>
                 {
                     Structure structure = s as Structure;
@@ -144,7 +143,7 @@ namespace RailHexLib
             Dictionary<Ground, List<Cell>>
                             joinsByGround = joinedNeighbors
                                 .GroupBy(b => b.Value)
-                                .ToDictionary(i => i.Key, i => i.Select(k => k.Key).ToList());
+                                .ToDictionary(pair => pair.Key, pair => pair.Select(k => k.Key).ToList());
 
             if (currentTile.HasBiome(Grounds.Ground.Road))
             {
@@ -166,20 +165,29 @@ namespace RailHexLib
                         var hasJoins = joinsOfGround.Count != 0;
                         // we are interested in zones that are of groundType 
                         // and contains one of joinedNeighbors
-                        var JoinedZoneCells = joinsOfGround;
-                        bool ZoneContainsJoinedCell(Zone z) => JoinedZoneCells.Any(c => z.Contains(c));
+                        bool ZoneContainsJoinedCell(Zone z) => joinsOfGround.Any(c => z.Contains(c));
 
                         var zones = Zones
                             .Where(z => z.ZoneType == groundType && ZoneContainsJoinedCell(z));
 
                         // merge zones
-                        var resourcesSumm = zones.Aggregate(0, (acc, z) => acc + z.ResourceCount);
+                        var resourcesSumm = zones.Aggregate(0, (acc, z) =>
+                        {
+                            return acc + z.ResourceCount;
+                        });
                         var mergedZone = new Zone(resourcesSumm, groundType);
+                        mergedZone.Extend(placedCell);
+                        mergedZone.Extend(zones.Aggregate(
+                            new List<Cell>(),
+                            (acc, z) => { acc.AddRange(z.Cells); return acc; }
+                        ));
+
                         Zones = Zones.Where(z => z.ZoneType != groundType).Append(mergedZone).ToList();
                     }
                     else
                     {
                         var newZone = new Zone(1, groundType);
+                        newZone.Extend(placedCell);
                         Zones.Add(newZone);
                     }
                 }
