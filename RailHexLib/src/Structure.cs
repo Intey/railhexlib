@@ -25,10 +25,10 @@ namespace RailHexLib
         {
             foreach (var zoneCell in zone.Cells)
             {
-                Debug.WriteLine("check {zone} {zoneCell}...");
+                Debug.WriteLine($"check {zone} {zoneCell}...");
                 foreach(var (c, _) in GetHexes())
                 {
-                    Debug.WriteLine("... with {c}");
+                    Debug.WriteLine($"... with {c}");
                     if (zoneCell.DistanceTo(c) == 1)
                     {
                         ConnectedZones.Add(zoneCell, zone);
