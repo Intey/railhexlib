@@ -94,20 +94,24 @@ namespace RailHexLib
                 foreach (var cell in structure.GetHexes())
                     placedTiles[cell.Key] = cell.Value;
 
-                structure.OnStructureAbandon += (object s, EventArgs e) =>
+                EventHandler handle = null;
+                handle = (object s, EventArgs e) =>
                 {
                     Structure structure = s as Structure;
                     this.structureRoads.Remove(structure.GetEnterCell());
                     this.Traders.RemoveAll(t => t.TradePoints.ContainsKey(structure.GetEnterCell()));
                     logger.Log("Structure abandoned");
 
+                    // Call hanlers of the game event (like rethrow)
                     // race conditions about unsubscribe after the null check
                     var tmp_event = StructureAbandonEvent;
                     if (tmp_event != null)
                     {
                         tmp_event(s, e);
                     }
+                    structure.OnAbandonEvent -= handle;
                 };
+                structure.OnAbandonEvent += handle;
             }
         }
 
@@ -132,7 +136,7 @@ namespace RailHexLib
             {
                 return PlacementResult.Fail;
             }
-            logger.Log($"place tile {currentTile} on {placedCell}");
+            logger.Log($"place tile {currentTile} on cell: {placedCell}. Rot: {currentTile.Rotation}");
             placedTiles[placedCell] = currentTile;
 
             var placementResult = new PlacementResult(currentTile);
@@ -159,7 +163,7 @@ namespace RailHexLib
             var joinableGround = Enum.GetValues(typeof(Ground)).OfType<Ground>().Where(g => g.IsJoinable());
             foreach (Ground groundType in joinableGround)
             {
-                logger.Log($"Process ground {groundType}");
+                //logger.Log($"Process ground {groundType}");
 
                 if (currentTile.HasBiome(groundType))
                 {
@@ -199,7 +203,7 @@ namespace RailHexLib
                 }
                 else
                 {
-                    logger.Log($"has no biome {groundType}");
+                    // logger.Log($"has no biome {groundType}");
                 }
             }
         }
@@ -213,7 +217,6 @@ namespace RailHexLib
 
             HashSet<Cell> changedOrphanRoads = new HashSet<Cell>();
             HashSet<Cell> changedStructureRoads = new HashSet<Cell>();
-
 
             // no joins, make new orphan
             if (joinedRoads.Count() == 0)
@@ -336,7 +339,7 @@ namespace RailHexLib
 
         }
 
-        private void TradeArrivesToAStructure(object r, Trader.PointReachedArgs e)
+        private void TraderArrivesToStructure(object r, Trader.PointReachedArgs e)
         {
             Trader route = (Trader)r;
 
@@ -368,7 +371,7 @@ namespace RailHexLib
                     path.Add(joineryCell);
                     path.AddRange(pair[1].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
                     Trader newRoute = new Trader(path, points);
-                    newRoute.OnTraderArrivesToAStructure += this.TradeArrivesToAStructure;
+                    newRoute.OnTraderArrivesToAStructure += this.TraderArrivesToStructure;
                     // ADD points to Route
                     result.Add(newRoute);
                 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -14,7 +14,7 @@ namespace RailHexLib
         protected Cell center;
         protected string name = "Unnamed";
 
-        public event EventHandler OnStructureAbandon;
+        public event EventHandler OnAbandonEvent;
         public int LifeTime {get => lifeTime;}
         private int lifeTime = Config.Structure.InitialTicksToDie; 
         private bool abandoned = false;
@@ -81,7 +81,7 @@ namespace RailHexLib
         {
             if (WillAbandon(ticks))
             {
-                EventHandler handler = OnStructureAbandon;
+                EventHandler handler = OnAbandonEvent;
                 if (handler != null)
                 {
                     handler(this, EventArgs.Empty);
