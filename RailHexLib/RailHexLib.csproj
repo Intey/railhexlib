@@ -9,4 +9,8 @@
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="postsharp" Version="6.10.16" />
+    <PackageReference Include="PostSharp.Patterns.Diagnostics" Version="6.10.16" />
+  </ItemGroup>
 </Project>

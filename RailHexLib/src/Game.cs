@@ -160,7 +160,7 @@ namespace RailHexLib
         }
         private void buildZones(Dictionary<Ground, List<Cell>> joinsByGround, Cell placedCell, PlacementResult placementResult)
         {
-            var joinableGround = Enum.GetValues(typeof(Ground)).OfType<Ground>().Where(g => g.IsJoinable());
+            var joinableGround = Enum.GetValues(typeof(Ground)).OfType<Ground>().Where(g => g.IsJoinable() && g != Ground.Road);
             foreach (Ground groundType in joinableGround)
             {
                 //logger.Log($"Process ground {groundType}");
@@ -367,9 +367,16 @@ namespace RailHexLib
                     points.Add(pair[0].StartPoint, pair[0].structure);
                     points.Add(pair[1].StartPoint, pair[1].structure);
 
+                    
                     path.AddRange(pair[0].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell))); // add income cell too
                     path.Add(joineryCell);
-                    path.AddRange(pair[1].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
+                    logger.Log($"SpawnTarders: Node {pair[1].road} - path to {joineryCell}");
+                    foreach(var node in pair[1].road) {
+                        logger.Log($"SpawnTarders: Node item: {node}: L{node.Left}, UL{node.UpLeft}, UR{node.UpRight}, R{node.Right}, DR{node.DownRight}, DL{node.DownLeft}");
+                    }
+                    var pth = pair[1].road.PathTo(joineryCell);
+                    logger.Log($"path: {pth}");
+                    path.AddRange(pth.Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
                     Trader newRoute = new Trader(path, points);
                     newRoute.OnTraderArrivesToAStructure += this.TraderArrivesToStructure;
                     // ADD points to Route
@@ -388,14 +395,13 @@ namespace RailHexLib
         private Dictionary<Cell, Ground> FindJoinedNeighbors(Cell placedCell)
         {
             Dictionary<Cell, Ground> joinsOfPlacedCell = new Dictionary<Cell, Ground>();
-            foreach (var neighbor in placedCell.Neighbours()) // structures.Boundaries()) // place struct: if "currentTile" will be the cell, then curentTile.Neighbours() may return complex boundary
+            foreach (var (side, neighbor) in placedCell.Neighbours()) // structures.Boundaries()) // place struct: if "currentTile" will be the cell, then curentTile.Neighbours() may return complex boundary
             {
                 if (placedTiles.ContainsKey(neighbor))
                 {
-                    IdentityCell currentTileSide = new IdentityCell(neighbor - placedCell);
+                    IdentityCell currentTileSide = side;
 
                     var currentTileSideBiome = currentTile.GetSideBiome(currentTileSide);
-
                     // skip unjoinable tiles
                     if (!currentTileSideBiome.IsJoinable())
                     {
@@ -403,8 +409,9 @@ namespace RailHexLib
                     }
 
                     Tile neighborTile = placedTiles[neighbor];
-                    var neighborSideBiome = neighborTile.GetSideBiome(currentTileSide.Inverted());
 
+                    var neighborSideBiome = neighborTile.GetSideBiome(currentTileSide.Inverted());
+                    logger.Log($"JOIN CHECK: curr tile: {currentTileSide}[{currentTileSideBiome}] -- {currentTileSide.Inverted()}[{neighborSideBiome}]");
                     if (currentTileSideBiome == neighborSideBiome)
                     {
                         logger.Log($"tile {currentTile}({placedCell}) has join {currentTileSideBiome} on {currentTileSide}");

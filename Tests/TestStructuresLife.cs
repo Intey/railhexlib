@@ -22,7 +22,7 @@ namespace RailHexLib.Tests
         [SetUp]
         public void Prepare()
         {
-            Trace.Listeners.Add(new ConsoleTraceListener());
+          //  Trace.Listeners.Add(new ConsoleTraceListener());
             settlement = new Settlement(settle1Position, "settlement1");
             Game.Reset(stack, logger);
             game = Game.GetInstance();

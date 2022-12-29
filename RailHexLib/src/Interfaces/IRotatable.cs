@@ -31,13 +31,13 @@ namespace RailHexLib.Interfaces
             else
                 newRot = (RotationType)degreeses.GetValue((int)Rotation + 1);
             Rotation = newRot;
-            var leftSide = sides[IdentityCell.leftSide];
-            sides[IdentityCell.leftSide] = sides[IdentityCell.downLeftSide];
-            sides[IdentityCell.downLeftSide] = sides[IdentityCell.downRightSide];
-            sides[IdentityCell.downRightSide] = sides[IdentityCell.rightSide];
-            sides[IdentityCell.rightSide] = sides[IdentityCell.upRightSide];
-            sides[IdentityCell.upRightSide] = sides[IdentityCell.upLeftSide];
-            sides[IdentityCell.upLeftSide] = leftSide;
+            var leftSide = sides[IdentityCell.topLeftSide];
+            sides[IdentityCell.topLeftSide] = sides[IdentityCell.bottomLeftSide];
+            sides[IdentityCell.bottomLeftSide] = sides[IdentityCell.bottomSide];
+            sides[IdentityCell.bottomSide] = sides[IdentityCell.bottomRightSide];
+            sides[IdentityCell.bottomRightSide] = sides[IdentityCell.topRightSide];
+            sides[IdentityCell.topRightSide] = sides[IdentityCell.topSide];
+            sides[IdentityCell.topSide] = leftSide;
         }
 
         public void Rotate60Clock(int count)

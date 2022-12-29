@@ -3,9 +3,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using PostSharp.Patterns.Diagnostics;
 
 namespace RailHexLib
 {
+    /// <summary>
+    /// Used for the road making.
+    /// Previos algorithm use approximation to detect the direction in which 
+    /// it's go. But this didn't works with the loops: road starts on the 
+    /// left and go to the right. 
+    /// Working approach - go over all cell and find a way in the PathTo.
+    /// 
+    /// </summary>
     public class HexNode : IEnumerable<HexNode>
     {
         public Cell Cell;
@@ -89,27 +98,27 @@ namespace RailHexLib
             if (Cell.DistanceTo(newNode.Cell) == 1)
             {
                 var direction = Cell.GetDirectionTo(newNode.Cell);
-                if (direction.Equals(IdentityCell.downLeftSide))
+                if (direction.Equals(IdentityCell.bottomLeftSide))
                 {
                     DownLeft = newNode;
                 }
-                else if (direction.Equals(IdentityCell.downRightSide))
+                else if (direction.Equals(IdentityCell.bottomSide))
                 {
                     DownRight = newNode;
                 }
-                else if (direction.Equals(IdentityCell.rightSide))
+                else if (direction.Equals(IdentityCell.bottomRightSide))
                 {
                     Right = newNode;
                 }
-                else if (direction.Equals(IdentityCell.leftSide))
+                else if (direction.Equals(IdentityCell.topLeftSide))
                 {
                     Left = newNode;
                 }
-                else if (direction.Equals(IdentityCell.upLeftSide))
+                else if (direction.Equals(IdentityCell.topSide))
                 {
                     UpLeft = newNode;
                 }
-                else if (direction.Equals(IdentityCell.upRightSide))
+                else if (direction.Equals(IdentityCell.topRightSide))
                 {
                     UpRight = newNode;
                 }
@@ -127,25 +136,28 @@ namespace RailHexLib
             return findCell(node, null, visited);
         }
 
-        public List<Cell> PathTo(Cell joineryCell)
+        public List<Cell> PathTo(Cell targetCell)
         {
+            Debug.WriteLine($"Path from {Cell} to {targetCell}");
             var result = new List<Cell>
             {
                 Cell
             };
 
-            if (Cell.Equals(joineryCell))
+            if (Cell.Equals(targetCell))
             {
                 return result;
             }
-
-            var distance = Cell.DistanceTo(joineryCell);
-            var nextCell = Cell.CellLerp(joineryCell, 1.0f / distance);
-
+             
+            var distance = Cell.DistanceTo(targetCell);
+            var nextCell = Cell.CellLerp(targetCell, 1.0f / distance);
+            Debug.WriteLine($"PathTo: distance {distance}, next: {nextCell}");
             var node = FindCell(nextCell, 1); // should check only children
+            Debug.WriteLine($"find cell returns {node}");
             if (node == null) return null;
 
-            var nextNodes = node.PathTo(joineryCell);
+            var nextNodes = node.PathTo(targetCell);
+            Debug.WriteLine($"next node returns {node}");
             if (nextNodes == null) return null;
             result.AddRange(nextNodes);
             return result;
@@ -160,34 +172,34 @@ namespace RailHexLib
             visited.Add(this);
 
             HexNode found;
-            if (Left != null && (fromSide == null || !fromSide.Equals(IdentityCell.leftSide)))
+            if (Left != null && (fromSide == null || !fromSide.Equals(IdentityCell.topLeftSide)))
             {
-                found = Left.findCell(node, IdentityCell.rightSide, visited);
+                found = Left.findCell(node, IdentityCell.bottomRightSide, visited);
                 if (found != null) return found;
             }
-            if (UpLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.upLeftSide)))
+            if (UpLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.topSide)))
             {
-                found = UpLeft.findCell(node, IdentityCell.downRightSide, visited);
+                found = UpLeft.findCell(node, IdentityCell.bottomSide, visited);
                 if (found != null) return found;
             }
-            if (UpRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.upRightSide)))
+            if (UpRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.topRightSide)))
             {
-                found = UpRight.findCell(node, IdentityCell.downLeftSide, visited);
+                found = UpRight.findCell(node, IdentityCell.bottomLeftSide, visited);
                 if (found != null) return found;
             }
-            if (Right != null && (fromSide == null || !fromSide.Equals(IdentityCell.rightSide)))
+            if (Right != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomRightSide)))
             {
-                found = Right.findCell(node, IdentityCell.leftSide, visited);
+                found = Right.findCell(node, IdentityCell.topLeftSide, visited);
                 if (found != null) return found;
             }
-            if (DownRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.downRightSide)))
+            if (DownRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomSide)))
             {
-                found = DownRight.findCell(node, IdentityCell.upLeftSide, visited);
+                found = DownRight.findCell(node, IdentityCell.topSide, visited);
                 if (found != null) return found;
             }
-            if (DownLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.downLeftSide)))
+            if (DownLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomLeftSide)))
             {
-                found = DownLeft.findCell(node, IdentityCell.upRightSide, visited);
+                found = DownLeft.findCell(node, IdentityCell.topRightSide, visited);
                 if (found != null) return found;
             }
             return null;
@@ -201,12 +213,12 @@ namespace RailHexLib
 
         internal HexNode GetSide(IdentityCell side)
         {
-            if (side == IdentityCell.leftSide) return left;
-            if (side == IdentityCell.upLeftSide) return upLeft;
-            if (side == IdentityCell.upRightSide) return upRight;
-            if (side == IdentityCell.rightSide) return right;
-            if (side == IdentityCell.downRightSide) return downRight;
-            if (side == IdentityCell.downLeftSide) return downLeft;
+            if (side == IdentityCell.topLeftSide) return left;
+            if (side == IdentityCell.topSide) return upLeft;
+            if (side == IdentityCell.topRightSide) return upRight;
+            if (side == IdentityCell.bottomRightSide) return right;
+            if (side == IdentityCell.bottomSide) return downRight;
+            if (side == IdentityCell.bottomLeftSide) return downLeft;
             Debug.Assert(false, "impossible side");
             return null;
         }
@@ -214,6 +226,11 @@ namespace RailHexLib
         public IEnumerator<HexNode> GetEnumerator()
         {
             return new HexNodeEnumerator(this);
+        }
+
+        public override string ToString()
+        {
+            return $"<{Cell.ToString()}>";
         }
     }
 
@@ -246,12 +263,12 @@ namespace RailHexLib
 
             // if current node doesn't have any children, go to previous
             while (current.Count > 0) { 
-                var moved = MoveToSide(IdentityCell.leftSide)
-                || MoveToSide(IdentityCell.upLeftSide)
-                || MoveToSide(IdentityCell.upRightSide)
-                || MoveToSide(IdentityCell.rightSide)
-                || MoveToSide(IdentityCell.downRightSide)
-                || MoveToSide(IdentityCell.downLeftSide);
+                var moved = MoveToSide(IdentityCell.topLeftSide)
+                || MoveToSide(IdentityCell.topSide)
+                || MoveToSide(IdentityCell.topRightSide)
+                || MoveToSide(IdentityCell.bottomRightSide)
+                || MoveToSide(IdentityCell.bottomSide)
+                || MoveToSide(IdentityCell.bottomLeftSide);
                 if (moved) { return HAS_NEXT; }
 
                 // if we can't move to a current node side, check previos until possible

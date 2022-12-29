@@ -9,11 +9,11 @@ namespace RailHexLib
         public Settlement(Cell center, string name="GIVEMEADEFAULTNAME") : base(center, name)
         {
             sides = new Dictionary<IdentityCell, Tile>(new IdentityCellEqualityComparer());
-            foreach (var neighbor in center.Neighbours())
+            foreach (var (side, _) in center.Neighbours())
             {
-                sides[new IdentityCell(neighbor - center)] = new GrassTile();
+                sides[side] = new GrassTile();
             }
-            incomeRoadCell = IdentityCell.leftSide;
+            incomeRoadCell = IdentityCell.topLeftSide;
 
             sides[incomeRoadCell] = new ROAD_180Tile();
         }
@@ -22,29 +22,29 @@ namespace RailHexLib
         {
             base.Rotate60Clock();
 
-            if (incomeRoadCell.Equals(IdentityCell.leftSide))
+            if (incomeRoadCell.Equals(IdentityCell.topLeftSide))
             {
-                incomeRoadCell = IdentityCell.upLeftSide;
+                incomeRoadCell = IdentityCell.topSide;
             }
-            else if (incomeRoadCell.Equals(IdentityCell.upLeftSide))
+            else if (incomeRoadCell.Equals(IdentityCell.topSide))
             {
-                incomeRoadCell = IdentityCell.upRightSide;
+                incomeRoadCell = IdentityCell.topRightSide;
             }
-            else if (incomeRoadCell.Equals(IdentityCell.upRightSide))
+            else if (incomeRoadCell.Equals(IdentityCell.topRightSide))
             {
-                incomeRoadCell = IdentityCell.rightSide;
+                incomeRoadCell = IdentityCell.bottomRightSide;
             }
-            else if (incomeRoadCell.Equals(IdentityCell.rightSide))
+            else if (incomeRoadCell.Equals(IdentityCell.bottomRightSide))
             {
-                incomeRoadCell = IdentityCell.downRightSide;
+                incomeRoadCell = IdentityCell.bottomSide;
             }
-            else if (incomeRoadCell.Equals(IdentityCell.downRightSide))
+            else if (incomeRoadCell.Equals(IdentityCell.bottomSide))
             {
-                incomeRoadCell = IdentityCell.downLeftSide;
+                incomeRoadCell = IdentityCell.bottomLeftSide;
             }
             else
             {
-                incomeRoadCell = IdentityCell.leftSide;
+                incomeRoadCell = IdentityCell.topLeftSide;
             }
             foreach(var side in sides)
             {

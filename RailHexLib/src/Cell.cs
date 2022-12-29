@@ -2,29 +2,46 @@
 using System.Diagnostics;
 using System.Collections.Generic;
 
-/**
- * Grids
- * 
- * ^ R Axis    \ Q Axis (Diagonal left-up to right-down)
- * |            v
- * ======================================================
- *  /R\
- * | Q |
- *  \S/
- * ======================================================
- *    /1\ /1\
- *   | - | 0 |
- *  /0\ /0\ /0\
- * | - | 0 | 1 |
- *  \ /-\ /-\ /
- *   | 0 | 1 |
- *    \ / \ /
- *    
- */
+
 
 namespace RailHexLib
 {
-    // [System.Serializable]
+    /*
+    * Grids
+    * 
+    * ^ R Axis    \ Q Axis (Diagonal left-up to right-down)
+    * |            v
+    * ======================================================
+    *  /R\
+    * | Q |
+    *  \S/
+    * ======================================================
+    *    /1\ /1\
+    *   | - | 0 |
+    *  /0\ /0\ /0\
+    * | - | 0 | 1 |
+    *  \ /-\ /-\ /
+    *   | 0 | 1 |
+    *    \ / \ /
+    *    
+    * Original
+    *    -1,0    -    -1,1
+    *         -     -  
+    *      -           -
+    * 0,-1 -    0,0    -  0,1
+    *      -           -
+    *         -     -
+    *   1,-1     -    1,0
+    *
+    * In Godot
+    *          1,-1
+    *   0,-1 -  -  -  1,0
+    *      -         -
+    *    -     0,0     - 
+    *      -         -
+    *   -1,0  -  -  - 0,1
+    *          -1,1
+    */
     public class Cell : IEquatable<Cell>, IDistancable<Cell>
     {
         // [SerializeField]
@@ -81,16 +98,16 @@ namespace RailHexLib
         {
             return $"(R:{R}, Q:{Q})";
         }
-        public List<Cell> Neighbours()
+        public Dictionary<IdentityCell, Cell> Neighbours()
         {
-            return new List<Cell>
+            return new Dictionary<IdentityCell, Cell>
             {
-                (this + IdentityCell.leftSide),
-                (this + IdentityCell.upLeftSide),
-                (this + IdentityCell.upRightSide),
-                (this + IdentityCell.rightSide),
-                (this + IdentityCell.downRightSide),
-                (this + IdentityCell.downLeftSide)
+                [IdentityCell.topLeftSide] = (this + IdentityCell.topLeftSide),
+                [IdentityCell.topSide] = (this + IdentityCell.topSide),
+                [IdentityCell.topRightSide] = (this + IdentityCell.topRightSide),
+                [IdentityCell.bottomRightSide] = (this + IdentityCell.bottomRightSide),
+                [IdentityCell.bottomSide] = (this + IdentityCell.bottomSide),
+                [IdentityCell.bottomLeftSide] = (this + IdentityCell.bottomLeftSide)
             };
         }
 
@@ -125,7 +142,7 @@ namespace RailHexLib
             Debug.Assert(l.size == r.size);
             return new Cell(l.R + r.R, l.Q + r.Q, l.size);
         }
-        
+
         public static Cell operator +(Cell l, IdentityCell r)
         {
             return new Cell(l.R + r.R, l.Q + r.Q, l.size);
@@ -155,10 +172,12 @@ namespace RailHexLib
 
         private float Lerp(int a, int b, float t)
         {
+            Debug.Assert(t <= 1.0f);
             return a + (b - a) * t;
         }
         public Cell CellLerp(Cell b, float t)
         {
+            Debug.Assert(t <= 1.0f);
             Debug.Assert(this.size == b.size);
 
             float r = Lerp(R, b.R, t);
@@ -233,14 +252,59 @@ namespace RailHexLib
         {
             return obj is IdentityCell && this.Equals((IdentityCell)obj);
         }
-        
+
+        /* Original
+        *    -1,0    -    -1,1
+        *         -     -  
+        *      -           -
+        * 0,-1 -    0,0    -  0,1
+        *      -           -
+        *         -     -
+        *   1,-1     -    1,0
+        */
+
+        /*
         public static readonly IdentityCell leftSide = new IdentityCell(0, -1);
         public static readonly IdentityCell upLeftSide = new IdentityCell(-1, 0);
         public static readonly IdentityCell upRightSide = new IdentityCell(-1, 1);
         public static readonly IdentityCell rightSide = new IdentityCell(0, 1);
         public static readonly IdentityCell downRightSide = new IdentityCell(1, 0);
         public static readonly IdentityCell downLeftSide = new IdentityCell(1, -1);
+        */
+
+        /* In Godot
+        *          1,-1
+        *   0,-1 -  -  -  1,0
+        *      -         -
+        *    -     0,0     - 
+        *      -         -
+        *   -1,0  -  -  - 0,1
+        *          -1,1
+        */
+        public static readonly IdentityCell topLeftSide = new IdentityCell(0, -1); // upLeft
+        public static readonly IdentityCell bottomLeftSide = new IdentityCell(-1, 0);
+        public static readonly IdentityCell bottomSide = new IdentityCell(-1, 1); // bottom
+        public static readonly IdentityCell bottomRightSide = new IdentityCell(0, 1); // down right
+        public static readonly IdentityCell topRightSide = new IdentityCell(1, 0);
+        public static readonly IdentityCell topSide = new IdentityCell(1, -1); // top
         internal static IdentityCell self = new IdentityCell(0, 0);
+
+        public override string ToString()
+        {
+            if (this == IdentityCell.topLeftSide)
+                return $"UL({R},{Q})";
+            else if (this == IdentityCell.topSide)
+                return $"T({R},{Q})";
+            else if (this == IdentityCell.topRightSide)
+                return $"UR({R},{Q})";
+            else if (this == IdentityCell.bottomRightSide)
+                return $"DR({R},{Q})";
+            else if (this == IdentityCell.bottomSide)
+                return $"B({R},{Q})";
+            else if (this == IdentityCell.bottomLeftSide)
+                return $"DL({R},{Q})";
+            else return $"(0,0)";
+        }
     }
     internal class IdentityCellEqualityComparer : IEqualityComparer<IdentityCell>
     {

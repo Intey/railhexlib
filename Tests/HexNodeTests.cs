@@ -3,6 +3,8 @@ using RailHexLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
+using PostSharp.Patterns.Diagnostics;
 
 namespace RailHexLib.Tests
 {
@@ -156,6 +158,20 @@ namespace RailHexLib.Tests
             Assert.AreEqual(new Cell(-1, 0, CELL_SIZE), nodesList[3]);
             Assert.AreEqual(new Cell(-2, 2, CELL_SIZE), nodesList[4]);
             Assert.AreEqual(new Cell(-3, 3, CELL_SIZE), nodesList[5]);
+        }
+
+        [Test]
+        public void TestGodotTileMapPositioning()
+        {
+            // LoggingServices.DefaultBackend = new PostSharp.Patterns.Diagnostics.Backends.Console.ConsoleLoggingBackend();
+            Trace.Listeners.Add(new ConsoleTraceListener());
+
+            var node =  new HexNode(new Cell(0,-1, CELL_SIZE));
+            node.Left = new HexNode(new Cell(0,-2, CELL_SIZE));
+            node = node.Left;
+            node.Left = new HexNode(new Cell(0,-3, CELL_SIZE));
+            node.Left.UpLeft = new HexNode(new Cell(1,-4, CELL_SIZE));
+            Assert.IsNotNull(node.PathTo(new Cell(1,-4,CELL_SIZE)));
         }
     }
 }

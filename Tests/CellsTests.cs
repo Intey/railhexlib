@@ -48,13 +48,13 @@ namespace RailHexLib.Tests
         [Test]
         public void TestDistance()
         {
-            Assert.AreEqual(1, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(0,  -1, CELL_SIZE)));
-            Assert.AreEqual(2, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(1,  -2, CELL_SIZE)));
+            Assert.AreEqual(1, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(0, -1, CELL_SIZE)));
+            Assert.AreEqual(2, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(1, -2, CELL_SIZE)));
             Assert.AreEqual(2, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(-1, -1, CELL_SIZE)));
-            Assert.AreEqual(3, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(-1,  3, CELL_SIZE)));
-            Assert.AreEqual(3, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(0,   3, CELL_SIZE)));
-            Assert.AreEqual(2, new Cell(0, 1, CELL_SIZE).DistanceTo(new Cell(-1,  3, CELL_SIZE)));
-            Assert.AreEqual(3, new Cell(0, 1, CELL_SIZE).DistanceTo(new Cell(-1,  4, CELL_SIZE)));
+            Assert.AreEqual(3, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(-1, 3, CELL_SIZE)));
+            Assert.AreEqual(3, new Cell(0, 0, CELL_SIZE).DistanceTo(new Cell(0, 3, CELL_SIZE)));
+            Assert.AreEqual(2, new Cell(0, 1, CELL_SIZE).DistanceTo(new Cell(-1, 3, CELL_SIZE)));
+            Assert.AreEqual(3, new Cell(0, 1, CELL_SIZE).DistanceTo(new Cell(-1, 4, CELL_SIZE)));
         }
 
 
@@ -100,27 +100,33 @@ namespace RailHexLib.Tests
         public void TestDirectionTo()
         {
             var cell = new Cell(0, 0, CELL_SIZE);
-            Assert.AreEqual(IdentityCell.leftSide, cell.GetDirectionTo(new Cell(0, -1, CELL_SIZE)));
-            Assert.AreEqual(IdentityCell.rightSide, cell.GetDirectionTo(new Cell(0, 1, CELL_SIZE)));
+            Assert.AreEqual(IdentityCell.topLeftSide, cell.GetDirectionTo(new Cell(0, -1, CELL_SIZE)));
+            Assert.AreEqual(IdentityCell.bottomRightSide, cell.GetDirectionTo(new Cell(0, 1, CELL_SIZE)));
 
             cell = new Cell(0, -2, CELL_SIZE);
-            Assert.AreEqual(IdentityCell.rightSide, cell.GetDirectionTo(new Cell(0, -1, CELL_SIZE)));
-            Assert.AreEqual(IdentityCell.leftSide, cell.GetDirectionTo(new Cell(0, -3, CELL_SIZE)));
+            Assert.AreEqual(IdentityCell.bottomRightSide, cell.GetDirectionTo(new Cell(0, -1, CELL_SIZE)));
+            Assert.AreEqual(IdentityCell.topLeftSide, cell.GetDirectionTo(new Cell(0, -3, CELL_SIZE)));
+
             cell = new Cell(0, -4, CELL_SIZE);
-            Assert.AreEqual(IdentityCell.rightSide, cell.GetDirectionTo(new Cell(0, -3, CELL_SIZE)));            
-            Assert.AreEqual(IdentityCell.leftSide, cell.GetDirectionTo(new Cell(0, -5, CELL_SIZE)));
-            Assert.AreEqual(IdentityCell.upLeftSide, cell.GetDirectionTo(new Cell(-1, -4, CELL_SIZE)));
-            Assert.AreEqual(IdentityCell.downRightSide, cell.GetDirectionTo(new Cell(1, -4, CELL_SIZE)));
+            Assert.Multiple(() =>
+            {
+                Assert.AreEqual(IdentityCell.bottomRightSide, cell.GetDirectionTo(new Cell(0, -3, CELL_SIZE)), "Direction to the bottom right");
+                Assert.AreEqual(IdentityCell.topLeftSide, cell.GetDirectionTo(new Cell(0, -5, CELL_SIZE)), "Direction to the top left");
+                Assert.AreEqual(IdentityCell.bottomLeftSide, cell.GetDirectionTo(new Cell(-1, -4, CELL_SIZE)), "Direction to the bottom left");
+                Assert.AreEqual(IdentityCell.topRightSide, cell.GetDirectionTo(new Cell(1, -4, CELL_SIZE)), "Direction to the top right");
+                Assert.AreEqual(IdentityCell.topSide, cell.GetDirectionTo(new Cell(1, -5, CELL_SIZE)), "Direction to the top");
+                Assert.AreEqual(IdentityCell.bottomSide, cell.GetDirectionTo(new Cell(-1, -3, CELL_SIZE)), "Direction to the bottom");
+            });
         }
 
         [Test]
         public void TestInversionOfSides()
         {
-            Assert.AreEqual(IdentityCell.leftSide, IdentityCell.rightSide.Inverted());
-            Assert.AreEqual(IdentityCell.rightSide, IdentityCell.leftSide.Inverted());
+            Assert.AreEqual(IdentityCell.topLeftSide, IdentityCell.bottomRightSide.Inverted());
+            Assert.AreEqual(IdentityCell.bottomRightSide, IdentityCell.topLeftSide.Inverted());
 
-            Assert.AreEqual(IdentityCell.upLeftSide, IdentityCell.downRightSide.Inverted());
-            Assert.AreEqual(IdentityCell.downLeftSide, IdentityCell.upRightSide.Inverted());
+            Assert.AreEqual(IdentityCell.topSide, IdentityCell.bottomSide.Inverted());
+            Assert.AreEqual(IdentityCell.bottomLeftSide, IdentityCell.topRightSide.Inverted());
         }
     }
 }
