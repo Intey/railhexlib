@@ -13,7 +13,7 @@ namespace RailHexLib.Tests
         const float CELL_SIZE = 1f;
         [SetUp]
         public void SetUp() {
-            Trace.Listeners.Add(new ConsoleTraceListener());
+            //Trace.Listeners.Add(new ConsoleTraceListener());
         }
         [Test]
         public void TestLink2HexNodeReference()

@@ -11,7 +11,7 @@ namespace RailHexLib.Tests
         [SetUp]
         public void setup()
         {
-               Trace.Listeners.Add(new ConsoleTraceListener());
+               // Trace.Listeners.Add(new ConsoleTraceListener());
         }
         [Test]
         public void TestRotate30()

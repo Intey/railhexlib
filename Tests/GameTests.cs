@@ -38,10 +38,13 @@ namespace RailHexLib.Tests
             game.NextTile();
             game.RotateCurrentTile();
             var result = game.PlaceCurrentTile(new Cell(0, -2, CELL_SIZE));
+            Assert.IsTrue(result.NewJoins.ContainsKey(new Cell(0, -1, CELL_SIZE)));
             game.RotateCurrentTile();
-            result = game.PlaceCurrentTile(new Cell(-1, -2, CELL_SIZE));   
+            result = game.PlaceCurrentTile(new Cell(1, -3, CELL_SIZE));   
+            Assert.IsTrue(result.NewJoins.ContainsKey(new Cell(0, -2, CELL_SIZE)), "Joins: " +string.Join(",", result.NewJoins.Keys));
+            Assert.AreEqual(1, result.NewStructureRoads.Count);
             var list = (from c in result.NewStructureRoads[0].road select c.Cell).ToArray();
-            Assert.AreEqual(new List<Cell>() {new(0, -1, CELL_SIZE), new(0, -2, CELL_SIZE), new (-1, -2, CELL_SIZE)}, list);
+            Assert.AreEqual(new List<Cell>() {new(0, -1, CELL_SIZE), new(0, -2, CELL_SIZE), new (1, -3, CELL_SIZE)}, list);
         }
     }
 }

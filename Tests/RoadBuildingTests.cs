@@ -100,7 +100,7 @@ namespace RailHexLib.Tests
         public void Prepare()
         {
             stack = new();
-            Trace.Listeners.Add(new ConsoleTraceListener());
+            // Trace.Listeners.Add(new ConsoleTraceListener());
             Settlement settlement1 = new(settle1Position, "settlement1");
             // settlement size is 3tiles on R, so from center we have 2 tiles.
             // -4  -3  -2  -1   0
@@ -294,14 +294,8 @@ namespace RailHexLib.Tests
 
         [Test]
         public void TestRotatedTilesRoad()
-        {
-            /*
-             * /==S1==\ r|r  |  /==S0==\
-             *  / \ / \r/r\r/r\ / \ / \
-             * | -5| -4|r-3| -2| -1|  0|
-             *  \ / \ / \ / \ / \ / \ / 
-             * 
-             */
+        { 
+        
             structures[1] = new Settlement(new Cell(0, -5, CELL_SIZE));
             structures[1].Rotate60Clock(3); // rotate 180
             game.AddStructures(structures);
@@ -311,27 +305,41 @@ namespace RailHexLib.Tests
             game.PushTile(new ROAD_120Tile());
             game.NextTile();
 
-            var result = game.PlaceCurrentTile(new Cell(0, -3, CELL_SIZE));
+            Cell nextPosition = structures[0].GetEnterCell();
+            
+            Cell previousCell = nextPosition;
+            nextPosition += IdentityCell.topLeftSide;
+            game.RotateCurrentTile(2);
+            var result = game.PlaceCurrentTile(nextPosition);
             Assert.AreEqual(1, result.NewStructureRoads.Count());
-
-            game.RotateCurrentTile(4);
-            game.PlaceCurrentTile(new Cell(-1, -3, CELL_SIZE));
+            Assert.IsTrue(result.NewJoins.ContainsKey(previousCell), 
+                $"place {nextPosition}, expect join with {previousCell}, but: " + string.Join(", ", result.NewJoins.Keys));
+            
+            
+            previousCell = nextPosition;
+            nextPosition += IdentityCell.topRightSide;
+            game.RotateCurrentTile(5);
+            result = game.PlaceCurrentTile(nextPosition);
+            Assert.AreEqual(1, result.NewJoins.Count());
+            Assert.IsTrue(result.NewJoins.ContainsKey(previousCell), 
+                $"place {nextPosition}, expect join with {previousCell}, but: " + string.Join(", ", result.NewJoins.Keys));
+            Assert.AreEqual(1, result.NewStructureRoads.Count());
+            
+            game.RotateCurrentTile(3);
+            nextPosition += IdentityCell.topLeftSide;
+            result = game.PlaceCurrentTile(nextPosition);
             Assert.AreEqual(1, result.NewJoins.Count());
             Assert.AreEqual(1, result.NewStructureRoads.Count());
 
-            game.RotateCurrentTile(4);
-            game.PlaceCurrentTile(new Cell(-1, -2, CELL_SIZE));
-            Assert.AreEqual(1, result.NewJoins.Count());
-            Assert.AreEqual(1, result.NewStructureRoads.Count());
-
-            game.RotateCurrentTile(1);
-            result = game.PlaceCurrentTile(new Cell(0, -2, CELL_SIZE));
-
+            previousCell = nextPosition;
+            nextPosition += IdentityCell.bottomLeftSide;
+            result = game.PlaceCurrentTile(nextPosition);
             
             Assert.IsTrue(result.GameOver);
             // there we can have non road joins, so check only the appropriate cells
-            Assert.AreEqual(Ground.Road, result.NewJoins[new Cell(-1, -2, CELL_SIZE)]);
-            Assert.AreEqual(Ground.Road, result.NewJoins[new Cell(0, -1, CELL_SIZE)]);
+            Assert.IsTrue(result.NewJoins.ContainsKey(previousCell), 
+                $"place {nextPosition}, expect join with {previousCell}, but: " + string.Join(", ", result.NewJoins.Keys));
+            Assert.AreEqual(Ground.Road, result.NewJoins[structures[1].GetEnterCell()]);
             Assert.AreEqual(1, result.NewTraders.Count());
 
         }
@@ -359,7 +367,7 @@ namespace RailHexLib.Tests
              */
             structures[1] = new Settlement(new Cell(1,-6, CELL_SIZE));
             structures[1].Rotate60Clock(3);
-            // structures.RemoveAt(1);
+            // structures.RemoveAt(1);Test4Rotation
             game.AddStructures(structures);
 
             game.PushTile(new ROAD_180Tile());
@@ -383,7 +391,7 @@ namespace RailHexLib.Tests
             result = game.PlaceCurrentTile(new Cell(1, -4, CELL_SIZE));
             Assert.IsTrue(result.isPlaced);
             Assert.AreEqual(Ground.Road, result.PlacedTile.Sides[IdentityCell.bottomSide], showSides(result.PlacedTile.Sides));
-            Assert.AreEqual(1, result.NewJoins.Count(), showSides(result.PlacedTile.Sides));
+            Assert.AreEqual(2, result.NewJoins.Count(), showSides(result.PlacedTile.Sides));
             Assert.AreEqual(1, result.NewTraders.Count());
 
 
