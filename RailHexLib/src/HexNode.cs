@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using PostSharp.Patterns.Diagnostics;
 
 namespace RailHexLib
 {
@@ -31,7 +30,7 @@ namespace RailHexLib
             Cell = c;
         }
 
-        public HexNode Left
+        public HexNode TopLeft
         {
             get => left;
             set
@@ -40,7 +39,7 @@ namespace RailHexLib
                 value.right = this;
             }
         }
-        public HexNode UpLeft
+        public HexNode Top
         {
             get => upLeft;
             set
@@ -49,7 +48,7 @@ namespace RailHexLib
                 value.downRight = this;
             }
         }
-        public HexNode UpRight
+        public HexNode TopRight
         {
             get => upRight;
             set
@@ -58,7 +57,7 @@ namespace RailHexLib
                 value.downLeft = this;
             }
         }
-        public HexNode Right
+        public HexNode BottomRight
         {
             get => right;
             set
@@ -67,7 +66,7 @@ namespace RailHexLib
                 value.left = this;
             }
         }
-        public HexNode DownRight
+        public HexNode Bottom
         {
             get => downRight;
             set
@@ -76,7 +75,7 @@ namespace RailHexLib
                 value.upLeft = this;
             }
         }
-        public HexNode DownLeft
+        public HexNode BottomLeft
         {
             get => downLeft;
             set
@@ -94,33 +93,32 @@ namespace RailHexLib
         /// <returns>parent node that adopt newNode. If not adopted - return null</returns>
         public HexNode Add(HexNode newNode)
         {
-
             if (Cell.DistanceTo(newNode.Cell) == 1)
             {
                 var direction = Cell.GetDirectionTo(newNode.Cell);
                 if (direction.Equals(IdentityCell.bottomLeftSide))
                 {
-                    DownLeft = newNode;
+                    BottomLeft = newNode;
                 }
                 else if (direction.Equals(IdentityCell.bottomSide))
                 {
-                    DownRight = newNode;
+                    Bottom = newNode;
                 }
                 else if (direction.Equals(IdentityCell.bottomRightSide))
                 {
-                    Right = newNode;
+                    BottomRight = newNode;
                 }
                 else if (direction.Equals(IdentityCell.topLeftSide))
                 {
-                    Left = newNode;
+                    TopLeft = newNode;
                 }
                 else if (direction.Equals(IdentityCell.topSide))
                 {
-                    UpLeft = newNode;
+                    Top = newNode;
                 }
                 else if (direction.Equals(IdentityCell.topRightSide))
                 {
-                    UpRight = newNode;
+                    TopRight = newNode;
                 }
                 return this;
             }
@@ -139,27 +137,54 @@ namespace RailHexLib
         public List<Cell> PathTo(Cell targetCell)
         {
             Debug.WriteLine($"Path from {Cell} to {targetCell}");
-            var result = new List<Cell>
-            {
-                Cell
-            };
+            var result = new List<Cell>();
+            var frontier = new PriorityQueue<HexNode, int>();
+            frontier.Enqueue(this, 1);
+            var previousCellFor = new Dictionary<Cell, Cell>();
+            previousCellFor[this.Cell] = null;
+            var costSoFar = new Dictionary<HexNode, int>();
+            costSoFar[this] = 0;
 
-            if (Cell.Equals(targetCell))
-            {
-                return result;
+            while(frontier.Count != 0) {
+                var current = frontier.Dequeue();
+                Debug.WriteLine($"Procell frontier: {current}");
+                if (current.Cell == targetCell){
+                    break;
+                }
+                foreach (var neighbor in current.Neighbors()) {
+                    var newCost = costSoFar[current] + 1; // TODO: add moveCost to cells(Tiles?)
+
+                    Debug.WriteLine($"Check frontier neighbor: {neighbor}");
+                    if (!costSoFar.ContainsKey(neighbor) || newCost < costSoFar[neighbor]) {
+                        costSoFar[neighbor] = newCost;
+                        var priority = newCost + neighbor.Cell.DistanceTo(targetCell);
+                        frontier.Enqueue(neighbor, priority);
+                        previousCellFor[neighbor.Cell] = current.Cell;
+                    }
+                }
             }
-             
-            var distance = Cell.DistanceTo(targetCell);
-            var nextCell = Cell.CellLerp(targetCell, 1.0f / distance);
-            Debug.WriteLine($"PathTo: distance {distance}, next: {nextCell}");
-            var node = FindCell(nextCell, 1); // should check only children
-            Debug.WriteLine($"find cell returns {node}");
-            if (node == null) return null;
+            if(!previousCellFor.ContainsKey(targetCell)) return result;
+            
+            var curr = previousCellFor[targetCell];
+            while(curr != null) {
+                result.Add(curr);
+                curr = previousCellFor[curr];
+            }
+            result.Reverse();
+            result.Add(targetCell);
+            return result;
+        }
+        private List<HexNode> Neighbors() 
+        {
 
-            var nextNodes = node.PathTo(targetCell);
-            Debug.WriteLine($"next node returns {node}");
-            if (nextNodes == null) return null;
-            result.AddRange(nextNodes);
+            var result =  new List<HexNode>();
+            if (TopLeft != null) result.Add(TopLeft);
+            if (Top != null) result.Add(Top);
+            if (TopRight != null) result.Add(TopRight);
+            
+            if (BottomRight != null) result.Add(BottomRight);
+            if (Bottom != null) result.Add(Bottom);
+            if (BottomLeft != null) result.Add(BottomLeft);
             return result;
         }
 
@@ -172,34 +197,34 @@ namespace RailHexLib
             visited.Add(this);
 
             HexNode found;
-            if (Left != null && (fromSide == null || !fromSide.Equals(IdentityCell.topLeftSide)))
+            if (TopLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.topLeftSide)))
             {
-                found = Left.findCell(node, IdentityCell.bottomRightSide, visited);
+                found = TopLeft.findCell(node, IdentityCell.bottomRightSide, visited);
                 if (found != null) return found;
             }
-            if (UpLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.topSide)))
+            if (Top != null && (fromSide == null || !fromSide.Equals(IdentityCell.topSide)))
             {
-                found = UpLeft.findCell(node, IdentityCell.bottomSide, visited);
+                found = Top.findCell(node, IdentityCell.bottomSide, visited);
                 if (found != null) return found;
             }
-            if (UpRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.topRightSide)))
+            if (TopRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.topRightSide)))
             {
-                found = UpRight.findCell(node, IdentityCell.bottomLeftSide, visited);
+                found = TopRight.findCell(node, IdentityCell.bottomLeftSide, visited);
                 if (found != null) return found;
             }
-            if (Right != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomRightSide)))
+            if (BottomRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomRightSide)))
             {
-                found = Right.findCell(node, IdentityCell.topLeftSide, visited);
+                found = BottomRight.findCell(node, IdentityCell.topLeftSide, visited);
                 if (found != null) return found;
             }
-            if (DownRight != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomSide)))
+            if (Bottom != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomSide)))
             {
-                found = DownRight.findCell(node, IdentityCell.topSide, visited);
+                found = Bottom.findCell(node, IdentityCell.topSide, visited);
                 if (found != null) return found;
             }
-            if (DownLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomLeftSide)))
+            if (BottomLeft != null && (fromSide == null || !fromSide.Equals(IdentityCell.bottomLeftSide)))
             {
-                found = DownLeft.findCell(node, IdentityCell.topRightSide, visited);
+                found = BottomLeft.findCell(node, IdentityCell.topRightSide, visited);
                 if (found != null) return found;
             }
             return null;

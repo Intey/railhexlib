@@ -365,14 +365,15 @@ namespace RailHexLib
                     // ADD struct to newRoute
                     Dictionary<Cell, Structure> points = new Dictionary<Cell, Structure>();
                     points.Add(pair[0].StartPoint, pair[0].structure);
-                    points.Add(pair[1].StartPoint, pair[1].structure);
-
-                    
-                    path.AddRange(pair[0].road.PathTo(joineryCell).Where<Cell>(i => !i.Equals(joineryCell))); // add income cell too
+                    points.Add(pair[1].StartPoint, pair[1].structure);  
+                    var firstPath = pair[0].road.PathTo(joineryCell);
+                    logger.Log($"first path {firstPath}");
+                    firstPath = firstPath.Where(i => !i.Equals(joineryCell)).ToList();
+                    path.AddRange(firstPath); // add income cell too
                     path.Add(joineryCell);
                     logger.Log($"SpawnTarders: Node {pair[1].road} - path to {joineryCell}");
                     foreach(var node in pair[1].road) {
-                        logger.Log($"SpawnTarders: Node item: {node}: L{node.Left}, UL{node.UpLeft}, UR{node.UpRight}, R{node.Right}, DR{node.DownRight}, DL{node.DownLeft}");
+                        logger.Log($"SpawnTarders: Node item: {node}: L{node.TopLeft}, UL{node.Top}, UR{node.TopRight}, R{node.BottomRight}, DR{node.Bottom}, DL{node.BottomLeft}");
                     }
                     var pth = pair[1].road.PathTo(joineryCell);
                     logger.Log($"path: {pth}");
