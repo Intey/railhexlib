@@ -109,9 +109,9 @@ namespace RailHexLib
                     {
                         tmp_event(s, e);
                     }
-                    structure.OnAbandonEvent -= handle;
+                    structure.OnStructureAbandon -= handle;
                 };
-                structure.OnAbandonEvent += handle;
+                structure.OnStructureAbandon += handle;
             }
         }
 
