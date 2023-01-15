@@ -1,10 +1,7 @@
 namespace RailHexLib {
-    public class Resource {
-
-        public string Name { get; }
-        public Resource(string name)
-        {
-            Name = name;
-        }
+    
+    public enum Resource {
+        Fish,
+        Wood
     }
 }

@@ -55,7 +55,7 @@ namespace RailHexLib
 
         public int S => -R - Q;
 
-        public Cell(int r, int q, float size)
+        public Cell(int r, int q, float size = 1.0f)
         {
             this.r = r;
             this.q = q;

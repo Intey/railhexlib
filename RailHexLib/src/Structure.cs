@@ -28,11 +28,12 @@ namespace RailHexLib
                 Debug.WriteLine($"check {zone} {zoneCell}...");
                 foreach(var (c, _) in GetHexes())
                 {
-                    Debug.WriteLine($"... with {c}");
+                    // search connection point
                     if (zoneCell.DistanceTo(c) == 1)
-                    {
+                    { 
                         ConnectedZones.Add(zoneCell, zone);
                         // TODO: subscibe zone actions
+                        // zone.OnCuncsumedOut
                     }
                 }
             }
@@ -87,6 +88,27 @@ namespace RailHexLib
                     handler(this, EventArgs.Empty);
                 }            
             }
+    
+            const int consumptionCount = 2;
+            var toDisconnect = new List<Cell>();
+            foreach(var (c, zone) in ConnectedZones)
+            {            
+                int consumed = zone.ConsumeResource(consumptionCount);
+                if (zone.ResourceCount == 0)
+                {
+                    toDisconnect.Add(c);
+                }
+                if(!resources.ContainsKey(zone.ResourceType))
+                {
+                    resources[zone.ResourceType] = 0;
+                }
+                resources[zone.ResourceType] = consumed;
+
+            }
+            foreach(var c in toDisconnect)
+            {
+                ConnectedZones.Remove(c);
+            } 
         }
 
         private bool WillAbandon(int ticks)
@@ -108,6 +130,9 @@ namespace RailHexLib
         public virtual void VisitTrader(Trader visitor) {
             lifeTime += Config.Structure.LifeTimeIncreaseOnTraderVisit;
         }
+
+        public Dictionary<Resource, int> Resources => resources;
+        private Dictionary<Resource, int> resources = new Dictionary<Resource, int>();
         
     }
 

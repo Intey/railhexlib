@@ -76,5 +76,11 @@ namespace RailHexLib.Tests
              Assert.AreEqual(expectedLife, route.TradePoints[new Cell(0, -1, CELL_SIZE)].LifeTime);
 
         }
+
+        [Test]
+        public void TestTraderMovesResources()
+        {
+            // TODO
+        }
     }
 }

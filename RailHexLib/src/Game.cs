@@ -183,8 +183,7 @@ namespace RailHexLib
                         {
                             return acc + z.ResourceCount;
                         });
-                        var mergedZone = new Zone(resourcesSumm, groundType);
-                        mergedZone.Extend(placedCell);
+                        var mergedZone = new Zone(placedCell, resourcesSumm, groundType);
                         mergedZone.Extend(zones.Aggregate(
                             new List<Cell>(),
                             (acc, z) => { acc.AddRange(z.Cells); return acc; }
@@ -194,8 +193,7 @@ namespace RailHexLib
                     }
                     else
                     {
-                        var newZone = new Zone(1, groundType);
-                        newZone.Extend(placedCell);
+                        var newZone = new Zone(placedCell, 1, groundType);
                         Zones.Add(newZone);
                         placementResult.NewZones.Add(newZone);
                         Structures.ForEach(s => s.ConnectZone(newZone));
