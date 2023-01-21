@@ -4,6 +4,8 @@ namespace RailHexLib {
         public static class Trader {
             /// how many tiles move a trader in one tick
             public static int moveTilesPerTick = 1;
+            public static double consumptionPercent = 0.3;
+            public static int maxResourceCountInInventory = 5;
         }
         public static class ScorePoints {
             public static int ForTradePointReached = 1;

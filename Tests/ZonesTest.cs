@@ -112,7 +112,7 @@ namespace RailHexLib.Tests
             Assert.AreEqual(0, zone.ResourceCount, "not all resources consumed");
             Assert.AreEqual(0, settlement.ConnectedZones.Count, "conntection to empty zone should be broken");
             Assert.AreEqual(resCount, settlement.Resources[Resource.Fish], "consumed resources should be in the settlement");
-        }v
+        }
     }
 
 }

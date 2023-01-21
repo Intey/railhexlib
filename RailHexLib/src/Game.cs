@@ -67,8 +67,8 @@ namespace RailHexLib
                 typeof(ROAD_180Tile),
                 typeof(ROAD_120Tile),
                 // typeof(ROAD_60Tile),
-                // typeof(GrassTile),
-                //typeof(WaterTile),
+                typeof(GrassTile),
+                typeof(WaterTile),
                 // new ROAD_3T_60_120Tile()
             };
 

@@ -133,7 +133,19 @@ namespace RailHexLib
 
         public Dictionary<Resource, int> Resources => resources;
         private Dictionary<Resource, int> resources = new Dictionary<Resource, int>();
-        
+        public void PickResources(Resource name, int count) 
+        {
+            Debug.Assert(Resources.ContainsKey(name) && count <= Resources[name]);
+            Resources[name] -= count;
+        }
+        public void addResource(Resource name, int count)
+        {
+            if (!resources.ContainsKey(name))
+            {
+                resources[name] = 0;
+            }
+            resources[name] += count;
+        }
     }
 
 }

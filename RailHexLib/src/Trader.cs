@@ -5,12 +5,14 @@ namespace RailHexLib
     public class Trader : IUpdatable
     {
         // use list for possible batching/optimization
-        public class PointReachedArgs: System.EventArgs {
-            public PointReachedArgs(List<Structure> structures) {
-                ReachedStructures = structures;
+        public class PointReachedArgs : System.EventArgs
+        {
+            public PointReachedArgs(Structure structure)
+            {
+                ReachedStructure = structure;
             }
 
-            public readonly List<Structure> ReachedStructures;
+            public readonly Structure ReachedStructure;
         }
 
         public event EventHandler<Trader.PointReachedArgs> OnTraderArrivesToAStructure;
@@ -19,22 +21,24 @@ namespace RailHexLib
         {
             Cells = cells;
             TradePoints = tradePoints;
-            Direction = 1;
-            CurrentPositionIndex = 0;
         }
 
         public List<Cell> Cells;
         public Dictionary<Cell, Structure> TradePoints;
+        int CurrentPositionIndex = 0;
+        int Direction = 1; // positive - forward, negative - backward
+        Dictionary<Resource, int> inventory = new Dictionary<Resource, int>();
 
+        public Dictionary<Resource, int> Inventory { get => inventory; }
         public Cell CurrentPosition => Cells[CurrentPositionIndex];
-        public void Tick(int ticks)
+        public void Tick(int ticks = 1)
         {
-            
+
             // calc that trader go over the settlement
             int maxIndex = Cells.Count - 1;
             for (int i = 0; i < ticks; i++)
             {
-                CurrentPositionIndex += Direction;  
+                CurrentPositionIndex += Direction;
 
                 // Switch direction
                 var onTheEdge = CurrentPositionIndex == maxIndex || CurrentPositionIndex == 0;
@@ -45,20 +49,32 @@ namespace RailHexLib
 
                 if (TradePoints.ContainsKey(CurrentPosition))
                 {
-                    var ReachedStructures = new List<Structure>(){TradePoints[CurrentPosition]};
-                    TradePoints[CurrentPosition].VisitTrader(this);
+                    var reachedStructure = TradePoints[CurrentPosition];
+                    // pick resources to fit inventory
+                    foreach (var (resType, count) in reachedStructure.Resources)
+                    {
+                        if (!inventory.ContainsKey(resType))
+                        {
+                            inventory[resType] = 0;
+                        }
+                        // we will pick lowest value, some percent or rest count to fill inventory 
+                        var toPick = Math.Min(
+                            (int)(count * Config.Trader.consumptionPercent),
+                            Config.Trader.maxResourceCountInInventory - inventory[resType]
+                        );
+                        reachedStructure.PickResources(resType, toPick);
+                        inventory[resType] += toPick;
+                    }
+
+                    reachedStructure.VisitTrader(this);
                     var tmp_event = OnTraderArrivesToAStructure;
                     if (tmp_event != null)
                     {
-                        tmp_event(this, new Trader.PointReachedArgs(ReachedStructures));
+                        tmp_event(this, new Trader.PointReachedArgs(reachedStructure));
                     }
                 }
             }
         }
-
-
-        int CurrentPositionIndex;
-        int Direction; // positive - forward, negative - backward
 
     }
 
