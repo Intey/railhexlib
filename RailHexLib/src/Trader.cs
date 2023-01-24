@@ -27,9 +27,9 @@ namespace RailHexLib
         public Dictionary<Cell, Structure> TradePoints;
         int CurrentPositionIndex = 0;
         int Direction = 1; // positive - forward, negative - backward
-        Dictionary<Resource, int> inventory = new Dictionary<Resource, int>();
+        Inventory inventory = new Inventory();
 
-        public Dictionary<Resource, int> Inventory { get => inventory; }
+        public Inventory Inventory { get => inventory; }
         public Cell CurrentPosition => Cells[CurrentPositionIndex];
         public void Tick(int ticks = 1)
         {
@@ -51,31 +51,33 @@ namespace RailHexLib
                 {
                     var reachedStructure = TradePoints[CurrentPosition];
                     // pick resources to fit inventory
-                    foreach (var (resType, count) in reachedStructure.Resources)
-                    {
-                        if (!inventory.ContainsKey(resType))
-                        {
-                            inventory[resType] = 0;
-                        }
-                        // we will pick lowest value, some percent or rest count to fill inventory 
-                        var toPick = Math.Min(
-                            (int)(count * Config.Trader.consumptionPercent),
-                            Config.Trader.maxResourceCountInInventory - inventory[resType]
-                        );
-                        reachedStructure.PickResources(resType, toPick);
-                        inventory[resType] += toPick;
-                    }
-
-                    reachedStructure.VisitTrader(this);
-                    var tmp_event = OnTraderArrivesToAStructure;
-                    if (tmp_event != null)
-                    {
-                        tmp_event(this, new Trader.PointReachedArgs(reachedStructure));
-                    }
+                    visitStructure(reachedStructure);
                 }
             }
         }
 
-    }
+        void visitStructure(Structure reachedStructure)
+        {
+            foreach (var (resType, count) in reachedStructure.Resources)
+            {
+                var existResource = inventory.ResourceCount(resType);
+                // we will pick lowest value, some percent or rest count to fill inventory 
+                var toPick = Math.Min(
+                    (int)(count * Config.Trader.consumptionPercent),
+                    Config.Trader.maxResourceCountInInventory - existResource
+                );
+                inventory.AddResource(resType, reachedStructure.Inventory.PickResource(resType, toPick));
+            }
 
-}
+            reachedStructure.VisitTrader(this);
+
+            var tmp_event = OnTraderArrivesToAStructure;
+            if (tmp_event != null)
+            {
+                tmp_event(this, new Trader.PointReachedArgs(reachedStructure));
+            }
+        }
+
+    } // class
+
+} // namespace 

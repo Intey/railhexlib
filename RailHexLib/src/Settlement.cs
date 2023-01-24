@@ -7,7 +7,12 @@ namespace RailHexLib
     public class Settlement : Structure
     {
 
-        public Settlement(Cell center, string name="GIVEMEADEFAULTNAME") : base(center, name)
+        public Settlement(Cell center,
+                          string name = "GIVEMEADEFAULTNAME",
+                          Dictionary<Resource, int> needs = null,
+                          Dictionary<Resource, int> resources = null
+        ) 
+        : base(center, name, needs, resources)
         {
             sides = new Dictionary<IdentityCell, Tile>(new IdentityCellEqualityComparer());
             foreach (var (side, _) in center.Neighbours())
@@ -17,8 +22,14 @@ namespace RailHexLib
             incomeRoadCell = IdentityCell.topLeftSide;
 
             sides[incomeRoadCell] = new ROAD_180Tile();
+
+            if (needs == null) 
+            {
+                
+            }
+
         }
-        
+
         public override void Rotate60Clock()
         {
             base.Rotate60Clock();
@@ -47,7 +58,7 @@ namespace RailHexLib
             {
                 incomeRoadCell = IdentityCell.topLeftSide;
             }
-            foreach(var side in sides)
+            foreach (var side in sides)
             {
                 side.Value.Rotate60Clock();
             }
@@ -67,13 +78,13 @@ namespace RailHexLib
         public override Dictionary<Cell, Tile> GetHexes()
         {
             var result = base.GetHexes();
-            foreach(var side in sides)
+            foreach (var side in sides)
             {
                 result[center + side.Key] = side.Value;
             }
             return result;
         }
-        
+
         public override string ToString()
         {
             return $"{name} Settlement";

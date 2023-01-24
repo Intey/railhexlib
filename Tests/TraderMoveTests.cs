@@ -102,7 +102,7 @@ namespace RailHexLib.Tests
                 restInSettlement,
                 count
             );
-            var traderHasRosourceCount = trader.Inventory[Resource.Fish];
+            var traderHasRosourceCount = trader.Inventory.Resources[Resource.Fish];
             Assert.AreEqual(
                     traderShouldPick,
                     traderHasRosourceCount
@@ -111,12 +111,12 @@ namespace RailHexLib.Tests
             traderShouldPick = 2;
             trader.Tick();
             trader.Tick();
-            traderHasRosourceCount = trader.Inventory[Resource.Fish];
+            traderHasRosourceCount = trader.Inventory.Resources[Resource.Fish];
             Assert.AreEqual(
                 Config.Trader.maxResourceCountInInventory,
                 traderHasRosourceCount
             );
-            
+
             restInSettlement = 10 - traderShouldPick;
             resources = trader.TradePoints[new Cell(0, -3)].Resources;
             Assert.AreEqual(
