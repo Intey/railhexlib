@@ -193,7 +193,7 @@ namespace RailHexLib
                     }
                     else
                     {
-                        var newZone = new Zone(placedCell, 1, groundType);
+                        var newZone = new Zone(placedCell, Config.Zone.defaultResourceCount, groundType);
                         Zones.Add(newZone);
                         placementResult.NewZones.Add(newZone);
                         Structures.ForEach(s => s.ConnectZone(newZone));
