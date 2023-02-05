@@ -9,33 +9,35 @@ namespace RailHexLib
 
         public class Need
         {
-            public Need(int cnt, int decTick)
+            public Need(int cnt)
             {
                 count = cnt;
-                decreaseOnTick = decTick;
             }
             int count;
-            int decreaseOnTick;
+            int filledCount = 0;
 
             // how many ticks this need is fullfiled
             int comboTicks = 0;
-            bool filled = false;
+            public bool Filled => filledCount >= count;
             public int Count { get => count; }
             public int ComboTicks { get => comboTicks; }
+            public int FilledCount { get => filledCount; }
 
+            // TODO: fill with zero? how to reset filledCount?
             public bool Fill(int count)
             {
-                bool filled = this.count <= count;
-                if (filled)
+                filledCount = count;
+                if (Filled)
                     this.comboTicks += 1;
                 else
                     this.comboTicks = 0;
-                return filled;
+                return Filled;
             }
         }
         public class NeedsLevel
         {
-            public Dictionary<Resource, Need> needs;
+            public bool Active = false;
+            public Dictionary<Resource, Need> needs = new Dictionary<Resource, Need>();
 
             /// consume reseurces from inventory and return count of unmeet needs
             public int FillNeeds(Inventory inventory)
@@ -52,10 +54,18 @@ namespace RailHexLib
             }
         }
 
-        public NeedsSystem(Inventory inventory, List<NeedsLevel> needs)
+        public NeedsSystem(Inventory inventory, List<Dictionary<Resource, int>> needLevels)
         {
             Inventory = inventory;
-            this.levels = needs;
+            foreach(var needs in needLevels)
+            {
+                var level = new NeedsLevel();
+                this.levels.Add(level);
+                foreach(var (resource, count) in needs)
+                {
+                    level.needs[resource] = new Need(count);
+                }
+            }
         }
 
         /*
@@ -66,20 +76,28 @@ namespace RailHexLib
         {
             int unmeetNeedsCount = 0;
             foreach (var level in levels)
-                level.FillNeeds(Inventory);
-
+                unmeetNeedsCount += level.FillNeeds(Inventory);
         }
 
         internal void fillBy(Trader trader)
         {
             foreach (var level in levels)
-                foreach (var (resource, need) in level.needs)
+            {
+                if (level.Active)
                 {
-                    var picked = trader.Inventory.PickResource(resource, need.Count);
+                    foreach (var (resource, need) in level.needs)
+                    {
+                        var picked = trader.Inventory.PickResource(resource, need.Count);
+                    }
                 }
+            }
+
         }
 
-        public List<NeedsLevel> levels;
+        public int UnmeetNeeds { get => unmeetNeeds; }
+        int unmeetNeeds = 0;
+
+        public List<NeedsLevel> levels = new List<NeedsLevel>();
         Inventory Inventory;
     }
 

@@ -9,7 +9,7 @@ namespace RailHexLib
 
         public Settlement(Cell center,
                           string name = "GIVEMEADEFAULTNAME",
-                          Dictionary<Resource, int> needs = null,
+                          List<Dictionary<Resource, int>> needs = null,
                           Dictionary<Resource, int> resources = null
         ) 
         : base(center, name, needs, resources)

@@ -8,7 +8,7 @@ namespace RailHexLib
     {
         public Structure(Cell center,
                          string name,
-                         Dictionary<Resource, int> needs = null,
+                         List<Dictionary<Resource, int>> needs = null,
                          Dictionary<Resource, int> resources = null
         )
         {
@@ -16,6 +16,9 @@ namespace RailHexLib
             if (needs != null)
             {
                 this.needsSystem = new NeedsSystem(this.Inventory, needs);
+            }
+            else {
+                needsSystem = new NeedsSystem(Inventory, new List<Dictionary<Resource, int>>());
             }
             if (resources != null)
             {
@@ -46,7 +49,7 @@ namespace RailHexLib
                     // search connection point
                     if (zoneCell.DistanceTo(c) == 1)
                     {
-                        ConnectedZones.Add(zoneCell, zone);
+                        ConnectedZones[zoneCell] = zone;
                         // TODO: subscibe zone actions
                         // zone.OnCuncsumedOut
                     }
@@ -133,7 +136,7 @@ namespace RailHexLib
             var toDisconnect = new List<Cell>();
             foreach (var (c, zone) in ConnectedZones)
             {
-                int consumed = zone.ConsumeResource(Config.Structure.zoneConsumptionCount);
+                int consumed = zone.ConsumeResource(Config.Structure.ZoneConsumptionCount);
                 if (zone.ResourceCount == 0)
                 {
                     toDisconnect.Add(c);
@@ -165,7 +168,7 @@ namespace RailHexLib
 
         public Inventory Inventory = new Inventory();
         NeedsSystem needsSystem;
-        
+
         public List<NeedsSystem.NeedsLevel> Needs { get => needsSystem.levels; }
     } // class
 
