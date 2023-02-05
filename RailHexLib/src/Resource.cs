@@ -2,6 +2,7 @@ namespace RailHexLib {
     
     public enum Resource {
         Fish,
-        Wood
+        Wood,
+        Grass
     }
 }

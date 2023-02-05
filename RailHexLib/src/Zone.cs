@@ -41,6 +41,9 @@ namespace RailHexLib
                 case Ground.Water:
                     ResourceType = Resource.Fish;
                     break;
+                case Ground.Grass:
+                    ResourceType = Resource.Grass;
+                    break;
                 default:
                     throw new System.NotImplementedException($"add new Resource type for ground {zoneType} in Zone cotr");
             }
