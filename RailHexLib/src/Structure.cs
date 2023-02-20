@@ -6,73 +6,6 @@ namespace RailHexLib
 {
     public abstract class Structure : Interfaces.IRotatable<Tile>
     {
-        public Structure(Cell center,
-                         string name,
-                         List<Dictionary<Resource, int>> needs = null,
-                         Dictionary<Resource, int> resources = null
-        )
-        {
-            this.center = center; this.name = name;
-            if (needs != null)
-            {
-                this.needsSystem = new NeedsSystem(this.Inventory, needs);
-            }
-            else {
-                needsSystem = new NeedsSystem(Inventory, new List<Dictionary<Resource, int>>());
-            }
-            if (resources != null)
-            {
-                foreach (var (r, c) in resources)
-                {
-                    this.Inventory.AddResource(r, c);
-                }
-            }
-        }
-        public Cell Center { get => center; }
-        protected Cell center;
-        protected string name = "Unnamed";
-
-        public event EventHandler OnStructureAbandon;
-        public int LifeTime { get => lifeTime; }
-        private int lifeTime = Config.Structure.InitialTicksToDie;
-        private bool abandoned = false;
-        // cell is connection point
-        public Dictionary<Cell, Zone> ConnectedZones { get; } = new Dictionary<Cell, Zone>();
-
-        public void ConnectZone(Zone zone)
-        {
-            foreach (var zoneCell in zone.Cells)
-            {
-                Debug.WriteLine($"check {zone} {zoneCell}...");
-                foreach (var (c, _) in GetHexes())
-                {
-                    // search connection point
-                    if (zoneCell.DistanceTo(c) == 1)
-                    {
-                        ConnectedZones[zoneCell] = zone;
-                        // TODO: subscibe zone actions
-                        // zone.OnCuncsumedOut
-                    }
-                }
-            }
-        }
-
-        public string Name
-        {
-            get => name;
-            set
-            {
-                if (value.Length > 0)
-                {
-                    name = value;
-                }
-                else
-                {
-                    throw new ArgumentException("name should be non empty string");
-                }
-            }
-        }
-
         public abstract string TileName();
 
         public abstract Cell GetEnterCell();
@@ -91,12 +24,83 @@ namespace RailHexLib
             return result;
 
         }
+        public Structure(Cell center,
+                         string name,
+                         List<Dictionary<Resource, int>> needs = null,
+                         Dictionary<Resource, int> resources = null
+        )
+        {
+            this.center = center; this.name = name;
+            if (needs != null)
+            {
+                this.needsSystem = new NeedsSystem(this.Inventory, needs);
+            }
+            else
+            {
+                needsSystem = new NeedsSystem(Inventory, new List<Dictionary<Resource, int>>());
+            }
+            if (resources != null)
+            {
+                foreach (var (r, c) in resources)
+                {
+                    this.Inventory.AddResource(r, c);
+                }
+            }
+        }
+
+        public Dictionary<Resource, int> Resources => Inventory.Resources;
+
+        public Inventory Inventory = new Inventory();
+
+        public List<NeedsSystem.NeedsLevel> NeedLevels { get => needsSystem.levels; }
+
+        public bool Abandoned => abandoned;
+
+        public Cell Center { get => center; }
+
+        public event EventHandler OnStructureAbandon;
+        public int LifeTime { get => lifeTime; }
+        // cell is connection point
+        public Dictionary<Cell, Zone> ConnectedZones { get; } = new Dictionary<Cell, Zone>();
+        public string Name
+        {
+            get => name;
+            set
+            {
+                if (value.Length > 0)
+                {
+                    name = value;
+                }
+                else
+                {
+                    throw new ArgumentException("name should be non empty string");
+                }
+            }
+        }
+        public void ConnectZone(Zone zone)
+        {
+            foreach (var zoneCell in zone.Cells)
+            {
+                Debug.WriteLine($"check {zone} {zoneCell}...");
+                foreach (var (c, _) in GetHexes())
+                {
+                    // search connection point
+                    if (zoneCell.DistanceTo(c) == 1)
+                    {
+                        ConnectedZones[zoneCell] = zone;
+                        // TODO: subscibe zone actions
+                        // zone.OnCuncsumedOut
+                    }
+                }
+            }
+        }
+
         public override string ToString()
         {
             return $"Structure ${name}";
         }
 
-        public virtual void Tick(int ticks)
+        public virtual void Tick(int ticks = 1)
         {
             if (abandoned)
             {
@@ -112,7 +116,7 @@ namespace RailHexLib
 
             if (lifeTime > 0)
             {
-                lifeTime -= ticks;
+                // lifeTime -= ticks;
 
                 int unmeetNeeds = needsSystem.UnmeetNeeds;
                 lifeTime -= ticks * unmeetNeeds;
@@ -123,6 +127,23 @@ namespace RailHexLib
                 }
             }
         }
+
+
+        public virtual void VisitTrader(Trader trader)
+        {
+            lifeTime += Config.Structure.LifeTimeIncreaseOnTraderVisit;
+            needsSystem.fillBy(trader);
+        }
+
+        public int PickResource(Resource name, int count)
+        {
+            return Inventory.PickResource(name, count);
+        }
+        public void addResource(Resource name, int count)
+        {
+            Inventory.AddResource(name, count);
+        }
+
         void abandon()
         {
             EventHandler handler = OnStructureAbandon;
@@ -148,28 +169,13 @@ namespace RailHexLib
                 ConnectedZones.Remove(c);
             }
         }
+        protected Cell center;
+        protected string name = "Unnamed";
+        protected NeedsSystem needsSystem;
 
-        public virtual void VisitTrader(Trader trader)
-        {
-            lifeTime += Config.Structure.LifeTimeIncreaseOnTraderVisit;
-            needsSystem.fillBy(trader);
-        }
+        private int lifeTime = Config.Structure.InitialTicksToDie;
+        private bool abandoned = false;
 
-        public int PickResource(Resource name, int count)
-        {
-            return Inventory.PickResource(name, count);
-        }
-        public void addResource(Resource name, int count)
-        {
-            Inventory.AddResource(name, count);
-        }
-
-        public Dictionary<Resource, int> Resources => Inventory.Resources;
-
-        public Inventory Inventory = new Inventory();
-        NeedsSystem needsSystem;
-
-        public List<NeedsSystem.NeedsLevel> Needs { get => needsSystem.levels; }
     } // class
 
 } // namespace
