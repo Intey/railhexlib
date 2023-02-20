@@ -32,9 +32,9 @@ namespace RailHexLib.Tests
             game.NextTile();
             var placeRes = game.PlaceCurrentTile(new Cell(2, 0, 1));
 
-            Assert.AreEqual(1, game.Zones.Count);
+            Assert.AreEqual(1, game.Zones.Count, "expect game add new zone to its list");
             Zone zone = game.Zones[0];
-            Assert.AreEqual(1, zone.ResourceCount);
+            Assert.AreEqual(Config.Zone.defaultResourceCount, zone.ResourceCount, "zone has default resource count");
             Assert.AreEqual(new Cell(2, 0, 1), zone.Cells[0]);
         }
         [Test]
