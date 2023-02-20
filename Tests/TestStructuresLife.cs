@@ -23,7 +23,12 @@ namespace RailHexLib.Tests
         public void Prepare()
         {
           //  Trace.Listeners.Add(new ConsoleTraceListener());
-            settlement = new Settlement(settle1Position, "settlement1");
+            settlement = new Settlement(settle1Position, "settlement1", new(){
+                new(){
+                [Resource.Fish] = 100000
+                }
+            });
+
             Game.Reset(stack, logger);
             game = Game.GetInstance();
         }
@@ -31,16 +36,15 @@ namespace RailHexLib.Tests
         [Test]
         public void TestStructureWillDie()
         {
-            var s = new Settlement(new Cell(0, 0, CELL_SIZE), "Unknown");
-            s.Tick(4);
-            Assert.AreEqual(Config.Structure.InitialTicksToDie - 4, s.LifeTime);
+            settlement.Tick(4);
+            Assert.AreEqual(Config.Structure.InitialTicksToDie - 4, settlement.LifeTime);
         }
         [Test]
         public void TestAbandonEventRemoveStructureRoad()
         {
             game.AddStructures(new List<Structure>(){settlement});
             game.Tick(Config.Structure.InitialTicksToDie);
-            Assert.AreEqual(0, game.StructureRoads.Count);
+            Assert.AreEqual(0, game.StructureRoads.Count, $"settlement life:{settlement.LifeTime}");
         }
 
         [Test]
