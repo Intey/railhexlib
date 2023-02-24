@@ -9,8 +9,9 @@ namespace RailHexLib.Tests
     {
 
         [SetUp]
-        public void SetUp(){
-        //    Trace.Listeners.Add(new ConsoleTraceListener());
+        public void SetUp()
+        {
+            //    Trace.Listeners.Add(new ConsoleTraceListener());
         }
 
         [Test]
@@ -23,7 +24,7 @@ namespace RailHexLib.Tests
             var settlement = new Settlement(new Cell(0, 0, 1));
             Game.Reset(stack, new Logger());
             var game = Game.GetInstance();
-            game.AddStructures(new(){settlement});
+            game.AddStructures(new() { settlement });
             Assert.IsTrue(game.NextTile());
             var placeRes = game.PlaceCurrentTile(new Cell(2, 0, 1));
             Assert.IsTrue(placeRes);
@@ -31,5 +32,4 @@ namespace RailHexLib.Tests
             Assert.AreEqual(1, structure.ConnectedZones.Count);
         }
     }
-
 }

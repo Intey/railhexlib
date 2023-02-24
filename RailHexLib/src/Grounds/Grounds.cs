@@ -8,16 +8,17 @@ namespace RailHexLib.Grounds
 
     public static class Extensions
     {
-        private static Dictionary<Ground, bool> joinsMap = new Dictionary<Ground, bool>(){
+        private static Dictionary<Ground, bool> JOINS_MAP = new Dictionary<Ground, bool>(){
             [Ground.Water] = true,
             [Ground.Grass] = true,
             [Ground.Road] = true,
             [Ground.Ground] = false,
+            [Ground.Forest] = true
 
         };
 
         public static bool IsJoinable(this Ground t) {
-            return joinsMap[t];
+            return JOINS_MAP[t];
         }
     }
     public enum Ground
@@ -25,6 +26,7 @@ namespace RailHexLib.Grounds
         Water,
         Grass,
         Road,
-        Ground
+        Ground,
+        Forest
     }
 }

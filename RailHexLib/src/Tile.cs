@@ -322,4 +322,22 @@ namespace RailHexLib
     //         return "Tile:Road(All)";
     //     }
     // }
+
+    public class Forest : Tile
+    {
+        public override string tileName() => "Forest";
+        public Forest()
+        {
+            sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
+            {
+                [IdentityCell.topLeftSide] = Grounds.Ground.Forest,
+                [IdentityCell.topSide] = Grounds.Ground.Forest,
+                [IdentityCell.topRightSide] = Grounds.Ground.Forest,
+                [IdentityCell.bottomRightSide] = Grounds.Ground.Forest,
+                [IdentityCell.bottomSide] = Grounds.Ground.Forest,
+                [IdentityCell.bottomLeftSide] = Grounds.Ground.Forest,
+            };
+        }
+        public override string ToString() => tileName();
+    }
 }

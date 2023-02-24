@@ -44,8 +44,11 @@ namespace RailHexLib
                 case Ground.Grass:
                     ResourceType = Resource.Grass;
                     break;
+                case Ground.Forest:
+                    ResourceType = Resource.Wood;
+                    break;
                 default:
-                    throw new System.NotImplementedException($"add new Resource type for ground {zoneType} in Zone cotr");
+                    throw new System.NotImplementedException($"add new Resource type for ground {zoneType} in Zone constructor");
             }
         }
 

@@ -69,6 +69,7 @@ namespace RailHexLib
                 // typeof(ROAD_60Tile),
                 typeof(GrassTile),
                 typeof(WaterTile),
+                typeof(Forest),
                 // new ROAD_3T_60_120Tile()
             };
 
@@ -82,7 +83,7 @@ namespace RailHexLib
                 this.stack = stack;
             }
         }
-        
+
         public void AddStructures(List<Structure> structures)
         {
             this.structures.AddRange(structures);
@@ -154,7 +155,7 @@ namespace RailHexLib
             // zones processing
             buildZones(joinsByGround, placedCell, placementResult);
 
-            
+
             placementResult.GameOver = !NextTile();
             return placementResult;
         }
@@ -363,14 +364,15 @@ namespace RailHexLib
                     // ADD struct to newRoute
                     Dictionary<Cell, Structure> points = new Dictionary<Cell, Structure>();
                     points.Add(pair[0].StartPoint, pair[0].structure);
-                    points.Add(pair[1].StartPoint, pair[1].structure);  
+                    points.Add(pair[1].StartPoint, pair[1].structure);
                     var firstPath = pair[0].road.PathTo(joineryCell);
                     logger.Log($"first path {firstPath}");
                     firstPath = firstPath.Where(i => !i.Equals(joineryCell)).ToList();
                     path.AddRange(firstPath); // add income cell too
                     path.Add(joineryCell);
                     logger.Log($"SpawnTarders: Node {pair[1].road} - path to {joineryCell}");
-                    foreach(var node in pair[1].road) {
+                    foreach (var node in pair[1].road)
+                    {
                         logger.Log($"SpawnTarders: Node item: {node}: L{node.TopLeft}, UL{node.Top}, UR{node.TopRight}, R{node.BottomRight}, DR{node.Bottom}, DL{node.BottomLeft}");
                     }
                     var pth = pair[1].road.PathTo(joineryCell);
@@ -452,6 +454,8 @@ namespace RailHexLib
             {
                 return new ROAD_120Tile();
             }
+            else if (randomValue == typeof(Forest))
+                return new Forest();
             else
             {
                 throw new NotImplementedException("Make a normal factory method, bitch");

@@ -76,12 +76,10 @@ namespace RailHexLib
         */
         public void Tick(int ticks)
         {
-            
             foreach (var level in levels)
             {
                  level.FillNeeds(Inventory);
             }
-            
         }
 
         internal void fillBy(Trader trader)

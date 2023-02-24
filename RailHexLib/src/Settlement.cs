@@ -5,8 +5,8 @@ using RailHexLib.Grounds;
 namespace RailHexLib
 {
     public class Settlement : Structure
-    {
-
+    {   
+            
         public Settlement(Cell center,
                           string name = "GIVEMEADEFAULTNAME",
                           List<Dictionary<Resource, int>> needs = null,

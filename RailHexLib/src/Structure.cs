@@ -6,6 +6,8 @@ namespace RailHexLib
 {
     public abstract class Structure : Interfaces.IRotatable<Tile>
     {
+        public event EventHandler OnStructureAbandon;
+
         public abstract string TileName();
 
         public abstract Cell GetEnterCell();
@@ -33,7 +35,7 @@ namespace RailHexLib
             this.center = center; this.name = name;
             if (needs != null)
             {
-                this.needsSystem = new NeedsSystem(this.Inventory, needs);
+                this.needsSystem = new NeedsSystem(Inventory, needs);
             }
             else
             {
@@ -50,15 +52,12 @@ namespace RailHexLib
 
         public Dictionary<Resource, int> Resources => Inventory.Resources;
 
-        public Inventory Inventory = new Inventory();
-
         public List<NeedsSystem.NeedsLevel> NeedLevels { get => needsSystem.levels; }
 
         public bool Abandoned => abandoned;
 
         public Cell Center { get => center; }
 
-        public event EventHandler OnStructureAbandon;
         public int LifeTime { get => lifeTime; }
         // cell is connection point
         public Dictionary<Cell, Zone> ConnectedZones { get; } = new Dictionary<Cell, Zone>();
@@ -77,6 +76,8 @@ namespace RailHexLib
                 }
             }
         }
+        public Inventory Inventory = new Inventory();
+
         public void ConnectZone(Zone zone)
         {
             foreach (var zoneCell in zone.Cells)
