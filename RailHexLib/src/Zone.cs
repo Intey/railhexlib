@@ -78,14 +78,15 @@ namespace RailHexLib
             if (resourceCount <= count) 
             {
                 consumed = resourceCount;
-                resourceCount = 0;
                 // TODO: abandon zone
             } 
             else
             {
-                resourceCount -= count;
-            }
 
+                consumed = count;
+            }
+            resourceCount -= consumed;
+            
             return consumed;
         }
     }

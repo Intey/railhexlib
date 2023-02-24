@@ -18,7 +18,7 @@ namespace RailHexLib.Tests
             Trace.Listeners.Add(new ConsoleTraceListener());
             var stack = new TileStack();
             Game.Reset(stack, new DevTools.Logger());
-            
+
         }
 
         [Test]
@@ -65,9 +65,9 @@ namespace RailHexLib.Tests
             placeRes = game.PlaceCurrentTile(new Cell(1, 0));
             Assert.AreEqual(2, placeRes.NewJoins.Count);
             Assert.AreEqual(1, game.Zones.Count);
-            Assert.AreEqual(new List<Cell>(){ 
+            Assert.AreEqual(new List<Cell>(){
                 new Cell(1, 0),
-                new Cell(0, 0), 
+                new Cell(0, 0),
                 new Cell(2, 0)
             },
             game.Zones[0].Cells);
@@ -75,7 +75,7 @@ namespace RailHexLib.Tests
             Assert.AreEqual(summ, game.Zones[0].ResourceCount);
         }
         [Test]
-        public void TestZoneConnection() 
+        public void TestZoneConnection()
         {
             var game = Game.GetInstance();
             game.stack.PushTile(new WaterTile());
@@ -84,15 +84,16 @@ namespace RailHexLib.Tests
             var settlement = new Settlement(new Cell(0, 0));
             game.AddStructures(new List<Structure>(){
                 settlement
-            }); 
+            });
 
             var topOfSettlementCell = settlement.Center + IdentityCell.topSide + IdentityCell.topSide;
-            var res = game.PlaceCurrentTile( topOfSettlementCell );
+            var res = game.PlaceCurrentTile(topOfSettlementCell);
             Assert.AreEqual(1, res.NewZones.Count);
             Assert.AreEqual(1, settlement.ConnectedZones.Count);
         }
         [Test]
-        public void TestZoneConsumptionOut() {
+        public void TestZoneConsumptionOut()
+        {
             var game = Game.GetInstance();
             game.stack.PushTile(new WaterTile());
             game.NextTile();
@@ -100,16 +101,19 @@ namespace RailHexLib.Tests
             var settlement = new Settlement(new Cell(0, 0));
             game.AddStructures(new List<Structure>(){
                 settlement
-            }); 
-            var resCount = 2;
+            });
+            var resCount = 10;
             var topOfSettlementCell = settlement.Center + IdentityCell.topSide + IdentityCell.topSide;
             var zone = new Zone(topOfSettlementCell, resCount, Ground.Water);
             Assert.AreEqual(1, topOfSettlementCell.DistanceTo(settlement.Center + IdentityCell.topSide));
             settlement.ConnectZone(zone);
             // settlement.setConsumptionSpeed(consumptionSpeed);
-            game.Tick(4);
+            game.Tick(1);
             // TODO: Check that connection will be removed when zone dissapears
-            Assert.AreEqual(0, zone.ResourceCount, "not all resources consumed");
+            Assert.AreEqual(resCount - Config.Structure.ZoneConsumptionCount, zone.ResourceCount, "resources not consumed");
+            Assert.AreEqual(Config.Structure.ZoneConsumptionCount, settlement.Resources[Resource.Fish], "consumed resources should be in the settlement");
+            game.Tick(1);
+            Assert.AreEqual(0, zone.ResourceCount, "resources not consumed");
             Assert.AreEqual(0, settlement.ConnectedZones.Count, "conntection to empty zone should be broken");
             Assert.AreEqual(resCount, settlement.Resources[Resource.Fish], "consumed resources should be in the settlement");
         }
