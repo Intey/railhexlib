@@ -69,7 +69,7 @@ namespace RailHexLib
                 // typeof(ROAD_60Tile),
                 typeof(GrassTile),
                 typeof(WaterTile),
-                typeof(Forest),
+                typeof(ForestTile),
                 // new ROAD_3T_60_120Tile()
             };
 
@@ -454,8 +454,8 @@ namespace RailHexLib
             {
                 return new ROAD_120Tile();
             }
-            else if (randomValue == typeof(Forest))
-                return new Forest();
+            else if (randomValue == typeof(ForestTile))
+                return new ForestTile();
             else
             {
                 throw new NotImplementedException("Make a normal factory method, bitch");

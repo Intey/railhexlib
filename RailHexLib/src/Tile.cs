@@ -323,10 +323,10 @@ namespace RailHexLib
     //     }
     // }
 
-    public class Forest : Tile
+    public class ForestTile : Tile
     {
         public override string tileName() => "Forest";
-        public Forest()
+        public ForestTile()
         {
             sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
             {

@@ -88,10 +88,7 @@ namespace RailHexLib
             {
                 if (level.Active)
                 {
-                    foreach (var (resource, need) in level.Needs)
-                    {
-                        var picked = trader.Inventory.PickResource(resource, need.ExpectedCount);
-                    }
+                    level.FillNeeds(trader.Inventory);
                 }
             }
 
