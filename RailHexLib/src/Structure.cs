@@ -158,6 +158,10 @@ namespace RailHexLib
             var toDisconnect = new List<Cell>();
             foreach (var (c, zone) in ConnectedZones)
             {
+                if (!Inventory.canAcceptResource(zone.ResourceType, Config.Structure.ZoneConsumptionCount))
+                {
+                    continue;
+                }
                 int consumed = zone.ConsumeResource(Config.Structure.ZoneConsumptionCount);
                 if (zone.ResourceCount == 0)
                 {
