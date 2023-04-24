@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 namespace RailHexLib
 {
+    using NeedsList = List<(Dictionary<Resource, int>, int)>;
     /// Handles needs of some object
-    public class NeedsSystem : IUpdatable
+    public class NeedsSystem
     {
 
         public class Need
@@ -37,6 +38,12 @@ namespace RailHexLib
         }
         public class NeedsLevel
         {
+            public NeedsLevel(int consumptionTicks, Inventory inventory)
+            {
+                timerNeeds = new Timer();
+                timerNeeds.Timeout = consumptionTicks;
+                timerNeeds.OnTimeout += () => FillNeeds(inventory);
+            }
             public bool Active = true;
             public Dictionary<Resource, Need> Needs = new Dictionary<Resource, Need>();
 
@@ -54,16 +61,23 @@ namespace RailHexLib
                 }
                 return unmeetNeedsCount;
             }
+            public void Tick(int ticks)
+            {
+                timerNeeds.Tick(ticks);
+            }
+
+            private Timer timerNeeds;
+
         }
 
-        public NeedsSystem(Inventory inventory, List<Dictionary<Resource, int>> needLevels)
+        public NeedsSystem(Inventory inventory, NeedsList needLevels)
         {
             Inventory = inventory;
-            foreach(var needs in needLevels)
+            foreach (var (needs, timeout) in needLevels)
             {
-                var level = new NeedsLevel();
+                var level = new NeedsLevel(timeout, inventory);
                 this.levels.Add(level);
-                foreach(var (resource, count) in needs)
+                foreach (var (resource, count) in needs)
                 {
                     level.Needs[resource] = new Need(count);
                 }
@@ -76,9 +90,10 @@ namespace RailHexLib
         */
         public void Tick(int ticks)
         {
+
             foreach (var level in levels)
             {
-                 level.FillNeeds(Inventory);
+                level.Tick(ticks);
             }
         }
 
@@ -94,17 +109,19 @@ namespace RailHexLib
 
         }
 
-        public int UnmeetNeeds { 
-            get {
+        public int UnmeetNeeds
+        {
+            get
+            {
                 int count = 0;
                 foreach (var level in levels)
                 {
-                    foreach(var (_, need) in level.Needs)
+                    foreach (var (_, need) in level.Needs)
                     {
                         if (!need.Filled) count++;
                     }
                 }
-                return count;   
+                return count;
             }
         }
 

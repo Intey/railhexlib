@@ -10,7 +10,7 @@ using RailHexLib.DevTools;
 namespace RailHexLib
 {
 
-    public class Game : IUpdatable
+    public class Game
     {
         private static Game instance;
         public static Game GetInstance(TileStack stack = null, ILogger logger = null)

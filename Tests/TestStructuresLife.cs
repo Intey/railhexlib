@@ -8,7 +8,7 @@ using RailHexLib.Grounds;
 
 namespace RailHexLib.Tests
 {
-
+    using NeedsList = List<(Dictionary<Resource, int>, int)>;
     [TestFixture]
     public class TestStructuresLife
     {
@@ -18,15 +18,13 @@ namespace RailHexLib.Tests
         readonly DevTools.Logger logger = new();
         private Game game = Game.GetInstance();
         private readonly Cell settle1Position = new(0, 0, CELL_SIZE);
-        
+
         [SetUp]
         public void Prepare()
         {
-          //  Trace.Listeners.Add(new ConsoleTraceListener());
+            //  Trace.Listeners.Add(new ConsoleTraceListener());
             settlement = new Settlement(settle1Position, "settlement1", new(){
-                new(){
-                [Resource.Fish] = 100000
-                }
+                (new(){[Resource.Fish] = 100000}, 1)
             });
 
             Game.Reset(stack, logger);
@@ -42,7 +40,7 @@ namespace RailHexLib.Tests
         [Test]
         public void TestAbandonEventRemoveStructureRoad()
         {
-            game.AddStructures(new List<Structure>(){settlement});
+            game.AddStructures(new List<Structure>() { settlement });
             game.Tick(Config.Structure.InitialTicksToDie);
             Assert.AreEqual(0, game.StructureRoads.Count, $"settlement life:{settlement.LifeTime}");
         }
@@ -50,7 +48,7 @@ namespace RailHexLib.Tests
         [Test]
         public void TestAbandonEventRemoveTrader()
         {
-            game.AddStructures(new List<Structure>(){settlement});
+            game.AddStructures(new List<Structure>() { settlement });
             game.Tick(Config.Structure.InitialTicksToDie);
             Assert.AreEqual(0, game.Traders.Count);
         }

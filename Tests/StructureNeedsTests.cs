@@ -9,6 +9,7 @@ using RailHexLib.Grounds;
 namespace RailHexLib.Tests
 {
 
+    using NeedsList = List<(Dictionary<Resource, int>, int)>;
     [TestFixture]
     public class StructureNeedsTests
     {
@@ -21,13 +22,11 @@ namespace RailHexLib.Tests
         [Test]
         public void TestStructureConsumeNeeds()
         {
-            var needs = new List<Dictionary<Resource, int>>(){
-                new(){ 
-                    [Resource.Fish] = 6,
-                }
+            var needs = new NeedsList(){
+                (new(){[Resource.Fish] = 6,}, 1)
             };
             var settlement = new Settlement(new Cell(0, 0), "", needs);
-            
+
             NeedsSystem.NeedsLevel needsLevel = settlement.NeedLevels[0];
             NeedsSystem.Need need = needsLevel.Needs[Resource.Fish];
 
@@ -44,7 +43,32 @@ namespace RailHexLib.Tests
             Assert.AreEqual(4, need.FilledCount);
             Assert.IsFalse(need.Filled);
             Assert.IsFalse(needsLevel.Filled);
-            Assert.AreEqual(Config.Structure.InitialTicksToDie-1, settlement.LifeTime);
+            Assert.AreEqual(Config.Structure.InitialTicksToDie - 1, settlement.LifeTime);
+        }
+        [Test]
+        public void TestStructureNeedsTimer()
+        {
+            var needs = new NeedsList(){
+                (new(){[Resource.Fish] = 6,}, 1),
+                (new(){[Resource.Wood] = 2,}, 2)
+            };
+            var settlement = new Settlement(new Cell(0, 0), "", needs);
+
+            NeedsSystem.NeedsLevel needsLevel = settlement.NeedLevels[0];
+            NeedsSystem.Need need = needsLevel.Needs[Resource.Fish];
+
+            settlement.addResource(Resource.Fish, 10);
+            settlement.addResource(Resource.Wood, 10);
+            settlement.Tick();
+            Assert.IsFalse(settlement.Abandoned);
+            Assert.AreEqual(settlement.Resources[Resource.Fish], 4);
+            Assert.AreEqual(settlement.Resources[Resource.Wood], 10);
+            settlement.Tick();
+            Assert.IsFalse(settlement.Abandoned);
+            Assert.AreEqual(settlement.Resources[Resource.Fish], 0);
+            Assert.AreEqual(settlement.Resources[Resource.Wood], 8);
+            settlement.Tick(2);
+            Assert.AreEqual(settlement.Resources[Resource.Wood], 6);
         }
     }
 }

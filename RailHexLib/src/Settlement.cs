@@ -4,14 +4,14 @@ using RailHexLib.Grounds;
 
 namespace RailHexLib
 {
+    using NeedsList = List<(Dictionary<Resource, int>, int)>;
     public class Settlement : Structure
-    {   
-            
+    {
         public Settlement(Cell center,
                           string name = "GIVEMEADEFAULTNAME",
-                          List<Dictionary<Resource, int>> needs = null,
+                          NeedsList needs = null,
                           Dictionary<Resource, int> resources = null
-        ) 
+        )
         : base(center, name, needs, resources)
         {
             sides = new Dictionary<IdentityCell, Tile>(new IdentityCellEqualityComparer());
@@ -23,9 +23,9 @@ namespace RailHexLib
 
             sides[incomeRoadCell] = new ROAD_180Tile();
 
-            if (needs == null) 
+            if (needs == null)
             {
-                
+
             }
 
         }

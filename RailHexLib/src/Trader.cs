@@ -2,7 +2,7 @@
 using System;
 namespace RailHexLib
 {
-    public class Trader : IUpdatable
+    public class Trader
     {
         // use list for possible batching/optimization
         public class PointReachedArgs : System.EventArgs

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using RailHexLib.Grounds;
 using System.Linq;
 using System.Diagnostics;
+using System;
 
 namespace RailHexLib
 {
@@ -24,6 +25,7 @@ namespace RailHexLib
 
     public class Zone
     {
+        public event EventHandler OnZoneAbandon;
         public List<FrontierCell> Cells { get; } = new List<FrontierCell>();
 
         public int ResourceCount => resourceCount;

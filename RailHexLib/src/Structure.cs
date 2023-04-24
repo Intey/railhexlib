@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace RailHexLib
 {
+    using NeedsList = List<(Dictionary<Resource, int>, int)>;
     public abstract class Structure : Interfaces.IRotatable<Tile>
     {
         public event EventHandler OnStructureAbandon;
@@ -28,7 +29,7 @@ namespace RailHexLib
         }
         public Structure(Cell center,
                          string name,
-                         List<Dictionary<Resource, int>> needs = null,
+                         NeedsList needs = null,
                          Dictionary<Resource, int> resources = null
         )
         {
@@ -39,7 +40,7 @@ namespace RailHexLib
             }
             else
             {
-                needsSystem = new NeedsSystem(Inventory, new List<Dictionary<Resource, int>>());
+                needsSystem = new NeedsSystem(Inventory, new NeedsList());
             }
             if (resources != null)
             {
