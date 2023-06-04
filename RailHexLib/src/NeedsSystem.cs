@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 namespace RailHexLib
 {
-    using NeedsList = List<(Dictionary<Resource, int>, int)>;
+    // List of resources needed. Each resource is a tuple of (count, ticks to consume)
+    using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
     /// Handles needs of some object
     public class NeedsSystem
     {
 
         public class Need
         {
-            public Need(int cnt)
+            public Need(int cnt, int consumptionTicks)
             {
                 count = cnt;
+                this.consumptionTicks = consumptionTicks;
             }
             int count;
             int filledCount = 0;
@@ -24,10 +26,14 @@ namespace RailHexLib
             public int ExpectedCount { get => count; }
             public int ComboTicks { get => comboTicks; }
             public int FilledCount { get => filledCount; }
-
+            int consumptionTicks;
+            int ticks = 0;
+            public bool NeedToFill => ticks >= consumptionTicks;
             // TODO: fill with zero? how to reset filledCount?
             public bool Fill(int count)
             {
+                ticks = 0; // reset NeedToFill
+
                 filledCount = count;
                 if (Filled)
                     this.comboTicks += 1;
@@ -35,15 +41,13 @@ namespace RailHexLib
                     this.comboTicks = 0;
                 return Filled;
             }
+            public void Tick(int ticks)
+            {
+                this.ticks += ticks;
+            }
         }
         public class NeedsLevel
         {
-            public NeedsLevel(int consumptionTicks, Inventory inventory)
-            {
-                timerNeeds = new Timer();
-                timerNeeds.Timeout = consumptionTicks;
-                timerNeeds.OnTimeout += () => FillNeeds(inventory);
-            }
             public bool Active = true;
             public Dictionary<Resource, Need> Needs = new Dictionary<Resource, Need>();
 
@@ -63,23 +67,26 @@ namespace RailHexLib
             }
             public void Tick(int ticks)
             {
-                timerNeeds.Tick(ticks);
+                foreach (var (_, need) in Needs)
+                {
+                    need.Tick(ticks);
+                }
             }
 
             private Timer timerNeeds;
 
         }
 
-        public NeedsSystem(Inventory inventory, NeedsList needLevels)
+        public NeedsSystem(Inventory inventory, NeedLevelList needLevels)
         {
             Inventory = inventory;
-            foreach (var (needs, timeout) in needLevels)
+            foreach (var needs in needLevels)
             {
-                var level = new NeedsLevel(timeout, inventory);
+                var level = new NeedsLevel();
                 this.levels.Add(level);
-                foreach (var (resource, count) in needs)
+                foreach (var (resource, (count, ticksToConsume)) in needs)
                 {
-                    level.Needs[resource] = new Need(count);
+                    level.Needs[resource] = new Need(count, ticksToConsume);
                 }
             }
         }
@@ -90,20 +97,19 @@ namespace RailHexLib
         */
         public void Tick(int ticks)
         {
-
             foreach (var level in levels)
             {
                 level.Tick(ticks);
             }
         }
-
-        internal void fillBy(Trader trader)
+        // Initiate process of filling needs
+        internal void fillBy(Inventory inventory)
         {
             foreach (var level in levels)
             {
                 if (level.Active)
                 {
-                    level.FillNeeds(trader.Inventory);
+                    level.FillNeeds(inventory);
                 }
             }
 

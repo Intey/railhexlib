@@ -9,7 +9,7 @@ using RailHexLib.DevTools;
 
 namespace RailHexLib
 {
-
+    using NeedLevelList  = List<Dictionary<Resource, (int, int)>>;
     public class Game
     {
         private static Game instance;

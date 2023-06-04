@@ -4,12 +4,12 @@ using RailHexLib.Grounds;
 
 namespace RailHexLib
 {
-    using NeedsList = List<(Dictionary<Resource, int>, int)>;
+    using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
     public class Settlement : Structure
     {
         public Settlement(Cell center,
                           string name = "GIVEMEADEFAULTNAME",
-                          NeedsList needs = null,
+                          NeedLevelList needs = null,
                           Dictionary<Resource, int> resources = null
         )
         : base(center, name, needs, resources)

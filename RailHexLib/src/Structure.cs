@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace RailHexLib
 {
-    using NeedsList = List<(Dictionary<Resource, int>, int)>;
+    using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
     public abstract class Structure : Interfaces.IRotatable<Tile>
     {
         public event EventHandler OnStructureAbandon;
@@ -29,7 +29,7 @@ namespace RailHexLib
         }
         public Structure(Cell center,
                          string name,
-                         NeedsList needs = null,
+                         NeedLevelList needs = null,
                          Dictionary<Resource, int> resources = null
         )
         {
@@ -40,7 +40,7 @@ namespace RailHexLib
             }
             else
             {
-                needsSystem = new NeedsSystem(Inventory, new NeedsList());
+                needsSystem = new NeedsSystem(Inventory, new NeedLevelList());
             }
             if (resources != null)
             {
@@ -134,7 +134,7 @@ namespace RailHexLib
         public virtual void VisitTrader(Trader trader)
         {
             lifeTime += Config.Structure.LifeTimeIncreaseOnTraderVisit;
-            needsSystem.fillBy(trader);
+            needsSystem.fillBy(trader.Inventory);
         }
 
         public int PickResource(Resource name, int count)
