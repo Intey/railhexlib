@@ -9,7 +9,17 @@ using RailHexLib.DevTools;
 
 namespace RailHexLib
 {
-    using NeedLevelList  = List<Dictionary<Resource, (int, int)>>;
+    using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
+    enum Direction
+    {
+        QMAX,
+        QMIN,
+        RMAX,
+        RMIN,
+        SMAX,
+        SMIN
+    };
+
     public class Game
     {
         private static Game instance;
@@ -37,6 +47,8 @@ namespace RailHexLib
         // Events
         public event EventHandler StructureAbandonEvent;
         public event EventHandler TraderArrivesToStructureEvent;
+        public event EventHandler NewStructureAppears;
+
 
         private List<Type> availableTiles;
         public TileStack stack;
@@ -57,6 +69,8 @@ namespace RailHexLib
         private ILogger logger;
         private int scorePoints;
 
+        private Timer newSettlementTimer = new Timer();
+        private bool paused = false;
         private Game(TileStack stack = null, ILogger logger = null)
         {
             this.logger = logger ?? new DefaultSilentLogger();
@@ -82,6 +96,8 @@ namespace RailHexLib
             {
                 this.stack = stack;
             }
+            newSettlementTimer.Timeout = Config.NewSettlement.TicksForNewSettlement;
+            newSettlementTimer.OnTimeout += AddNewSettlement;
         }
 
         public void AddStructures(List<Structure> structures)
@@ -323,6 +339,8 @@ namespace RailHexLib
 
         public void Tick(int ticks)
         {
+            if (paused) return;
+
             foreach (var t in traders)
             {
                 t.Tick(ticks);
@@ -335,7 +353,157 @@ namespace RailHexLib
             {
                 structure.Tick(ticks);
             }
+            newSettlementTimer.Tick(ticks);
 
+        }
+        private void AddNewSettlement()
+        {
+            logger.Log("Add new settlement");
+            var center = randomUnplacedCell();
+            var needsList = new NeedLevelList()
+            {
+                //level 1
+                (new(){
+                    [Resource.Fish] = (2, 2),
+                    [Resource.Wood] = (1, 4)
+                }),
+                // level 2
+                (new(){
+                    [Resource.Grass] = (4, 10),
+                }),
+            };
+
+            var settlement = new Settlement(center, "Settlement", needsList);
+            logger.Log($"Place new settlement in {center}");
+            AddStructures(new() { settlement });
+            var handler = NewStructureAppears;
+            if (handler != null)
+            {
+                NewStructureAppears(settlement, EventArgs.Empty);
+            }
+        }
+
+        // find random cell in area exclude filled convex hull of placed cells
+        // return multiple cells distributed in specified area
+        Cell randomUnplacedCell()
+        {
+            var placedCells = placedTiles.Keys;
+            Cell maxQCell = placedCells.First();
+            Cell maxRCell = placedCells.First();
+            Cell maxSCell = placedCells.First();
+            Cell minQCell = placedCells.First();
+            Cell minRCell = placedCells.First();
+            Cell minSCell = placedCells.First();
+
+            foreach (var cell in placedCells)
+            {
+                if (cell.Q > maxQCell.Q)
+                {
+                    maxQCell = cell;
+                }
+                if (cell.R > maxRCell.R)
+                {
+                    maxRCell = cell;
+                }
+                if (cell.S > maxSCell.S)
+                {
+                    maxSCell = cell;
+                }
+                if (cell.Q < minQCell.Q)
+                {
+                    minQCell = cell;
+                }
+                if (cell.R < minRCell.R)
+                {
+                    minRCell = cell;
+                }
+                if (cell.S < minSCell.S)
+                {
+                    minSCell = cell;
+                }
+            }
+
+            var directions = new List<(Direction, Cell, int)>(){
+                (Direction.QMAX, maxQCell, maxQCell.Q), (Direction.QMIN, minQCell, minQCell.Q),
+                (Direction.RMAX, maxRCell, maxRCell.R), (Direction.RMIN, minRCell, minRCell.R),
+                (Direction.SMAX, maxSCell, maxSCell.S), (Direction.SMIN, minSCell, minSCell.S)
+            }.OrderBy(x => Math.Abs(x.Item3)).ToList();
+
+
+            // logger.Log("random new cell: has bounds \n" +
+            // $"maxQ {maxQCell}, maxR {maxRCell}, maxS {maxSCell}\n" +
+            // $"minQ {minQCell}, minR {minRCell}, minS {minSCell}");
+            var rnd = new Random();
+            double probability = rnd.NextDouble();
+            bool makeFarestPosition = probability >= Config.NewSettlement.FarPositionProbability;
+            if (!makeFarestPosition)
+            {
+                logger.Log("use nearest position");
+                directions = directions.Take(directions.Count() / 2).ToList();
+            }
+            // 0 - MaxQ, 1 - MinQ, 2 - MaxR, 3 - MinR, 4 - MaxS, 5 - MinS
+            var targetDirection = directions[rnd.Next(directions.Count())];
+
+            switch (targetDirection.Item1)
+            {
+                case Direction.QMAX:
+                    {
+                        int qAxisPos = 0;
+                        qAxisPos = targetDirection.Item3 + rnd.Next(Config.NewSettlement.minNearestCellOffset,
+                          Config.NewSettlement.minNearestCellOffset + Config.NewSettlement.offsetBufferLinesCount);
+                        int rAxisPos = -rnd.Next(Math.Abs(qAxisPos) + 1);
+                        return new Cell(rAxisPos, qAxisPos);
+                    }
+                case Direction.QMIN:
+                    {
+                        int qAxisPos = 0;
+                        // logger.Log("select direction on Q-");
+                        qAxisPos = -Math.Abs(targetDirection.Item3 - rnd.Next(Config.NewSettlement.minNearestCellOffset,
+                         Config.NewSettlement.minNearestCellOffset + Config.NewSettlement.offsetBufferLinesCount));
+                        int rAxisPos = -rnd.Next(Math.Abs(qAxisPos) + 1);
+                        return new Cell(rAxisPos, qAxisPos);
+                        return targetDirection.Item2;
+                    }
+                case Direction.RMAX:
+                    {
+                        int rAxisPos = 0;
+                        // logger.Log("select direction on R+");
+                        rAxisPos = targetDirection.Item3 + rnd.Next(Config.NewSettlement.minNearestCellOffset,
+                        Config.NewSettlement.minNearestCellOffset + Config.NewSettlement.offsetBufferLinesCount);
+                        int qAxisPos = -rnd.Next(Math.Abs(rAxisPos) + 1);
+                        return new Cell(rAxisPos, qAxisPos);
+                    }
+                case Direction.RMIN:
+                    {
+                        int rAxisPos = 0;
+                        // logger.Log("select direction on R-");
+                        rAxisPos = -Math.Abs(targetDirection.Item3 - rnd.Next(Config.NewSettlement.minNearestCellOffset,
+                         Config.NewSettlement.minNearestCellOffset + Config.NewSettlement.offsetBufferLinesCount));
+                        int qAxisPos = -rnd.Next(Math.Abs(rAxisPos) + 1);
+                        return new Cell(rAxisPos, qAxisPos);
+                    }
+                case Direction.SMAX:
+                    {
+                        int sAxisPos = 0;
+                        // logger.Log("select direction on S+");
+                        sAxisPos = targetDirection.Item3 + rnd.Next(Config.NewSettlement.minNearestCellOffset,
+                        Config.NewSettlement.minNearestCellOffset + Config.NewSettlement.offsetBufferLinesCount);
+                        int rAxisPos = -rnd.Next(Math.Abs(sAxisPos) + 1);
+                        int qAxisPos = -sAxisPos - rAxisPos;
+                        return new Cell(rAxisPos, qAxisPos);
+                    }
+                case Direction.SMIN:
+                    {
+                        int sAxisPos = 0;
+                        // logger.Log("select direction on S-");
+                        sAxisPos = -Math.Abs(targetDirection.Item3 - rnd.Next(Config.NewSettlement.minNearestCellOffset,
+                         Config.NewSettlement.minNearestCellOffset + Config.NewSettlement.offsetBufferLinesCount));
+                        int rAxisPos = -rnd.Next(Math.Abs(sAxisPos) + 1);
+                        int qAxisPos = -sAxisPos - rAxisPos;
+                        return new Cell(rAxisPos, qAxisPos);
+                    }
+            }
+            throw new Exception("unreachable random position");
         }
 
         private void TraderArrivesToStructure(object r, Trader.PointReachedArgs e)
@@ -470,6 +638,40 @@ namespace RailHexLib
                 var tile = MakeRandomTileType();
                 stack.PushTile(tile);
             }
+        }
+        public void InitializeLevel(int ln)
+        {
+            if (ln == 1)
+            {
+                var s1N = new List<Dictionary<Resource, (int, int)>>(){
+                    (
+                        new() {
+                            [Resource.Fish] = (2,2)
+                        }
+                    ),
+                    (
+                        new() {
+                            [Resource.Wood] = (4,4)
+                        }
+                    )
+                };
+
+                var s = new Settlement(new Cell(0, -10), "settlement1", s1N);
+                s.Rotate60Clock(3); // 180
+
+                var s2N = new List<Dictionary<Resource, (int, int)>>(){
+                    (new(){[Resource.Fish] = (2, 2)})
+                };
+
+                var s2 = new Settlement(new Cell(0, 0), "Settlement2", s2N);
+
+                var structs = new List<Structure>() { s2, s };
+                AddStructures(structs);
+            }
+        }
+        public void TogglePause()
+        {
+            paused = !paused;
         }
     }
 }

@@ -8,6 +8,8 @@ namespace RailHexLib
         public int Ticks { get; private set; }
         public int Timeout { get; set; }
         public bool IsRunning { get; private set; }
+        // for UI display timer
+        public int RestTime => Timeout - Ticks;
         public void Tick(int ticks)
         {
             Ticks += ticks;

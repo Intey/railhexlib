@@ -9,7 +9,7 @@ using RailHexLib.Grounds;
 namespace RailHexLib.Tests
 {
 
-    using NeedsList = List<(Dictionary<Resource, int>, int)>;
+    using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
     [TestFixture]
     public class StructureNeedsTests
     {
@@ -22,8 +22,10 @@ namespace RailHexLib.Tests
         [Test]
         public void TestStructureConsumeNeeds()
         {
-            var needs = new NeedsList(){
-                (new(){[Resource.Fish] = 6,}, 1)
+            var needs = new NeedLevelList(){
+                (new(){
+                    [Resource.Fish] = (6, 1)
+                })
             };
             var settlement = new Settlement(new Cell(0, 0), "", needs);
 
@@ -33,13 +35,13 @@ namespace RailHexLib.Tests
             settlement.addResource(Resource.Fish, 10);
             settlement.Tick();
             Assert.IsFalse(settlement.Abandoned);
-            Assert.AreEqual(settlement.Resources[Resource.Fish], 4);
+            Assert.AreEqual(4, settlement.Resources[Resource.Fish]);
             Assert.AreEqual(Config.Structure.InitialTicksToDie, settlement.LifeTime);
             Assert.AreEqual(6, need.FilledCount);
 
             settlement.Tick();
             Assert.IsFalse(settlement.Abandoned);
-            Assert.AreEqual(settlement.Resources[Resource.Fish], 0);
+            Assert.AreEqual(0, settlement.Resources[Resource.Fish]);
             Assert.AreEqual(4, need.FilledCount);
             Assert.IsFalse(need.Filled);
             Assert.IsFalse(needsLevel.Filled);
@@ -48,9 +50,12 @@ namespace RailHexLib.Tests
         [Test]
         public void TestStructureNeedsTimer()
         {
-            var needs = new NeedsList(){
-                (new(){[Resource.Fish] = 6,}, 1),
-                (new(){[Resource.Wood] = 2,}, 2)
+            var needs = new NeedLevelList(){
+                (new(){
+                    [Resource.Fish] = (6, 1),
+                [Resource.Wood] = (2, 2)
+
+            })
             };
             var settlement = new Settlement(new Cell(0, 0), "", needs);
 

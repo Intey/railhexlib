@@ -96,7 +96,7 @@ namespace RailHexLib
 
         public override string ToString()
         {
-            return $"(R:{R}, Q:{Q})";
+            return $"(R:{R}, Q:{Q}, S:{S})";
         }
         public Dictionary<IdentityCell, Cell> Neighbours()
         {

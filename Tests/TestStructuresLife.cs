@@ -24,7 +24,10 @@ namespace RailHexLib.Tests
         {
             //  Trace.Listeners.Add(new ConsoleTraceListener());
             settlement = new Settlement(settle1Position, "settlement1", new(){
-                (new(){[Resource.Fish] = 100000}, 1)
+                (new(){
+                    [Resource.Fish] = (100000, 1)
+
+            })
             });
 
             Game.Reset(stack, logger);
