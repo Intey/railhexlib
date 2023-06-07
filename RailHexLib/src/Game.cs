@@ -104,7 +104,11 @@ namespace RailHexLib
                 this.stack = stack;
             }
             newSettlementTimer.Timeout = Config.NewSettlement.TicksForNewSettlement;
-            newSettlementTimer.OnTimeout += AddNewSettlement;
+            newSettlementTimer.OnTimeout += () =>
+            {
+                AddNewSettlement();
+                AddNewSettlement();
+            };
         }
 
         public void AddStructures(List<Structure> structures)

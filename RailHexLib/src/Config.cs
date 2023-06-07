@@ -34,7 +34,7 @@ namespace RailHexLib
         public static class NewSettlement
         {
             public static double FarPositionProbability = 0.8;
-            public static int TicksForNewSettlement = 50;
+            public static int TicksForNewSettlement = 100;
             public static int minNearestCellOffset = 20;
             public static int offsetBufferLinesCount = 10;
         }
