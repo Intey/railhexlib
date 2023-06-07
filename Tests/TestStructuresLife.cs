@@ -22,7 +22,8 @@ namespace RailHexLib.Tests
         [SetUp]
         public void Prepare()
         {
-            //  Trace.Listeners.Add(new ConsoleTraceListener());
+            
+            Trace.Listeners.Add(new ConsoleTraceListener());
             settlement = new Settlement(settle1Position, "settlement1", new(){
                 (new(){
                     [Resource.Fish] = (100000, 1)
@@ -32,6 +33,7 @@ namespace RailHexLib.Tests
 
             Game.Reset(stack, logger);
             game = Game.GetInstance();
+            game.Features[FeatureTypes.NewSettlementAppears] = false;
         }
 
         [Test]
@@ -45,12 +47,14 @@ namespace RailHexLib.Tests
         {
             game.AddStructures(new List<Structure>() { settlement });
             game.Tick(Config.Structure.InitialTicksToDie);
-            Assert.AreEqual(0, game.StructureRoads.Count, $"settlement life:{settlement.LifeTime}");
+            Assert.IsTrue(settlement.Abandoned);
+            Assert.AreEqual(0, game.StructureRoads.Count, $"Structure road should be removed. Settlement lifetime: {settlement.LifeTime}");
         }
 
         [Test]
         public void TestAbandonEventRemoveTrader()
         {
+            
             game.AddStructures(new List<Structure>() { settlement });
             game.Tick(Config.Structure.InitialTicksToDie);
             Assert.AreEqual(0, game.Traders.Count);

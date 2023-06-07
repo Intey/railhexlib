@@ -19,6 +19,10 @@ namespace RailHexLib
         SMAX,
         SMIN
     };
+    public enum FeatureTypes
+    {
+        NewSettlementAppears
+    }
 
     public class Game
     {
@@ -49,6 +53,7 @@ namespace RailHexLib
         public event EventHandler TraderArrivesToStructureEvent;
         public event EventHandler NewStructureAppears;
 
+        public Dictionary<FeatureTypes, bool> Features = new Dictionary<FeatureTypes, bool>();
 
         private List<Type> availableTiles;
         public TileStack stack;
@@ -73,6 +78,8 @@ namespace RailHexLib
         private bool paused = false;
         private Game(TileStack stack = null, ILogger logger = null)
         {
+
+            Features[FeatureTypes.NewSettlementAppears] = true;
             this.logger = logger ?? new DefaultSilentLogger();
             placedTiles = new Dictionary<Cell, Tile>(new CellEqualityComparer());
             structureRoads = new Dictionary<Cell, StructureRoad>();
@@ -115,6 +122,7 @@ namespace RailHexLib
                 handle = (object s, EventArgs e) =>
                 {
                     Structure structure = s as Structure;
+
                     this.structureRoads.Remove(structure.GetEnterCell());
                     this.Traders.RemoveAll(t => t.TradePoints.ContainsKey(structure.GetEnterCell()));
                     logger.Log("Structure abandoned");
@@ -358,6 +366,9 @@ namespace RailHexLib
         }
         private void AddNewSettlement()
         {
+            logger.Log($"Feature {FeatureTypes.NewSettlementAppears} state: {Features[FeatureTypes.NewSettlementAppears]}");
+            if (!Features[FeatureTypes.NewSettlementAppears]) return;
+
             logger.Log("Add new settlement");
             var center = randomUnplacedCell();
             var needsList = new NeedLevelList()

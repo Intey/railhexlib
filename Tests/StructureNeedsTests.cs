@@ -66,14 +66,14 @@ namespace RailHexLib.Tests
             settlement.addResource(Resource.Wood, 10);
             settlement.Tick();
             Assert.IsFalse(settlement.Abandoned);
-            Assert.AreEqual(settlement.Resources[Resource.Fish], 4);
-            Assert.AreEqual(settlement.Resources[Resource.Wood], 10);
+            Assert.AreEqual(4, settlement.Resources[Resource.Fish]);
+            Assert.AreEqual(10, settlement.Resources[Resource.Wood]);
             settlement.Tick();
             Assert.IsFalse(settlement.Abandoned);
-            Assert.AreEqual(settlement.Resources[Resource.Fish], 0);
-            Assert.AreEqual(settlement.Resources[Resource.Wood], 8);
+            Assert.AreEqual(0, settlement.Resources[Resource.Fish]);
+            Assert.AreEqual(8, settlement.Resources[Resource.Wood]);
             settlement.Tick(2);
-            Assert.AreEqual(settlement.Resources[Resource.Wood], 6);
+            Assert.AreEqual(6, settlement.Resources[Resource.Wood]);
         }
     }
 }

@@ -8,75 +8,6 @@ namespace RailHexLib
     /// Handles needs of some object
     public class NeedsSystem
     {
-
-        public class Need
-        {
-            public Need(int cnt, int consumptionTicks)
-            {
-                count = cnt;
-                this.consumptionTicks = consumptionTicks;
-            }
-            int count;
-            int filledCount = 0;
-
-            // how many ticks this need is fullfiled
-            int comboTicks = 0;
-            public bool Filled => filledCount >= count;
-            // count of required resource
-            public int ExpectedCount { get => count; }
-            public int ComboTicks { get => comboTicks; }
-            public int FilledCount { get => filledCount; }
-            int consumptionTicks;
-            int ticks = 0;
-            public bool NeedToFill => ticks >= consumptionTicks;
-            // TODO: fill with zero? how to reset filledCount?
-            public bool Fill(int count)
-            {
-                ticks = 0; // reset NeedToFill
-
-                filledCount = count;
-                if (Filled)
-                    this.comboTicks += 1;
-                else
-                    this.comboTicks = 0;
-                return Filled;
-            }
-            public void Tick(int ticks)
-            {
-                this.ticks += ticks;
-            }
-        }
-        public class NeedsLevel
-        {
-            public bool Active = true;
-            public Dictionary<Resource, Need> Needs = new Dictionary<Resource, Need>();
-
-            public bool Filled => !Needs.Any((ResNeedPair) => !ResNeedPair.Value.Filled);
-            /// consume reseurces from inventory and return count of unmeet needs
-            public int FillNeeds(Inventory inventory)
-            {
-                int unmeetNeedsCount = 0;
-
-                foreach (var (resource, need) in Needs)
-                {
-                    var picked = inventory.PickResource(resource, need.ExpectedCount);
-                    if (!need.Fill(picked))
-                        unmeetNeedsCount += 1;
-                }
-                return unmeetNeedsCount;
-            }
-            public void Tick(int ticks)
-            {
-                foreach (var (_, need) in Needs)
-                {
-                    need.Tick(ticks);
-                }
-            }
-
-            private Timer timerNeeds;
-
-        }
-
         public NeedsSystem(Inventory inventory, NeedLevelList needLevels)
         {
             Inventory = inventory;
@@ -101,6 +32,8 @@ namespace RailHexLib
             {
                 level.Tick(ticks);
             }
+            //try to fill by linked inventory
+            fillBy(Inventory);
         }
         // Initiate process of filling needs
         internal void fillBy(Inventory inventory)
@@ -133,6 +66,78 @@ namespace RailHexLib
 
         public List<NeedsLevel> levels = new List<NeedsLevel>();
         Inventory Inventory;
+
+        public class Need
+        {
+            public Need(int cnt, int consumptionTicks)
+            {
+                count = cnt;
+                this.consumptionTicks = consumptionTicks;
+            }
+            readonly int count;
+            int filledCount = 0;
+
+            public bool Filled => filledCount >= count;
+            // count of required resource
+            public int ExpectedCount { get => count; }
+            public int FilledCount { get => filledCount; }
+            readonly int consumptionTicks;
+            int ticks = 0;
+            public bool NeedToFill => ticks >= consumptionTicks;
+            // TODO: fill with zero? how to reset filledCount?
+            public bool Fill(int count)
+            {
+                ticks = 0; // reset NeedToFill
+                filledCount = count;
+                return Filled;
+            }
+            public void Tick(int ticks)
+            {
+                this.ticks += ticks;
+                if (NeedToFill)
+                {
+                    filledCount -= count;
+                    if (filledCount <= 0)
+                    {
+                        filledCount = 0;
+                    }
+                    ticks = 0;
+                }
+            }
+        }
+        public class NeedsLevel
+        {
+            public bool Active = true;
+            public Dictionary<Resource, Need> Needs = new Dictionary<Resource, Need>();
+
+            public bool Filled => !Needs.Any((ResNeedPair) => !ResNeedPair.Value.Filled);
+            /// consume reseurces from inventory and return count of unmeet needs
+            public int FillNeeds(Inventory inventory)
+            {
+                int unmeetNeedsCount = 0;
+
+                foreach (var (resource, need) in Needs)
+                {
+                    if (need.NeedToFill)
+                    {
+                        var picked = inventory.PickResource(resource, need.ExpectedCount);
+                        if (!need.Fill(picked))
+                            unmeetNeedsCount += 1;
+                    }
+                }
+                return unmeetNeedsCount;
+            }
+            public void Tick(int ticks)
+            {
+                foreach (var (_, need) in Needs)
+                {
+                    need.Tick(ticks); ;
+                }
+            }
+
+            private Timer timerNeeds;
+
+        }
     }
 
 }
