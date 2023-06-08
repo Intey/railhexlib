@@ -7,6 +7,7 @@ namespace RailHexLib
     using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
     public abstract class Structure : Interfaces.IRotatable<Tile>
     {
+        static Interfaces.ILogger logger = new DevTools.Logger("structure");
         public event EventHandler OnStructureAbandon;
 
         public abstract string TileName();
@@ -83,7 +84,7 @@ namespace RailHexLib
         {
             foreach (var zoneCell in zone.Cells)
             {
-                Debug.WriteLine($"check {zone} {zoneCell}...");
+                logger.Log($"check {zone} {zoneCell}...", "zone");
                 foreach (var (c, _) in GetHexes())
                 {
                     // search connection point

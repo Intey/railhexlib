@@ -100,7 +100,6 @@ namespace RailHexLib.Tests
         public void Prepare()
         {
             stack = new();
-            // Trace.Listeners.Add(new ConsoleTraceListener());
             Settlement settlement1 = new(settle1Position, "settlement1");
             // settlement size is 3tiles on R, so from center we have 2 tiles.
             // -4  -3  -2  -1   0

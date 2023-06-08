@@ -6,6 +6,7 @@ namespace RailHexLib.Interfaces
 {
     public interface ILogger
     {
-        void Log(string msg);
+        public void Log(string msg, string category = null);
+        string Category { get; }
     }
 }

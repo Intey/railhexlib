@@ -8,6 +8,7 @@ namespace RailHexLib.Tests
     [TestFixture]
     public class TileRotationTest
     {
+        DevTools.Logger logger = new DevTools.Logger("tiletest");
         [SetUp]
         public void setup()
         {
@@ -43,7 +44,7 @@ namespace RailHexLib.Tests
             t.Rotate60Clock();
             t.Rotate60Clock();
             foreach( var s in t.Sides)
-                Debug.Print($"{s}");
+                logger.Log($"{s}");
 
             Assert.AreEqual(t.Sides[IdentityCell.topLeftSide], Ground.Road);
             Assert.AreEqual(t.Sides[IdentityCell.topSide], Ground.Ground);

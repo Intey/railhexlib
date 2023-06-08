@@ -15,10 +15,9 @@ namespace RailHexLib.Tests
         [SetUp]
         public void SetUp()
         {
-            Trace.Listeners.Add(new ConsoleTraceListener());
+            var logger = new DevTools.Logger("test-zones");
             var stack = new TileStack();
-            Game.Reset(1.0f, stack, new DevTools.Logger());
-
+            Game.Reset(1.0f, stack, logger);
         }
 
         [Test]

@@ -81,7 +81,15 @@ namespace RailHexLib
             Cell.CELL_SIZE = cellSize;
 
             Features[FeatureTypes.NewSettlementAppears] = true;
-            this.logger = logger ?? new DefaultSilentLogger();
+            if (logger != null)
+            {
+                this.logger = new Logger(logger.Category + "-game");
+            }
+            else
+            {
+                this.logger = new Logger("game");
+            }
+
             placedTiles = new Dictionary<Cell, Tile>(new CellEqualityComparer());
             structureRoads = new Dictionary<Cell, StructureRoad>();
 

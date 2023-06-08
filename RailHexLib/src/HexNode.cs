@@ -16,6 +16,7 @@ namespace RailHexLib
     /// </summary>
     public class HexNode : IEnumerable<HexNode>
     {
+        static Interfaces.ILogger logger = new DevTools.Logger("hexnode");
         public Cell Cell;
         // links
         private HexNode left = null;
@@ -136,7 +137,7 @@ namespace RailHexLib
 
         public List<Cell> PathTo(Cell targetCell)
         {
-            Debug.WriteLine($"Path from {Cell} to {targetCell}");
+            logger.Log($"Path from {Cell} to {targetCell}", "pathto");
             var result = new List<Cell>();
             var frontier = new PriorityQueue<HexNode, int>();
             frontier.Enqueue(this, 1);
@@ -147,14 +148,14 @@ namespace RailHexLib
 
             while(frontier.Count != 0) {
                 var current = frontier.Dequeue();
-                Debug.WriteLine($"Procell frontier: {current}");
+                logger.Log($"Procell frontier: {current}", "pathto");
                 if (current.Cell == targetCell){
                     break;
                 }
                 foreach (var neighbor in current.Neighbors()) {
                     var newCost = costSoFar[current] + 1; // TODO: add moveCost to cells(Tiles?)
 
-                    Debug.WriteLine($"Check frontier neighbor: {neighbor}");
+                    logger.Log($"Check frontier neighbor: {neighbor}", "pathto");
                     if (!costSoFar.ContainsKey(neighbor) || newCost < costSoFar[neighbor]) {
                         costSoFar[neighbor] = newCost;
                         var priority = newCost + neighbor.Cell.DistanceTo(targetCell);

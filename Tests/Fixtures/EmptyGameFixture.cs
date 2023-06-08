@@ -12,7 +12,7 @@ namespace RailHexLib.Tests
         [SetUp]
         public void SetUp()
         {
-            Game.Reset(stack: new TileStack(), logger: new Logger());
+            Game.Reset(stack: new TileStack());
             game = Game.GetInstance();
         }
     }
