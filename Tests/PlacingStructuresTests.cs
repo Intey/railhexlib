@@ -34,7 +34,7 @@ namespace RailHexLib.Tests
             structures.Add(settlement1);
             structures.Add(settlement2);
 
-            game = Game.GetInstance(stack, logger);
+            game = Game.GetInstance(1.0f, stack, logger);
         }
 
         [Test]

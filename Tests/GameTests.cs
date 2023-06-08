@@ -20,7 +20,7 @@ namespace RailHexLib.Tests
             stack.PushTile(new ROAD_120Tile());
             stack.PushTile(new ROAD_180Tile());
             
-            Game.Reset(stack);
+            Game.Reset(1.0f, stack);
             game = Game.GetInstance();
             Settlement settlement1 = new(new Cell(0, 0, CELL_SIZE), "settlement1");
             // settlement size is 3tiles on R, so from center we have 2 tiles.

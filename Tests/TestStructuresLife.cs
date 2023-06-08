@@ -31,7 +31,7 @@ namespace RailHexLib.Tests
             })
             });
 
-            Game.Reset(stack, logger);
+            Game.Reset(1.0f, stack, logger);
             game = Game.GetInstance();
             game.Features[FeatureTypes.NewSettlementAppears] = false;
         }

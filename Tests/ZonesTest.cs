@@ -17,7 +17,7 @@ namespace RailHexLib.Tests
         {
             Trace.Listeners.Add(new ConsoleTraceListener());
             var stack = new TileStack();
-            Game.Reset(stack, new DevTools.Logger());
+            Game.Reset(1.0f, stack, new DevTools.Logger());
 
         }
 

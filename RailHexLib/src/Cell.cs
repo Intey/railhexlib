@@ -44,6 +44,7 @@ namespace RailHexLib
     */
     public class Cell : IEquatable<Cell>, IDistancable<Cell>
     {
+        public static float CELL_SIZE = 1.0f;
         // [SerializeField]
         private int r, q;
 
@@ -55,8 +56,10 @@ namespace RailHexLib
 
         public int S => -R - Q;
 
-        public Cell(int r, int q, float size = 1.0f)
+        public Cell(int r, int q, float size = 0.0f)
         {
+            if (size == 0.0f)
+                size = CELL_SIZE;
             this.r = r;
             this.q = q;
             this.size = size;
@@ -116,7 +119,6 @@ namespace RailHexLib
         public override int GetHashCode() // required for use as a key in Dictionary
         {
             int hashCode = -630286571;
-            hashCode = hashCode * -1521134295 + size.GetHashCode();
             hashCode = hashCode * -1521134295 + R.GetHashCode();
             hashCode = hashCode * -1521134295 + Q.GetHashCode();
             return hashCode;
@@ -125,7 +127,6 @@ namespace RailHexLib
         public bool Equals(Cell cell)
         {
             return cell != null &&
-                   size == cell.size &&
                    R == cell.R &&
                    Q == cell.Q;
         }

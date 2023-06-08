@@ -27,18 +27,18 @@ namespace RailHexLib
     public class Game
     {
         private static Game instance;
-        public static Game GetInstance(TileStack stack = null, ILogger logger = null)
+        public static Game GetInstance(float cellSize = 1.0f, TileStack stack = null, ILogger logger = null)
         {
             if (instance == null)
             {
-                instance = new Game();
+                instance = new Game(cellSize, stack, logger);
             }
             return instance;
         }
-        public static void Reset(TileStack stack = null, ILogger logger = null)
+        public static void Reset(float cellSize = 1.0f, TileStack stack = null, ILogger logger = null)
         {
             instance = null;
-            instance = new Game(stack, logger);
+            instance = new Game(cellSize, stack, logger);
         }
         public Tile CurrentTile => currentTile;
         public List<Structure> Structures => structures;
@@ -76,8 +76,9 @@ namespace RailHexLib
 
         private Timer newSettlementTimer = new Timer();
         private bool paused = false;
-        private Game(TileStack stack = null, ILogger logger = null)
+        private Game(float cellSize, TileStack stack = null, ILogger logger = null)
         {
+            Cell.CELL_SIZE = cellSize;
 
             Features[FeatureTypes.NewSettlementAppears] = true;
             this.logger = logger ?? new DefaultSilentLogger();
@@ -117,10 +118,11 @@ namespace RailHexLib
 
             foreach (var structure in structures)
             {
-
                 this.structureRoads[structure.GetEnterCell()] = new StructureRoad(structure);
                 foreach (var cell in structure.GetHexes())
+                {
                     placedTiles[cell.Key] = cell.Value;
+                }
 
                 EventHandler handle = null;
                 handle = (object s, EventArgs e) =>
@@ -152,25 +154,24 @@ namespace RailHexLib
         /// <summary>
         /// Place tile on game board
         /// </summary>
-        /// <param name="placedCell"></param>
+        /// <param name="targetCell"></param>
         /// <returns>false if tile is not placed</returns>
-        public PlacementResult PlaceCurrentTile(Cell placedCell)
+        public PlacementResult PlaceCurrentTile(Cell targetCell)
         {
             // if (stack.Empty()) {
             //     return PlacementResult.Fail;
             // }
             Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile() or maybe stack is empty");
-
-            if (!CanPlaceCurrentTile(placedCell))
+            if (!CanPlaceCurrentTile(targetCell))
             {
                 return PlacementResult.Fail;
             }
-            logger.Log($"place tile {currentTile} on cell: {placedCell}. Rot: {currentTile.Rotation}");
-            placedTiles[placedCell] = currentTile;
+            logger.Log($"place tile {currentTile} on cell: {targetCell}. Rot: {currentTile.Rotation}");
+            placedTiles[targetCell] = currentTile;
 
             var placementResult = new PlacementResult(currentTile);
 
-            Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(placedCell);
+            Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(targetCell);
             placementResult.NewJoins = joinedNeighbors;
 
             Dictionary<Ground, List<Cell>>
@@ -178,10 +179,10 @@ namespace RailHexLib
                                 .GroupBy(b => b.Value)
                                 .ToDictionary(pair => pair.Key, pair => pair.Select(k => k.Key).ToList());
 
-            buildRoads(joinsByGround, placedCell, placementResult);
+            buildRoads(joinsByGround, targetCell, placementResult);
 
             // zones processing
-            buildZones(joinsByGround, placedCell, placementResult);
+            buildZones(joinsByGround, targetCell, placementResult);
 
 
             placementResult.GameOver = !NextTile();
@@ -477,7 +478,6 @@ namespace RailHexLib
                          Config.NewSettlement.minNearestCellOffset + Config.NewSettlement.offsetBufferLinesCount));
                         int rAxisPos = -rnd.Next(Math.Abs(qAxisPos) + 1);
                         return new Cell(rAxisPos, qAxisPos);
-                        return targetDirection.Item2;
                     }
                 case Direction.RMAX:
                     {

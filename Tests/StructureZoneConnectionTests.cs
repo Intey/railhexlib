@@ -22,7 +22,7 @@ namespace RailHexLib.Tests
             stack.PushTile(new WaterTile());
 
             var settlement = new Settlement(new Cell(0, 0, 1));
-            Game.Reset(stack, new Logger());
+            Game.Reset(1.0f, stack, new Logger());
             var game = Game.GetInstance();
             game.AddStructures(new() { settlement });
             Assert.IsTrue(game.NextTile());

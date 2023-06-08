@@ -112,7 +112,7 @@ namespace RailHexLib.Tests
             structures.Add(settlement1);
             structures.Add(settlement2);
 
-            Game.Reset(stack, logger);
+            Game.Reset(1.0f, stack, logger);
             game = Game.GetInstance();
         }
 
