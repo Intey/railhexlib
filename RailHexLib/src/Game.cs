@@ -55,9 +55,9 @@ namespace RailHexLib
 
         public Dictionary<FeatureTypes, bool> Features = new Dictionary<FeatureTypes, bool>();
 
-        private List<Type> availableTiles;
+        private List<Type> availableTiles = new List<Type>();
         public TileStack stack;
-        private Random rnd;
+        private Random rnd = new Random();
         private Dictionary<Cell, Tile> placedTiles;
         private Tile currentTile;
         /// <summary>
