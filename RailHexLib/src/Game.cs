@@ -166,9 +166,9 @@ namespace RailHexLib
         /// <returns>false if tile is not placed</returns>
         public PlacementResult PlaceCurrentTile(Cell targetCell)
         {
-            // if (stack.Empty()) {
-            //     return PlacementResult.Fail;
-            // }
+            if (currentTile == null) {
+                return PlacementResult.Fail;
+            }
             Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile() or maybe stack is empty");
             if (!CanPlaceCurrentTile(targetCell))
             {
