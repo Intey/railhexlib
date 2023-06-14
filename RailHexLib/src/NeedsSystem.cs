@@ -57,7 +57,7 @@ namespace RailHexLib
                 {
                     foreach (var (_, need) in level.Needs)
                     {
-                        if (!need.Filled) count++;
+                        if (!need.NeedToFill) count++;
                     }
                 }
                 return count;
@@ -83,7 +83,7 @@ namespace RailHexLib
             public int FilledCount { get => filledCount; }
             readonly int consumptionTicks;
             int ticks = 0;
-            public bool NeedToFill => ticks >= consumptionTicks;
+            internal bool NeedToFill => ticks >= consumptionTicks;
             // TODO: fill with zero? how to reset filledCount?
             public bool Fill(int count)
             {

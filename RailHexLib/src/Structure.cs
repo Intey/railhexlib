@@ -34,6 +34,9 @@ namespace RailHexLib
                          Dictionary<Resource, int> resources = null
         )
         {
+            lifeTimer.Timeout = Config.Structure.AbandonTimerTicks;
+            lifeTimer.OnTimeout += lifeTimerHandler;
+
             this.center = center; this.name = name;
             if (needs != null)
             {
@@ -105,6 +108,7 @@ namespace RailHexLib
 
         public virtual void Tick(int ticks = 1)
         {
+            lifeTimer.Tick(ticks);
             if (abandoned)
             {
                 return;
@@ -117,12 +121,15 @@ namespace RailHexLib
 
             needsSystem.Tick(ticks);
 
+        }
+        void lifeTimerHandler()
+        {
             if (lifeTime > 0)
             {
                 // lifeTime -= ticks;
 
                 int unmeetNeeds = needsSystem.UnmeetNeeds;
-                lifeTime -= ticks * unmeetNeeds;
+                lifeTime -= unmeetNeeds;
                 if (lifeTime <= 0)
                 {
                     abandoned = true;
@@ -182,6 +189,7 @@ namespace RailHexLib
 
         private int lifeTime = Config.Structure.InitialTicksToDie;
         private bool abandoned = false;
+        Timer lifeTimer = new Timer();
 
     } // class
 

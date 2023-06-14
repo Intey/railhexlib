@@ -22,8 +22,9 @@ namespace RailHexLib
 
         public static class Structure
         {
+            public static int AbandonTimerTicks = 2;
             public static int LifeTimeIncreaseOnTraderVisit = 5;
-            public static int InitialTicksToDie = 60;
+            public static int InitialTicksToDie = 120;
             public static int ZoneConsumptionCount = 5;
             public static int MaxLifetime = 40;
         }

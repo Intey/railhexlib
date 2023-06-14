@@ -7,10 +7,9 @@ using System.Text.RegularExpressions;
 
 namespace RailHexLib.DevTools
 {
-    public class Logger : ILogger
+    public abstract class BaseLogger : ILogger
     {
         string category;
-        TraceSource source;
         static TraceSource debug = new TraceSource("debug logger");
         static Dictionary<string, bool> rules;
 
@@ -35,15 +34,12 @@ namespace RailHexLib.DevTools
             return false;
         }
 
-        public Logger(string category = null)
+        public BaseLogger(string category = null)
         {
             if (category != null)
             {
                 this.category = category;
-                source = new TraceSource(category);
                 var listener = new ConsoleTraceListener();
-                source.Listeners.Add(listener);
-                source.Switch.Level = SourceLevels.All;
                 debug.Listeners.Add(listener);
                 if (Environment.GetEnvironmentVariable("DEBUG_LOG") != null)
                     debug.Switch.Level = SourceLevels.All;
@@ -54,6 +50,7 @@ namespace RailHexLib.DevTools
             parseRules();
 
         }
+        protected abstract void logImpl(string msg);
         public void Log(string msg, string category = null)
         {
             debug.TraceInformation($"log in '{category}' and logger category '{this.category}'");
@@ -71,7 +68,8 @@ namespace RailHexLib.DevTools
             if (testCategory != null && Enabled(testCategory))
             {
                 //debug.TraceInformation($"msg '{msg}'");
-                source.TraceInformation(msg);
+                logImpl(msg);
+                
             }
         }
         void parseRules()
@@ -94,6 +92,24 @@ namespace RailHexLib.DevTools
         }
 
     }
+
+    public class Logger : BaseLogger
+    {
+        TraceSource source;
+        public Logger(string category=null) : base(category)
+        {
+            var listener = new ConsoleTraceListener();
+            source = new TraceSource(category);
+            source.Listeners.Add(listener);
+            source.Switch.Level = SourceLevels.All;
+        }
+
+        protected override void logImpl(string msg)
+        {
+            source.TraceInformation(msg);
+        }
+    }
+
     public class DefaultSilentLogger : ILogger
     {
         public string Category => "silent";

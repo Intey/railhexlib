@@ -668,13 +668,14 @@ namespace RailHexLib
             {
                 var s1N = new List<Dictionary<Resource, (int, int)>>(){
                     (
+                        // res, count, consume ticks
                         new() {
-                            [Resource.Fish] = (2,2)
+                            [Resource.Fish] = (5, 10)
                         }
                     ),
                     (
                         new() {
-                            [Resource.Wood] = (4,4)
+                            [Resource.Wood] = (4, 20)
                         }
                     )
                 };
@@ -683,7 +684,7 @@ namespace RailHexLib
                 s.Rotate60Clock(3); // 180
 
                 var s2N = new List<Dictionary<Resource, (int, int)>>(){
-                    (new(){[Resource.Fish] = (2, 2)})
+                    (new(){[Resource.Fish] = (5, 10)})
                 };
 
                 var s2 = new Settlement(new Cell(0, 0), "Settlement2", s2N);
