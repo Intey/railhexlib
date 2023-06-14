@@ -4,6 +4,10 @@ namespace RailHexLib
     public static class Config
     {
 
+        public static class Game
+        {
+            public static int TicksForFoolTile = 20;
+        }
         public static class Trader
         {
             /// how many tiles move a trader in one tick

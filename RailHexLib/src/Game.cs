@@ -55,7 +55,8 @@ namespace RailHexLib
 
         public Dictionary<FeatureTypes, bool> Features = new Dictionary<FeatureTypes, bool>();
 
-        private List<Type> availableTiles = new List<Type>();
+        private Dictionary<Type, int> availableTiles = new();
+        private List<Type> variants = new();
         public TileStack stack;
         private Random rnd = new Random();
         private Dictionary<Cell, Tile> placedTiles;
@@ -75,6 +76,7 @@ namespace RailHexLib
         private int scorePoints;
 
         private Timer newSettlementTimer = new Timer();
+        Timer newTileForFool = new();
         private bool paused = false;
         private Game(float cellSize, TileStack stack = null, ILogger logger = null)
         {
@@ -93,15 +95,22 @@ namespace RailHexLib
             placedTiles = new Dictionary<Cell, Tile>(new CellEqualityComparer());
             structureRoads = new Dictionary<Cell, StructureRoad>();
 
-            availableTiles = new List<Type>(){
-                typeof(ROAD_180Tile),
-                typeof(ROAD_120Tile),
-                // typeof(ROAD_60Tile),
-                typeof(GrassTile),
-                typeof(WaterTile),
-                typeof(ForestTile),
-                // new ROAD_3T_60_120Tile()
+            availableTiles = new Dictionary<Type, int>()
+            {
+                [typeof(ROAD_180Tile)] = 10,
+                [typeof(ROAD_120Tile)] = 10,
+                [typeof(ROAD_60Tile)] = 10,
+                [typeof(GrassTile)] = 50,
+                [typeof(WaterTile)] = 30,
+                [typeof(ForestTile)] = 20,
             };
+            foreach (var (type, count) in availableTiles)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    variants.Add(type);
+                }
+            }
 
             if (stack == null)
             {
@@ -117,6 +126,12 @@ namespace RailHexLib
             {
                 AddNewSettlement();
                 AddNewSettlement();
+            };
+            newTileForFool.Timeout = Config.Game.TicksForFoolTile;
+            newTileForFool.OnTimeout += () =>
+            {
+                if (stack.Empty())
+                    PushTile(MakeRandomTileType());
             };
         }
 
@@ -166,7 +181,8 @@ namespace RailHexLib
         /// <returns>false if tile is not placed</returns>
         public PlacementResult PlaceCurrentTile(Cell targetCell)
         {
-            if (currentTile == null) {
+            if (currentTile == null)
+            {
                 return PlacementResult.Fail;
             }
             Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile() or maybe stack is empty");
@@ -623,7 +639,9 @@ namespace RailHexLib
 
         private Tile MakeRandomTileType()
         {
-            var randomValue = availableTiles[rnd.Next(availableTiles.Count)];
+            var probability = rnd.NextDouble();
+
+            var randomValue = variants[rnd.Next(variants.Count)];
 
             if (randomValue == typeof(ROAD_60Tile))
             {
