@@ -191,28 +191,6 @@ namespace RailHexLib
         }
     }
 
-    public class ROAD_3T_180_300Tile : Tile
-    {
-        public override string tileName() => "ROAD_3T_180_300";
-
-        public ROAD_3T_180_300Tile()
-        {
-            sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
-            {
-                [IdentityCell.topLeftSide] = Grounds.Ground.Road,
-                [IdentityCell.topSide] = Grounds.Ground.Ground,
-                [IdentityCell.topRightSide] = Grounds.Ground.Ground,
-                [IdentityCell.bottomRightSide] = Grounds.Ground.Road,
-                [IdentityCell.bottomSide] = Grounds.Ground.Ground,
-                [IdentityCell.bottomLeftSide] = Grounds.Ground.Road,
-            };
-        }
-        public override string ToString()
-        {
-            return "Tile:Road(180,300)";
-        }
-    }
-
     // public class ROAD_4T_60_120_180Tile : Tile
     // {
     //     public override string tileName() => "ROAD_4T_60_120_180";

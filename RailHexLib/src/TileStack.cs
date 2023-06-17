@@ -16,15 +16,12 @@ namespace RailHexLib
             {
                 [typeof(ROAD_180Tile)] = 10,
                 [typeof(ROAD_120Tile)] = 10,
-                [typeof(GrassTile)] = 50,
-                [typeof(WaterTile)] = 30,
+                [typeof(GrassTile)] = 30,
+                [typeof(WaterTile)] = 20,
                 [typeof(ForestTile)] = 20,
-                [typeof(ROAD_3T_120_240Tile)] = 5,
-                [typeof(ROAD_3T_180_300Tile)] = 0,
-                // too low angle
-                //[typeof(ROAD_60Tile)] = 10,
-                //[typeof(ROAD_3T_60_120Tile)] = 5,
-                //[typeof(ROAD_3T_60_180Tile)] = 5,
+                [typeof(ROAD_3T_120_240Tile)] = 2,
+                [typeof(ROAD_3T_60_120Tile)] = 5,
+                [typeof(ROAD_3T_60_180Tile)] = 1,
             };
             foreach (var (type, count) in availableTiles)
             {
