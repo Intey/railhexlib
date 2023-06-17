@@ -15,8 +15,10 @@ namespace RailHexLib
             Ticks += ticks;
             if (Ticks >= Timeout)
             {
+                int Overflows = Ticks / Timeout;
                 Ticks %= Timeout;
-                OnTimeout();
+                for (int i = 0; i < Overflows; i++)
+                    OnTimeout();
             }
 
         }

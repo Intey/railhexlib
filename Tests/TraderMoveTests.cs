@@ -77,7 +77,7 @@ namespace RailHexLib.Tests
         {
             trader.Tick(2);
             var expectedLife =
-            Config.Structure.InitialTicksToDie
+            Config.Structure.InitialLife
             + Config.Structure.LifeTimeIncreaseOnTraderVisit;
 
             Assert.AreEqual(expectedLife, trader.TradePoints[new Cell(0, -1, CELL_SIZE)].LifeTime);

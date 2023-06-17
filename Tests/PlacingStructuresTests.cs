@@ -15,7 +15,7 @@ namespace RailHexLib.Tests
         const float CELL_SIZE = 1f;
         public TileStack stack = new();
         readonly List<Structure> structures = new();
-        readonly DevTools.Logger logger = new();
+        readonly DevTools.Logger logger = new("placing-structure-test");
         private Game game = Game.GetInstance();
         private readonly Cell settle1Position = new(0, 0, CELL_SIZE);
         private readonly Cell settle2Position = new(0, -4, CELL_SIZE);

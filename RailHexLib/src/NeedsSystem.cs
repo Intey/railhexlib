@@ -56,7 +56,7 @@ namespace RailHexLib
                 {
                     foreach (var need in level.Needs)
                     {
-                        if (!need.Filled) res.Append(need);
+                        if (!need.Filled) res.Add(need);
                     }
                 }
                 return res;
@@ -71,15 +71,14 @@ namespace RailHexLib
             public Need(Resource res, int count, int consumptionTicks)
             {
                 resource = res;
-                this.count = count;
+                this.ExpectedCount = count;
                 this.consumptionTicks = consumptionTicks;
             }
-            readonly int count;
             int filledCount = 0;
             Resource resource;
-            public bool Filled => filledCount >= count;
+            public bool Filled => filledCount >= ExpectedCount;
             // count of required resource
-            public int ExpectedCount { get => count; }
+            public readonly int ExpectedCount;
             public int FilledCount { get => filledCount; }
             readonly int consumptionTicks;
             int ticks = 0;
@@ -100,7 +99,7 @@ namespace RailHexLib
                 this.ticks += ticks;
                 if (RequireReplenish)
                 {
-                    filledCount -= count;
+                    filledCount -= ExpectedCount;
                     if (filledCount <= 0)
                     {
                         filledCount = 0;

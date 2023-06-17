@@ -15,7 +15,7 @@ namespace RailHexLib.Tests
         const float CELL_SIZE = 1f;
         public TileStack stack = new();
         Structure settlement;
-        readonly DevTools.Logger logger = new();
+        readonly DevTools.Logger logger = new("structure-life-test");
         private Game game = Game.GetInstance();
         private readonly Cell settle1Position = new(0, 0, CELL_SIZE);
 
@@ -27,7 +27,7 @@ namespace RailHexLib.Tests
             settlement = new Settlement(settle1Position, "settlement1",
                 new List<NeedsSystem.NeedsLevel>(){
                     new NeedsSystem.NeedsLevel(
-                        new NeedsSystem.Need(Resource.Fish, 100000, 1)
+                        new NeedsSystem.Need(Resource.Fish, 1, 1)
                     )
                 }
             );
@@ -40,15 +40,15 @@ namespace RailHexLib.Tests
         [Test]
         public void TestStructureWillDie()
         {
-            settlement.Tick(4);
-            Assert.AreEqual(Config.Structure.InitialTicksToDie - 4, settlement.LifeTime);
+            settlement.Tick(4 * Config.Structure.AbandonTimerTicks);
+            Assert.AreEqual(Config.Structure.InitialLife - 4, settlement.LifeTime);
         }
         [Test]
         public void TestAbandonEventRemoveStructureRoad()
         {
             game.AddStructures(new List<Structure>() { settlement });
-            game.Tick(Config.Structure.InitialTicksToDie);
-            Assert.IsTrue(settlement.Abandoned);
+            game.Tick(Config.Structure.InitialLife * Config.Structure.AbandonTimerTicks);
+            Assert.IsTrue(settlement.Abandoned, $"settlement lifetime {settlement.LifeTime} should be zero");
             Assert.AreEqual(0, game.StructureRoads.Count, $"Structure road should be removed. Settlement lifetime: {settlement.LifeTime}");
         }
 
@@ -57,7 +57,7 @@ namespace RailHexLib.Tests
         {
 
             game.AddStructures(new List<Structure>() { settlement });
-            game.Tick(Config.Structure.InitialTicksToDie);
+            game.Tick(Config.Structure.InitialLife * Config.Structure.AbandonTimerTicks);
             Assert.AreEqual(0, game.Traders.Count);
         }
     }

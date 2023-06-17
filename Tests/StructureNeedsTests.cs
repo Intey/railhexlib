@@ -36,16 +36,16 @@ namespace RailHexLib.Tests
             settlement.Tick();
             Assert.IsFalse(settlement.Abandoned);
             Assert.AreEqual(4, settlement.Resources[Resource.Fish]);
-            Assert.AreEqual(Config.Structure.InitialTicksToDie, settlement.LifeTime);
+            Assert.AreEqual(Config.Structure.InitialLife, settlement.LifeTime);
             Assert.AreEqual(6, need.FilledCount);
 
-            settlement.Tick();
+            settlement.Tick(Config.Structure.AbandonTimerTicks);
             Assert.IsFalse(settlement.Abandoned);
             Assert.AreEqual(0, settlement.Resources[Resource.Fish]);
             Assert.AreEqual(4, need.FilledCount);
             Assert.IsFalse(need.Filled);
             Assert.IsFalse(needsLevel.Filled);
-            Assert.AreEqual(Config.Structure.InitialTicksToDie - 1, settlement.LifeTime);
+            Assert.AreEqual(Config.Structure.InitialLife - 1, settlement.LifeTime);
         }
         [Test]
         public void TestStructureNeedsTimer()

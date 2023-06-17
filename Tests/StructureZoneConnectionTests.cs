@@ -7,12 +7,8 @@ namespace RailHexLib.Tests
     [TestFixture]
     public class StructureConnectionTests
     {
+        readonly DevTools.Logger logger = new("zone-connection-test");
 
-        [SetUp]
-        public void SetUp()
-        {
-            //    Trace.Listeners.Add(new ConsoleTraceListener());
-        }
 
         [Test]
         public void TestWaterTileConnected()
@@ -22,7 +18,7 @@ namespace RailHexLib.Tests
             stack.PushTile(new WaterTile());
 
             var settlement = new Settlement(new Cell(0, 0, 1));
-            Game.Reset(1.0f, stack, new Logger());
+            Game.Reset(1.0f, stack, logger);
             var game = Game.GetInstance();
             game.AddStructures(new() { settlement });
             Assert.IsTrue(game.NextTile());

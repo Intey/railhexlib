@@ -134,7 +134,7 @@ namespace RailHexLib
 
         public virtual void Tick(int ticks = 1)
         {
-            lifeTimer.Tick(ticks);
+
             if (abandoned)
             {
                 return;
@@ -146,6 +146,7 @@ namespace RailHexLib
             }
 
             needsSystem.Tick(ticks);
+            lifeTimer.Tick(ticks);
 
         }
         void lifeTimerHandler()
@@ -216,7 +217,7 @@ namespace RailHexLib
         protected string name = "Unnamed";
         protected NeedsSystem needsSystem;
 
-        private int lifeTime = Config.Structure.InitialTicksToDie;
+        private int lifeTime = Config.Structure.InitialLife;
         private bool abandoned = false;
         Timer lifeTimer = new Timer();
 

@@ -28,9 +28,8 @@ namespace RailHexLib
         {
             public static int AbandonTimerTicks = 2;
             public static int LifeTimeIncreaseOnTraderVisit = 5;
-            public static int InitialTicksToDie = 120;
+            public static int InitialLife = 120;
             public static int ZoneConsumptionCount = 5;
-            public static int MaxLifetime = 40;
         }
         public static class Zone
         {

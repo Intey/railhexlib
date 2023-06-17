@@ -91,7 +91,7 @@ namespace RailHexLib.Tests
 
         public TileStack stack = new();
         readonly List<Structure> structures = new();
-        readonly DevTools.Logger logger = new();
+        readonly DevTools.Logger logger = new("road-building-test");
         private Game game;
         private readonly Cell settle1Position = new(0, 0, CELL_SIZE);
         private readonly Cell settle2Position = new(0, -4, CELL_SIZE);
