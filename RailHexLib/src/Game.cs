@@ -55,10 +55,7 @@ namespace RailHexLib
 
         public Dictionary<FeatureTypes, bool> Features = new Dictionary<FeatureTypes, bool>();
 
-        private Dictionary<Type, int> availableTiles = new();
-        private List<Type> variants = new();
         public TileStack stack;
-        private Random rnd = new Random();
         private Dictionary<Cell, Tile> placedTiles;
         private Tile currentTile;
         /// <summary>
@@ -95,27 +92,11 @@ namespace RailHexLib
             placedTiles = new Dictionary<Cell, Tile>(new CellEqualityComparer());
             structureRoads = new Dictionary<Cell, StructureRoad>();
 
-            availableTiles = new Dictionary<Type, int>()
-            {
-                [typeof(ROAD_180Tile)] = 10,
-                [typeof(ROAD_120Tile)] = 10,
-                [typeof(ROAD_60Tile)] = 10,
-                [typeof(GrassTile)] = 50,
-                [typeof(WaterTile)] = 30,
-                [typeof(ForestTile)] = 20,
-            };
-            foreach (var (type, count) in availableTiles)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    variants.Add(type);
-                }
-            }
+
 
             if (stack == null)
             {
-                this.rnd = new Random(1);
-                InitializeDefaultStack();
+                stack = new TileStack();
             }
             else
             {
@@ -131,7 +112,7 @@ namespace RailHexLib
             newTileForFool.OnTimeout += () =>
             {
                 if (stack.Empty())
-                    PushTile(MakeRandomTileType());
+                    stack.PushRandomTile();
             };
         }
 
@@ -554,7 +535,7 @@ namespace RailHexLib
 
             for (int i = 0; i < Config.Stack.TilesForTradePointReached; i++)
             {
-                PushTile(MakeRandomTileType());
+                stack.PushRandomTile();
             }
         }
 
@@ -637,53 +618,41 @@ namespace RailHexLib
             return !exists;
         }
 
-        private Tile MakeRandomTileType()
-        {
-            var probability = rnd.NextDouble();
-
-            var randomValue = variants[rnd.Next(variants.Count)];
-
-            if (randomValue == typeof(ROAD_60Tile))
-            {
-                return new ROAD_60Tile();
-            }
-            else if (randomValue == typeof(ROAD_180Tile))
-            {
-                return new ROAD_180Tile();
-            }
-            else if (randomValue == typeof(GrassTile))
-            {
-                return new GrassTile();
-            }
-            else if (randomValue == typeof(WaterTile))
-            {
-                return new WaterTile();
-            }
-            else if (randomValue == typeof(ROAD_120Tile))
-            {
-                return new ROAD_120Tile();
-            }
-            else if (randomValue == typeof(ForestTile))
-                return new ForestTile();
-            else
-            {
-                throw new NotImplementedException("Make a normal factory method, bitch");
-            }
-        }
-
-        private void InitializeDefaultStack()
-        {
-            stack = new TileStack();
-            for (int i = 0; i < 20; i++)
-            {
-                var tile = MakeRandomTileType();
-                stack.PushTile(tile);
-            }
-        }
         public void InitializeLevel(int ln)
         {
+            if (ln == 0)
+            {
+                var s1N = new List<Dictionary<Resource, (int, int)>>(){
+                    (
+                        // res, count, consume ticks
+                        new() {
+                            [Resource.Fish] = (5, 10)
+                        }
+                    ),
+                    (
+                        new() {
+                            [Resource.Wood] = (4, 20)
+                        }
+                    )
+                };
+
+                var s = new Settlement(new Cell(0, -10), "settlement1", s1N);
+                s.Rotate60Clock(3); // 180
+
+                var s2N = new List<Dictionary<Resource, (int, int)>>(){
+                    (new(){[Resource.Fish] = (5, 10)})
+                };
+
+                var s2 = new Settlement(new Cell(0, 0), "Settlement2", s2N);
+
+                var structs = new List<Structure>() { s2, s };
+                AddStructures(structs);
+            }
             if (ln == 1)
             {
+                stack = new TileStack();
+                stack.InitializeInitialStack();
+
                 var s1N = new List<Dictionary<Resource, (int, int)>>(){
                     (
                         // res, count, consume ticks

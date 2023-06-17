@@ -125,93 +125,93 @@ namespace RailHexLib
         }
     }
 
-    // public class ROAD_3T_60_120Tile : Tile
-    // {
-    //     public override string tileName() => "ROAD_3T_60_120";
+    public class ROAD_3T_60_120Tile : Tile
+    {
+        public override string tileName() => "ROAD_3T_60_120";
 
-    //     public ROAD_3T_60_120Tile()
-    //     {
-    //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
-    //         {
-    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
-    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
-    //             [IdentityCell.upRightSide] = Grounds.Ground.Road,
-    //             [IdentityCell.rightSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.downRightSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.downLeftSide] = Grounds.Ground.Ground,
-    //         };
-    //     }
-    //     public override string ToString()
-    //     {
-    //         return "Tile:Road(60,120)";
-    //     }
-    // }
+        public ROAD_3T_60_120Tile()
+        {
+            sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
+            {
+                [IdentityCell.topLeftSide] = Grounds.Ground.Road,
+                [IdentityCell.topSide] = Grounds.Ground.Road,
+                [IdentityCell.topRightSide] = Grounds.Ground.Road,
+                [IdentityCell.bottomRightSide] = Grounds.Ground.Ground,
+                [IdentityCell.bottomSide] = Grounds.Ground.Ground,
+                [IdentityCell.bottomLeftSide] = Grounds.Ground.Ground,
+            };
+        }
+        public override string ToString()
+        {
+            return "Tile:Road(60,120)";
+        }
+    }
 
-    // public class ROAD_3T_60_180Tile : Tile
-    // {
-    //     public override string tileName() => "ROAD_3T_60_180";
+    public class ROAD_3T_60_180Tile : Tile
+    {
+        public override string tileName() => "ROAD_3T_60_180";
 
-    //     public ROAD_3T_60_180Tile()
-    //     {
-    //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
-    //         {
-    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
-    //             [IdentityCell.upLeftSide] = Grounds.Ground.Road,
-    //             [IdentityCell.upRightSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.rightSide] = Grounds.Ground.Road,
-    //             [IdentityCell.downRightSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.downLeftSide] = Grounds.Ground.Ground
-    //         };
-    //     }
-    //     public override string ToString()
-    //     {
-    //         return "Tile:Road(60,180)";
-    //     }
-    // }
+        public ROAD_3T_60_180Tile()
+        {
+            sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
+            {
+                [IdentityCell.topLeftSide] = Grounds.Ground.Road,
+                [IdentityCell.topSide] = Grounds.Ground.Road,
+                [IdentityCell.topRightSide] = Grounds.Ground.Ground,
+                [IdentityCell.bottomRightSide] = Grounds.Ground.Road,
+                [IdentityCell.bottomSide] = Grounds.Ground.Ground,
+                [IdentityCell.bottomLeftSide] = Grounds.Ground.Ground
+            };
+        }
+        public override string ToString()
+        {
+            return "Tile:Road(60,180)";
+        }
+    }
 
-    // public class ROAD_3T_120_240Tile : Tile
-    // {
-    //     public override string tileName() => "ROAD_3T_120_240";
+    public class ROAD_3T_120_240Tile : Tile
+    {
+        public override string tileName() => "ROAD_3T_120_240";
 
-    //     public ROAD_3T_120_240Tile()
-    //     {
-    //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
-    //         {
-    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
-    //             [IdentityCell.upLeftSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.upRightSide] = Grounds.Ground.Road,
-    //             [IdentityCell.rightSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.downRightSide] = Grounds.Ground.Road,
-    //             [IdentityCell.downLeftSide] = Grounds.Ground.Ground
-    //         };
-    //     }
-    //     public override string ToString()
-    //     {
-    //         return "Tile:Road(120,240)";
-    //     }
-    // }
+        public ROAD_3T_120_240Tile()
+        {
+            sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
+            {
+                [IdentityCell.topLeftSide] = Grounds.Ground.Road,
+                [IdentityCell.topSide] = Grounds.Ground.Ground,
+                [IdentityCell.topRightSide] = Grounds.Ground.Road,
+                [IdentityCell.bottomRightSide] = Grounds.Ground.Ground,
+                [IdentityCell.bottomSide] = Grounds.Ground.Road,
+                [IdentityCell.bottomLeftSide] = Grounds.Ground.Ground
+            };
+        }
+        public override string ToString()
+        {
+            return "Tile:Road(120,240)";
+        }
+    }
 
-    // public class ROAD_3T_180_300Tile : Tile
-    // {
-    //     public override string tileName() => "ROAD_3T_180_300";
+    public class ROAD_3T_180_300Tile : Tile
+    {
+        public override string tileName() => "ROAD_3T_180_300";
 
-    //     public ROAD_3T_180_300Tile()
-    //     {
-    //         sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
-    //         {
-    //             [IdentityCell.leftSide] = Grounds.Ground.Road,
-    //             [IdentityCell.upLeftSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.upRightSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.rightSide] = Grounds.Ground.Road,
-    //             [IdentityCell.downRightSide] = Grounds.Ground.Ground,
-    //             [IdentityCell.downLeftSide] = Grounds.Ground.Road,
-    //         };
-    //     }
-    //     public override string ToString()
-    //     {
-    //         return "Tile:Road(180,300)";
-    //     }
-    // }
+        public ROAD_3T_180_300Tile()
+        {
+            sides = new Dictionary<IdentityCell, Grounds.Ground>(new IdentityCellEqualityComparer())
+            {
+                [IdentityCell.topLeftSide] = Grounds.Ground.Road,
+                [IdentityCell.topSide] = Grounds.Ground.Ground,
+                [IdentityCell.topRightSide] = Grounds.Ground.Ground,
+                [IdentityCell.bottomRightSide] = Grounds.Ground.Road,
+                [IdentityCell.bottomSide] = Grounds.Ground.Ground,
+                [IdentityCell.bottomLeftSide] = Grounds.Ground.Road,
+            };
+        }
+        public override string ToString()
+        {
+            return "Tile:Road(180,300)";
+        }
+    }
 
     // public class ROAD_4T_60_120_180Tile : Tile
     // {
