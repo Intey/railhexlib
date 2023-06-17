@@ -7,9 +7,10 @@ namespace RailHexLib
     using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
     public class Settlement : Structure
     {
+
         public Settlement(Cell center,
                           string name = "GIVEMEADEFAULTNAME",
-                          NeedLevelList needs = null,
+                          List<NeedsSystem.NeedsLevel> needs = null,
                           Dictionary<Resource, int> resources = null
         )
         : base(center, name, needs, resources)

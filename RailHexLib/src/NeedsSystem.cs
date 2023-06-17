@@ -8,19 +8,17 @@ namespace RailHexLib
     /// Handles needs of some object
     public class NeedsSystem
     {
-        public NeedsSystem(Inventory inventory, NeedLevelList needLevels)
+        public NeedsSystem(Inventory inventory, List<NeedsLevel> needLevels)
         {
             Inventory = inventory;
-            foreach (var needs in needLevels)
-            {
-                var level = new NeedsLevel();
-                this.levels.Add(level);
-                foreach (var (resource, (count, ticksToConsume)) in needs)
-                {
-                    level.Needs[resource] = new Need(count, ticksToConsume);
-                }
-            }
+            levels = needLevels;
         }
+        public NeedsSystem(Inventory inventory, params NeedsLevel[] needLevels)
+        {
+            Inventory = inventory;
+            levels = needLevels.ToList();
+        }
+
 
         /*
         Should track time, while a need is fullfilled or not
@@ -48,19 +46,20 @@ namespace RailHexLib
 
         }
 
-        public int UnmeetNeeds
+        public List<Need> UnmeetNeeds
         {
+
             get
             {
-                int count = 0;
+                List<Need> res = new();
                 foreach (var level in levels)
                 {
-                    foreach (var (_, need) in level.Needs)
+                    foreach (var need in level.Needs)
                     {
-                        if (!need.NeedToFill) count++;
+                        if (!need.Filled) res.Append(need);
                     }
                 }
-                return count;
+                return res;
             }
         }
 
@@ -69,32 +68,37 @@ namespace RailHexLib
 
         public class Need
         {
-            public Need(int cnt, int consumptionTicks)
+            public Need(Resource res, int count, int consumptionTicks)
             {
-                count = cnt;
+                resource = res;
+                this.count = count;
                 this.consumptionTicks = consumptionTicks;
             }
             readonly int count;
             int filledCount = 0;
-
+            Resource resource;
             public bool Filled => filledCount >= count;
             // count of required resource
             public int ExpectedCount { get => count; }
             public int FilledCount { get => filledCount; }
             readonly int consumptionTicks;
             int ticks = 0;
-            internal bool NeedToFill => ticks >= consumptionTicks;
+            /// Technical property shows that this need require to fill on next tick
+            internal bool RequireReplenish => ticks >= consumptionTicks;
+
+            public Resource Resource => resource;
+
             // TODO: fill with zero? how to reset filledCount?
             public bool Fill(int count)
             {
-                ticks = 0; // reset NeedToFill
+                ticks = 0; // Filled. Start timer again.
                 filledCount = count;
                 return Filled;
             }
             public void Tick(int ticks)
             {
                 this.ticks += ticks;
-                if (NeedToFill)
+                if (RequireReplenish)
                 {
                     filledCount -= count;
                     if (filledCount <= 0)
@@ -104,23 +108,30 @@ namespace RailHexLib
                     ticks = 0;
                 }
             }
+
+            public override string ToString()
+            {
+                return $"Need of {resource} {filledCount}/{ExpectedCount}";
+            }
         }
         public class NeedsLevel
         {
+            public NeedsLevel(List<Need> needs) { Needs = needs; }
+            public NeedsLevel(params Need[] needs) { Needs = needs.ToList(); }
             public bool Active = true;
-            public Dictionary<Resource, Need> Needs = new Dictionary<Resource, Need>();
+            public List<Need> Needs = new();
 
-            public bool Filled => !Needs.Any((ResNeedPair) => !ResNeedPair.Value.Filled);
+            public bool Filled => !Needs.Any((need) => !need.Filled);
             /// consume reseurces from inventory and return count of unmeet needs
             public int FillNeeds(Inventory inventory)
             {
                 int unmeetNeedsCount = 0;
 
-                foreach (var (resource, need) in Needs)
+                foreach (var need in Needs)
                 {
-                    if (need.NeedToFill)
+                    if (need.RequireReplenish)
                     {
-                        var picked = inventory.PickResource(resource, need.ExpectedCount);
+                        var picked = inventory.PickResource(need.Resource, need.ExpectedCount);
                         if (!need.Fill(picked))
                             unmeetNeedsCount += 1;
                     }
@@ -129,7 +140,7 @@ namespace RailHexLib
             }
             public void Tick(int ticks)
             {
-                foreach (var (_, need) in Needs)
+                foreach (var need in Needs)
                 {
                     need.Tick(ticks); ;
                 }

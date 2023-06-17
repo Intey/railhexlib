@@ -22,16 +22,16 @@ namespace RailHexLib.Tests
         [Test]
         public void TestStructureConsumeNeeds()
         {
-            var needs = new NeedLevelList(){
-                (new(){
-                    [Resource.Fish] = (6, 1)
-                })
+            var needs = new List<NeedsSystem.NeedsLevel>(){
+            new NeedsSystem.NeedsLevel(
+                    new NeedsSystem.Need(Resource.Fish, 6, 1)
+                )
             };
             var settlement = new Settlement(new Cell(0, 0), "", needs);
 
             NeedsSystem.NeedsLevel needsLevel = settlement.NeedLevels[0];
-            NeedsSystem.Need need = needsLevel.Needs[Resource.Fish];
-
+            NeedsSystem.Need need = needsLevel.Needs.Find(x => x.Resource == Resource.Fish);
+            Assert.NotNull(need);
             settlement.addResource(Resource.Fish, 10);
             settlement.Tick();
             Assert.IsFalse(settlement.Abandoned);
@@ -50,17 +50,15 @@ namespace RailHexLib.Tests
         [Test]
         public void TestStructureNeedsTimer()
         {
-            var needs = new NeedLevelList(){
-                (new(){
-                    [Resource.Fish] = (6, 1),
-                [Resource.Wood] = (2, 2)
-
-            })
+            var needs = new List<NeedsSystem.NeedsLevel>(){
+                new NeedsSystem.NeedsLevel(
+                    new NeedsSystem.Need(Resource.Fish, 6, 1),
+                    new NeedsSystem.Need(Resource.Wood, 2, 2)
+                )
             };
             var settlement = new Settlement(new Cell(0, 0), "", needs);
 
             NeedsSystem.NeedsLevel needsLevel = settlement.NeedLevels[0];
-            NeedsSystem.Need need = needsLevel.Needs[Resource.Fish];
 
             settlement.addResource(Resource.Fish, 10);
             settlement.addResource(Resource.Wood, 10);

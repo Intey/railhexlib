@@ -381,17 +381,18 @@ namespace RailHexLib
 
             logger.Log("Add new settlement");
             var center = randomUnplacedCell();
-            var needsList = new NeedLevelList()
+
+            var needsList = new List<NeedsSystem.NeedsLevel>()
             {
                 //level 1
-                (new(){
-                    [Resource.Fish] = (2, 2),
-                    [Resource.Wood] = (1, 4)
-                }),
+                new NeedsSystem.NeedsLevel(
+                    new NeedsSystem.Need(Resource.Fish, 2,2),
+                    new NeedsSystem.Need(Resource.Wood, 1,4)
+                ),
                 // level 2
-                (new(){
-                    [Resource.Grass] = (4, 10),
-                }),
+                new NeedsSystem.NeedsLevel(
+                    new NeedsSystem.Need(Resource.Grass,4, 10)
+                )
             };
 
             var settlement = new Settlement(center, "Settlement", needsList);
@@ -622,28 +623,25 @@ namespace RailHexLib
         {
             if (ln == 0)
             {
-                var s1N = new List<Dictionary<Resource, (int, int)>>(){
-                    (
-                        // res, count, consume ticks
-                        new() {
-                            [Resource.Fish] = (5, 10)
-                        }
+                var s1N = new List<NeedsSystem.NeedsLevel>() {
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Fish, 5, 10)
                     ),
-                    (
-                        new() {
-                            [Resource.Wood] = (4, 20)
-                        }
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Wood, 4, 20)
                     )
                 };
 
-                var s = new Settlement(new Cell(0, -10), "settlement1", s1N);
+                var s = new Settlement(new Cell(0, -10), "Riverdale", s1N);
                 s.Rotate60Clock(3); // 180
 
-                var s2N = new List<Dictionary<Resource, (int, int)>>(){
-                    (new(){[Resource.Fish] = (5, 10)})
+                var s2N = new List<NeedsSystem.NeedsLevel>(){
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Fish,5, 10)
+                    )
                 };
 
-                var s2 = new Settlement(new Cell(0, 0), "Settlement2", s2N);
+                var s2 = new Settlement(new Cell(0, 0), " Bitchland", s2N);
 
                 var structs = new List<Structure>() { s2, s };
                 AddStructures(structs);
@@ -653,26 +651,24 @@ namespace RailHexLib
                 stack = new TileStack();
                 stack.InitializeInitialStack();
 
-                var s1N = new List<Dictionary<Resource, (int, int)>>(){
-                    (
-                        // res, count, consume ticks
-                        new() {
-                            [Resource.Fish] = (5, 10)
-                        }
+                var s1N = new List<NeedsSystem.NeedsLevel>(){
+                    new NeedsSystem.NeedsLevel(
+                    new NeedsSystem.Need(Resource.Fish, count: 5, consumptionTicks: 10)
                     ),
-                    (
-                        new() {
-                            [Resource.Wood] = (4, 20)
-                        }
-                    )
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Wood, count: 4, consumptionTicks: 20)
+                    ),
                 };
 
                 var s = new Settlement(new Cell(0, -10), "settlement1", s1N);
                 s.Rotate60Clock(3); // 180
 
-                var s2N = new List<Dictionary<Resource, (int, int)>>(){
-                    (new(){[Resource.Fish] = (5, 10)})
+                var s2N = new List<NeedsSystem.NeedsLevel>(){
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Fish,5, 10)
+                    )
                 };
+
 
                 var s2 = new Settlement(new Cell(0, 0), "Settlement2", s2N);
 

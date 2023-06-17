@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -30,7 +30,7 @@ namespace RailHexLib
         }
         public Structure(Cell center,
                          string name,
-                         NeedLevelList needs = null,
+                         List<NeedsSystem.NeedsLevel> needs = null,
                          Dictionary<Resource, int> resources = null
         )
         {
@@ -44,7 +44,33 @@ namespace RailHexLib
             }
             else
             {
-                needsSystem = new NeedsSystem(Inventory, new NeedLevelList());
+                needsSystem = new NeedsSystem(Inventory, new List<NeedsSystem.NeedsLevel>());
+            }
+            if (resources != null)
+            {
+                foreach (var (r, c) in resources)
+                {
+                    this.Inventory.AddResource(r, c);
+                }
+            }
+        }
+        public Structure(Cell center,
+                         string name,
+                         NeedsSystem.NeedsLevel[] needs = null,
+                         Dictionary<Resource, int> resources = null
+        )
+        {
+            lifeTimer.Timeout = Config.Structure.AbandonTimerTicks;
+            lifeTimer.OnTimeout += lifeTimerHandler;
+
+            this.center = center; this.name = name;
+            if (needs != null)
+            {
+                this.needsSystem = new NeedsSystem(Inventory, needs);
+            }
+            else
+            {
+                needsSystem = new NeedsSystem(Inventory, new List<NeedsSystem.NeedsLevel>());
             }
             if (resources != null)
             {
@@ -126,10 +152,13 @@ namespace RailHexLib
         {
             if (lifeTime > 0)
             {
-                // lifeTime -= ticks;
-
-                int unmeetNeeds = needsSystem.UnmeetNeeds;
-                lifeTime -= unmeetNeeds;
+                var unmeetNeeds = needsSystem.UnmeetNeeds;
+                logger.Log($"{name} have unmeet needs: {unmeetNeeds.Count}");
+                foreach (var unmeetNeed in unmeetNeeds)
+                {
+                    logger.Log(unmeetNeed.ToString(), " unmeetNeed");
+                }
+                lifeTime -= unmeetNeeds.Count;
                 if (lifeTime <= 0)
                 {
                     abandoned = true;
