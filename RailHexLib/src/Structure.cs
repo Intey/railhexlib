@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.Linq;
 namespace RailHexLib
 {
     using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
@@ -122,10 +122,19 @@ namespace RailHexLib
                         ConnectedZones[zoneCell] = zone;
                         // TODO: subscibe zone actions
                         // zone.OnCuncsumedOut
+                        zone.OnZoneAbandon += this.DisconnectZone;
                     }
                 }
             }
         }
+         void DisconnectZone(object sender, EventArgs args) {
+            Zone t = sender as Zone;
+            if (t != null)
+            {
+                var key = ConnectedZones.First(x => x.Value == t).Key;
+                ConnectedZones.Remove(key);
+            }
+         }
 
         public override string ToString()
         {

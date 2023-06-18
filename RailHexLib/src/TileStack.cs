@@ -33,10 +33,6 @@ namespace RailHexLib
         }
         public void InitializeInitialStack()
         {
-            for (int i = 0; i < 20; i++)
-            {
-                PushRandomTile();
-            }
             // first step should be easy for player
             PushTile(new ROAD_180Tile());
             PushTile(new ROAD_180Tile());
@@ -44,7 +40,12 @@ namespace RailHexLib
             PushTile(new ROAD_180Tile());
             PushTile(new ROAD_180Tile());
             PushTile(new ROAD_180Tile());
-            PushTile(new ROAD_180Tile());
+            PushTile(new ROAD_3T_60_180Tile());
+            for (int i = 0; i < 20; i++)
+            {
+                PushRandomTile();
+            }
+
 
         }
         public void PushTile(Tile t)

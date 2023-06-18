@@ -50,6 +50,7 @@ namespace RailHexLib
         public List<Zone> Zones { get; set; } = new List<Zone>();
         // Events
         public event EventHandler StructureAbandonEvent;
+        public event EventHandler ZoneAbandonEvent;
         public event EventHandler TraderArrivesToStructureEvent;
         public event EventHandler NewStructureAppears;
 
@@ -229,6 +230,22 @@ namespace RailHexLib
                     else
                     {
                         var newZone = new Zone(placedCell, Config.Zone.defaultResourceCount, groundType);
+                        EventHandler handle = null;
+                        handle = (object s, EventArgs e) =>
+                        {
+                            Zone zone = s as Zone;
+                            logger.Log("zone abandoned");
+
+                            // Call hanlers of the game event (like rethrow)
+                            // race conditions about unsubscribe after the null check
+                            var tmp_event = this.ZoneAbandonEvent;
+                            if (tmp_event != null)
+                            {
+                                tmp_event(s, e);
+                            }
+                            newZone.OnZoneAbandon -= handle;
+                        };
+                        newZone.OnZoneAbandon += handle;
                         Zones.Add(newZone);
                         placementResult.NewZones.Add(newZone);
                         Structures.ForEach(s => s.ConnectZone(newZone));
