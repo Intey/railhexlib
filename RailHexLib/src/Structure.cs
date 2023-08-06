@@ -127,14 +127,15 @@ namespace RailHexLib
                 }
             }
         }
-         void DisconnectZone(object sender, EventArgs args) {
+        void DisconnectZone(object sender, EventArgs args)
+        {
             Zone t = sender as Zone;
             if (t != null)
             {
                 var key = ConnectedZones.First(x => x.Value == t).Key;
                 ConnectedZones.Remove(key);
             }
-         }
+        }
 
         public override string ToString()
         {
@@ -177,11 +178,20 @@ namespace RailHexLib
             }
         }
 
-
+        /// <summary>
+        /// move all resources from trader to settlement
+        /// </summary>
         public virtual void VisitTrader(Trader trader)
         {
             lifeTime += Config.Structure.LifeTimeIncreaseOnTraderVisit;
-            needsSystem.fillBy(trader.Inventory);
+
+            foreach (var resource in trader.Inventory.Resources.Keys)
+            {
+                var picked = trader.Inventory.PickResource(
+                                                resource,
+                                                Config.Trader.maxResourceCountInInventory);
+                Inventory.AddResource(resource, picked);
+            }
         }
 
         public int PickResource(Resource name, int count)

@@ -12,8 +12,9 @@ namespace RailHexLib
         {
             /// how many tiles move a trader in one tick
             public static int moveTilesPerTick = 1;
-            public static double consumptionPercent = 0.3;
-            public static int maxResourceCountInInventory = 5;
+            public static double consumptionPercent = 0.5;
+            public static int exchangeOutCount = 15;
+            public static int maxResourceCountInInventory = 25;
         }
         public static class ScorePoints
         {
