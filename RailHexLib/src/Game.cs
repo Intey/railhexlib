@@ -9,7 +9,12 @@ using RailHexLib.DevTools;
 
 namespace RailHexLib
 {
+
     using NeedLevelList = List<Dictionary<Resource, (int, int)>>;
+    /// <summary>
+    /// Axis directions. Used for deciding new random cell. 
+    /// Possibly to be replaced with the Sectors concept.
+    /// </summary>
     enum Direction
     {
         QMAX,
@@ -24,9 +29,241 @@ namespace RailHexLib
         NewSettlementAppears
     }
 
+    /// <summary>
+    /// The Game. Game is a singleton class because only one game can exists
+    /// </summary>
     public class Game
     {
-        private static Game instance;
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public event EventHandler StructureAbandonEvent;
+        public event EventHandler ZoneAbandonEvent;
+        public event EventHandler TraderArrivesToStructureEvent;
+        public event EventHandler NewStructureAppears;
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// User action. Toggle pause state. 
+        /// Tick method will skip it's body if paused
+        /// </summary>
+        public void TogglePause()
+        {
+            paused = !paused;
+        }
+
+        /// <summary>
+        /// User action. Place tile on game board
+        /// </summary>
+        /// <param name="targetCell"></param>
+        /// <returns>false if tile is not placed</returns>
+        public PlacementResult PlaceCurrentTile(Cell targetCell)
+        {
+            if (currentTile == null)
+            {
+                return PlacementResult.Fail;
+            }
+            Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile() or maybe stack is empty");
+            if (!CanPlaceCurrentTile(targetCell))
+            {
+                return PlacementResult.Fail;
+            }
+            logger.Log($"place tile {currentTile} on cell: {targetCell}. Rot: {currentTile.Rotation}");
+            placedTiles[targetCell] = currentTile;
+
+            var placementResult = new PlacementResult(currentTile);
+
+            Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(targetCell);
+            placementResult.NewJoins = joinedNeighbors;
+
+            Dictionary<Ground, List<Cell>>
+                            joinsByGround = joinedNeighbors
+                                .GroupBy(b => b.Value)
+                                .ToDictionary(pair => pair.Key, pair => pair.Select(k => k.Key).ToList());
+
+            buildRoads(joinsByGround, targetCell, placementResult);
+
+            // zones processing
+            buildZones(joinsByGround, targetCell, placementResult);
+
+
+            placementResult.GameOver = !NextTile();
+            return placementResult;
+        }
+
+        /// <summary>
+        /// User action. Rotate current tile clockwise count times. 
+        /// If one - tile will be rotated by 60 degrees
+        /// </summary>
+        /// <param name="count">how many rotations to do</param>
+        public void RotateCurrentTile(int count = 1)
+        {
+            Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile()?");
+
+            for (int i = 0; i < count; i++)
+            {
+                currentTile.Rotate60Clock();
+            }
+        }
+
+        public void SendTrader(Trader trader, Dictionary<Structure, Dictionary<Resource, int>> exchangePoints)
+        {
+            foreach (var (structure, resources) in exchangePoints)
+            {
+                trader.TradePoints[structure.GetEnterCell()] = structure;
+            }
+        }
+        public bool CanPlaceCurrentTile(Cell cell)
+        {
+            bool exists = placedTiles.ContainsKey(cell);
+            return !exists;
+        }
+
+        public void InitializeLevel(int ln)
+        {
+            if (ln == 0)
+            {
+                var s1N = new List<NeedsSystem.NeedsLevel>() {
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Fish, 5, 10)
+                    ),
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Wood, 4, 20)
+                    )
+                };
+
+                var s = new Settlement(new Cell(0, -10), "Riverdale", s1N);
+                s.Rotate60Clock(3); // 180
+
+                var s2N = new List<NeedsSystem.NeedsLevel>(){
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Fish,5, 10)
+                    )
+                };
+
+                var s2 = new Settlement(new Cell(0, 0), " Bitchland", s2N);
+
+                var structs = new List<Structure>() { s2, s };
+                AddStructures(structs);
+            }
+            if (ln == 1)
+            {
+                stack = new TileStack();
+                stack.InitializeInitialStack();
+
+                var s1N = new List<NeedsSystem.NeedsLevel>(){
+                    new NeedsSystem.NeedsLevel(
+                    new NeedsSystem.Need(Resource.Fish, count: 5, consumptionTicks: 10)
+                    ),
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Wood, count: 4, consumptionTicks: 20)
+                    ),
+                };
+
+                var s = new Settlement(new Cell(0, -10), "settlement1", s1N);
+                s.Rotate60Clock(3); // 180
+
+                var s2N = new List<NeedsSystem.NeedsLevel>(){
+                    new NeedsSystem.NeedsLevel(
+                        new NeedsSystem.Need(Resource.Fish,5, 10)
+                    )
+                };
+
+
+                var s2 = new Settlement(new Cell(0, 0), "Settlement2", s2N);
+
+                var structs = new List<Structure>() { s2, s };
+                AddStructures(structs);
+            }
+        }
+
+        public void AddStructures(List<Structure> structures)
+        {
+            this.structures.AddRange(structures);
+
+            foreach (var structure in structures)
+            {
+                this.structureRoads[structure.GetEnterCell()] = new StructureRoad(structure);
+                foreach (var cell in structure.GetHexes())
+                {
+                    placedTiles[cell.Key] = cell.Value;
+                }
+
+                void handle(object s, EventArgs e)
+                {
+                    Structure structure = s as Structure;
+
+                    this.structureRoads.Remove(structure.GetEnterCell());
+                    this.Traders.RemoveAll(t => t.TradePoints.ContainsKey(structure.GetEnterCell()));
+                    logger.Log("Structure abandoned");
+
+                    // Call hanlers of the game event (like rethrow)
+                    // race conditions about unsubscribe after the null check
+                    // var tmp_event = StructureAbandonEvent;
+                    // if (tmp_event != null)
+                    // {
+                    //     tmp_event(s, e);
+                    // }
+                    // suggestion of delegation simplification of above. Does it handle race conditions?
+                    StructureAbandonEvent?.Invoke(s, e);
+                    structure.OnStructureAbandon -= handle;
+                }
+
+                structure.OnStructureAbandon += handle;
+            }
+        }
+
+        public void PushTile(Tile newTile)
+        {
+            stack.PushTile(newTile);
+        }
+
+        public bool NextTile()
+        {
+            if (stack == null)
+            {
+                throw new NullReferenceException("Stack doesn't initialized");
+            }
+            currentTile = stack.PopTile();
+
+            if (currentTile == null) return false;
+
+            return true;
+        }
+
+        public void Tick(int ticks)
+        {
+            if (paused) return;
+
+            foreach (var t in traders)
+            {
+                t.Tick(ticks);
+            }
+            foreach (var (_, tile) in placedTiles)
+            {
+                tile.Tick(ticks);
+            }
+            foreach (var structure in Structures)
+            {
+                structure.Tick(ticks);
+            }
+            newSettlementTimer.Tick(ticks);
+
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public Tile CurrentTile => currentTile;
+        public List<Structure> Structures => structures;
+        public Dictionary<Cell, StructureRoad> StructureRoads => structureRoads;
+
+        public List<Trader> Traders => traders;
+        public int ScorePoints => scorePoints;
+        public List<Zone> Zones { get; set; } = new List<Zone>();
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public Dictionary<Cell, HexNode> OrphanRoads = new();
+        public Dictionary<FeatureTypes, bool> Features = new ();
+        public TileStack stack;
+        
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         public static Game GetInstance(float cellSize = 1.0f, TileStack stack = null, ILogger logger = null)
         {
             if (instance == null)
@@ -40,42 +277,6 @@ namespace RailHexLib
             instance = null;
             instance = new Game(cellSize, stack, logger);
         }
-        public Tile CurrentTile => currentTile;
-        public List<Structure> Structures => structures;
-        public Dictionary<Cell, StructureRoad> StructureRoads => structureRoads;
-        public Dictionary<Cell, HexNode> OrphanRoads = new Dictionary<Cell, HexNode>();
-
-        public List<Trader> Traders => traders;
-        public int ScorePoints => scorePoints;
-        public List<Zone> Zones { get; set; } = new List<Zone>();
-        // Events
-        public event EventHandler StructureAbandonEvent;
-        public event EventHandler ZoneAbandonEvent;
-        public event EventHandler TraderArrivesToStructureEvent;
-        public event EventHandler NewStructureAppears;
-
-        public Dictionary<FeatureTypes, bool> Features = new Dictionary<FeatureTypes, bool>();
-
-        public TileStack stack;
-        private Dictionary<Cell, Tile> placedTiles;
-        private Tile currentTile;
-        /// <summary>
-        /// Key is the enter cell of the structure because it's the begin of the road
-        /// </summary>
-        private Dictionary<Cell, StructureRoad> structureRoads;
-
-        private List<Structure> structures = new List<Structure>();
-        /// <summary>
-        /// Contains orphan roads where Key is root Node
-        /// </summary>
-
-        private List<Trader> traders = new List<Trader>();
-        private ILogger logger;
-        private int scorePoints;
-
-        private Timer newSettlementTimer = new Timer();
-        Timer newTileForFool = new();
-        private bool paused = false;
         private Game(float cellSize, TileStack stack = null, ILogger logger = null)
         {
             Cell.CELL_SIZE = cellSize;
@@ -117,83 +318,6 @@ namespace RailHexLib
             };
         }
 
-        public void AddStructures(List<Structure> structures)
-        {
-            this.structures.AddRange(structures);
-
-            foreach (var structure in structures)
-            {
-                this.structureRoads[structure.GetEnterCell()] = new StructureRoad(structure);
-                foreach (var cell in structure.GetHexes())
-                {
-                    placedTiles[cell.Key] = cell.Value;
-                }
-
-                EventHandler handle = null;
-                handle = (object s, EventArgs e) =>
-                {
-                    Structure structure = s as Structure;
-
-                    this.structureRoads.Remove(structure.GetEnterCell());
-                    this.Traders.RemoveAll(t => t.TradePoints.ContainsKey(structure.GetEnterCell()));
-                    logger.Log("Structure abandoned");
-
-                    // Call hanlers of the game event (like rethrow)
-                    // race conditions about unsubscribe after the null check
-                    var tmp_event = StructureAbandonEvent;
-                    if (tmp_event != null)
-                    {
-                        tmp_event(s, e);
-                    }
-                    structure.OnStructureAbandon -= handle;
-                };
-                structure.OnStructureAbandon += handle;
-            }
-        }
-
-        public void PushTile(Tile newTile)
-        {
-            stack.PushTile(newTile);
-        }
-
-        /// <summary>
-        /// Place tile on game board
-        /// </summary>
-        /// <param name="targetCell"></param>
-        /// <returns>false if tile is not placed</returns>
-        public PlacementResult PlaceCurrentTile(Cell targetCell)
-        {
-            if (currentTile == null)
-            {
-                return PlacementResult.Fail;
-            }
-            Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile() or maybe stack is empty");
-            if (!CanPlaceCurrentTile(targetCell))
-            {
-                return PlacementResult.Fail;
-            }
-            logger.Log($"place tile {currentTile} on cell: {targetCell}. Rot: {currentTile.Rotation}");
-            placedTiles[targetCell] = currentTile;
-
-            var placementResult = new PlacementResult(currentTile);
-
-            Dictionary<Cell, Ground> joinedNeighbors = FindJoinedNeighbors(targetCell);
-            placementResult.NewJoins = joinedNeighbors;
-
-            Dictionary<Ground, List<Cell>>
-                            joinsByGround = joinedNeighbors
-                                .GroupBy(b => b.Value)
-                                .ToDictionary(pair => pair.Key, pair => pair.Select(k => k.Key).ToList());
-
-            buildRoads(joinsByGround, targetCell, placementResult);
-
-            // zones processing
-            buildZones(joinsByGround, targetCell, placementResult);
-
-
-            placementResult.GameOver = !NextTile();
-            return placementResult;
-        }
         private void buildZones(Dictionary<Ground, List<Cell>> joinsByGround, Cell placedCell, PlacementResult placementResult)
         {
             var joinableGround = Enum.GetValues(typeof(Ground)).OfType<Ground>().Where(g => g.IsJoinable() && g != Ground.Road);
@@ -265,8 +389,8 @@ namespace RailHexLib
             // prepare
             var placedHexNodeRoads = new HexNode(placedCell);
 
-            HashSet<Cell> changedOrphanRoads = new HashSet<Cell>();
-            HashSet<Cell> changedStructureRoads = new HashSet<Cell>();
+            HashSet<Cell> changedOrphanRoads = new ();
+            HashSet<Cell> changedStructureRoads = new();
 
             // no joins, make new orphan
             if (joinedRoads.Count() == 0)
@@ -314,12 +438,7 @@ namespace RailHexLib
             {
                 var changedStructureRoads_ = changedStructureRoads.Select(cell => structureRoads[cell]);
 
-                var roadsToJoin = new Dictionary<Cell, IEnumerable<StructureRoad>>()
-                {
-                    [placedHexNodeRoads.Cell] = changedStructureRoads_,
-                };
-
-                var newTraders = SpawnTraders(roadsToJoin);
+                var newTraders = SpawnTraders(placedHexNodeRoads.Cell, changedStructureRoads_);
                 placementResult.NewTraders = newTraders;
                 this.traders.AddRange(newTraders);
 
@@ -349,48 +468,6 @@ namespace RailHexLib
             return false;
         }
 
-        public void RotateCurrentTile(int count = 1)
-        {
-            Debug.Assert(currentTile != null, "Current tile should exists. Forget to call NextTile()?");
-
-            for (int i = 0; i < count; i++)
-            {
-                currentTile.Rotate60Clock();
-            }
-        }
-
-        public bool NextTile()
-        {
-            if (stack == null)
-            {
-                throw new NullReferenceException("Stack doesn't initialized");
-            }
-            currentTile = stack.PopTile();
-
-            if (currentTile == null) return false;
-
-            return true;
-        }
-
-        public void Tick(int ticks)
-        {
-            if (paused) return;
-
-            foreach (var t in traders)
-            {
-                t.Tick(ticks);
-            }
-            foreach (var (_, tile) in placedTiles)
-            {
-                tile.Tick(ticks);
-            }
-            foreach (var structure in Structures)
-            {
-                structure.Tick(ticks);
-            }
-            newSettlementTimer.Tick(ticks);
-
-        }
         private void AddNewSettlement()
         {
             logger.Log($"Feature {FeatureTypes.NewSettlementAppears} state: {Features[FeatureTypes.NewSettlementAppears]}");
@@ -424,7 +501,7 @@ namespace RailHexLib
 
         // find random cell in area exclude filled convex hull of placed cells
         // return multiple cells distributed in specified area
-        Cell randomUnplacedCell()
+        private Cell randomUnplacedCell()
         {
             var placedCells = placedTiles.Keys;
             Cell maxQCell = placedCells.First();
@@ -557,40 +634,40 @@ namespace RailHexLib
             }
         }
 
-        private List<Trader> SpawnTraders(IEnumerable<KeyValuePair<Cell, IEnumerable<StructureRoad>>> RoadsToJoin)
+        private List<Trader> SpawnTraders(Cell joineryCell, IEnumerable<StructureRoad> joinedStructureRoads)
         {
             var result = new List<Trader>();
-            foreach (var group in RoadsToJoin)
-            {
-                var joineryCell = group.Key;
-                var pairs = Utils.MakePairs(group.Value.ToList());
-                foreach (var pair in pairs)
-                {
-                    List<Cell> path = new List<Cell>();
-                    // ADD struct to newRoute
-                    Dictionary<Cell, Structure> points = new Dictionary<Cell, Structure>();
-                    points.Add(pair[0].StartPoint, pair[0].structure);
-                    points.Add(pair[1].StartPoint, pair[1].structure);
-                    var firstPath = pair[0].road.PathTo(joineryCell);
-                    logger.Log($"first path {firstPath}");
-                    firstPath = firstPath.Where(i => !i.Equals(joineryCell)).ToList();
-                    path.AddRange(firstPath); // add income cell too
-                    path.Add(joineryCell);
-                    logger.Log($"SpawnTarders: Node {pair[1].road} - path to {joineryCell}");
-                    foreach (var node in pair[1].road)
-                    {
-                        logger.Log($"SpawnTarders: Node item: {node}: L{node.TopLeft}, UL{node.Top}, UR{node.TopRight}, R{node.BottomRight}, DR{node.Bottom}, DL{node.BottomLeft}");
-                    }
-                    var pth = pair[1].road.PathTo(joineryCell);
-                    logger.Log($"path: {pth}");
-                    path.AddRange(pth.Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
-                    Trader newRoute = new Trader(path, points);
-                    newRoute.OnTraderArrivesToAStructure += this.TraderArrivesToStructure;
-                    // ADD points to Route
-                    result.Add(newRoute);
-                }
 
+            var pairs = Utils.MakePairs(joinedStructureRoads.ToList());
+            foreach (var pair in pairs)
+            {
+                List<Cell> path = new List<Cell>();
+                // ADD struct to newRoute
+                Dictionary<Cell, Structure> points = new()
+                {
+                    [pair[0].StartPoint] = pair[0].structure,
+                    [pair[1].StartPoint] = pair[1].structure
+                };
+
+                var firstPath = pair[0].road.PathTo(joineryCell);
+                logger.Log($"first path {firstPath}");
+                firstPath = firstPath.Where(i => !i.Equals(joineryCell)).ToList();
+                path.AddRange(firstPath); // add income cell too
+                path.Add(joineryCell);
+                logger.Log($"SpawnTarders: Node {pair[1].road} - path to {joineryCell}");
+                foreach (var node in pair[1].road)
+                {
+                    logger.Log($"SpawnTarders: Node item: {node}: L{node.TopLeft}, UL{node.Top}, UR{node.TopRight}, R{node.BottomRight}, DR{node.Bottom}, DL{node.BottomLeft}");
+                }
+                var pth = pair[1].road.PathTo(joineryCell);
+                logger.Log($"path: {pth}");
+                path.AddRange(pth.Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
+                Trader newRoute = new Trader(path, points);
+                newRoute.OnTraderArrivesToAStructure += this.TraderArrivesToStructure;
+                // ADD points to Route
+                result.Add(newRoute);
             }
+
             return result;
         }
 
@@ -630,72 +707,28 @@ namespace RailHexLib
             return joinsOfPlacedCell;
         }
 
-        public bool CanPlaceCurrentTile(Cell cell)
-        {
-            bool exists = placedTiles.ContainsKey(cell);
-            return !exists;
-        }
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        private static Game instance;
+        private Dictionary<Cell, Tile> placedTiles;
+        private Tile currentTile;
+        /// <summary>
+        /// Key is the enter cell of the structure because it's the begin of the road
+        /// </summary>
+        private Dictionary<Cell, StructureRoad> structureRoads;
 
-        public void InitializeLevel(int ln)
-        {
-            if (ln == 0)
-            {
-                var s1N = new List<NeedsSystem.NeedsLevel>() {
-                    new NeedsSystem.NeedsLevel(
-                        new NeedsSystem.Need(Resource.Fish, 5, 10)
-                    ),
-                    new NeedsSystem.NeedsLevel(
-                        new NeedsSystem.Need(Resource.Wood, 4, 20)
-                    )
-                };
+        private List<Structure> structures = new List<Structure>();
+        /// <summary>
+        /// Contains orphan roads where Key is root Node
+        /// </summary>
 
-                var s = new Settlement(new Cell(0, -10), "Riverdale", s1N);
-                s.Rotate60Clock(3); // 180
+        private List<Trader> traders = new List<Trader>();
+        private ILogger logger;
+        private int scorePoints;
 
-                var s2N = new List<NeedsSystem.NeedsLevel>(){
-                    new NeedsSystem.NeedsLevel(
-                        new NeedsSystem.Need(Resource.Fish,5, 10)
-                    )
-                };
-
-                var s2 = new Settlement(new Cell(0, 0), " Bitchland", s2N);
-
-                var structs = new List<Structure>() { s2, s };
-                AddStructures(structs);
-            }
-            if (ln == 1)
-            {
-                stack = new TileStack();
-                stack.InitializeInitialStack();
-
-                var s1N = new List<NeedsSystem.NeedsLevel>(){
-                    new NeedsSystem.NeedsLevel(
-                    new NeedsSystem.Need(Resource.Fish, count: 5, consumptionTicks: 10)
-                    ),
-                    new NeedsSystem.NeedsLevel(
-                        new NeedsSystem.Need(Resource.Wood, count: 4, consumptionTicks: 20)
-                    ),
-                };
-
-                var s = new Settlement(new Cell(0, -10), "settlement1", s1N);
-                s.Rotate60Clock(3); // 180
-
-                var s2N = new List<NeedsSystem.NeedsLevel>(){
-                    new NeedsSystem.NeedsLevel(
-                        new NeedsSystem.Need(Resource.Fish,5, 10)
-                    )
-                };
+        private Timer newSettlementTimer = new Timer();
+        Timer newTileForFool = new();
+        private bool paused = false;
 
 
-                var s2 = new Settlement(new Cell(0, 0), "Settlement2", s2N);
-
-                var structs = new List<Structure>() { s2, s };
-                AddStructures(structs);
-            }
-        }
-        public void TogglePause()
-        {
-            paused = !paused;
-        }
     }
 }
