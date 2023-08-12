@@ -58,6 +58,7 @@ namespace RailHexLib
 
         void visitStructure(Structure reachedStructure)
         {
+            // exchange
             foreach (var (resType, count) in reachedStructure.Resources)
             {
                 var existResource = inventory.ResourceCount(resType);
@@ -69,6 +70,13 @@ namespace RailHexLib
                 inventory.AddResource(resType, reachedStructure.Inventory.PickResource(resType, toPick));
             }
 
+            foreach (var resource in Inventory.Resources.Keys)
+            {
+                var picked = Inventory.PickResource(
+                                                 resource,
+                                                Config.Trader.maxResourceCountInInventory);
+                reachedStructure.Inventory.AddResource(resource, picked);
+            }
             reachedStructure.VisitTrader(this);
 
             var tmp_event = OnTraderArrivesToAStructure;

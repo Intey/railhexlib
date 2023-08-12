@@ -83,8 +83,6 @@ namespace RailHexLib
 
             // zones processing
             buildZones(joinsByGround, targetCell, placementResult);
-
-
             placementResult.GameOver = !NextTile();
             return placementResult;
         }
@@ -110,6 +108,8 @@ namespace RailHexLib
             {
                 trader.TradePoints[structure.GetEnterCell()] = structure;
             }
+            var routePairs = Utils.MakePairs(exchangePoints.Keys.ToList());
+
         }
         public bool CanPlaceCurrentTile(Cell cell)
         {
@@ -260,9 +260,9 @@ namespace RailHexLib
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         public Dictionary<Cell, HexNode> OrphanRoads = new();
-        public Dictionary<FeatureTypes, bool> Features = new ();
+        public Dictionary<FeatureTypes, bool> Features = new();
         public TileStack stack;
-        
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         public static Game GetInstance(float cellSize = 1.0f, TileStack stack = null, ILogger logger = null)
         {
@@ -389,7 +389,7 @@ namespace RailHexLib
             // prepare
             var placedHexNodeRoads = new HexNode(placedCell);
 
-            HashSet<Cell> changedOrphanRoads = new ();
+            HashSet<Cell> changedOrphanRoads = new();
             HashSet<Cell> changedStructureRoads = new();
 
             // no joins, make new orphan
@@ -402,12 +402,12 @@ namespace RailHexLib
             // now add joins to exist roads or create orphans
             foreach (var joinedRoadCell in joinedRoads)
             {
-                foreach (var (roadCell, road) in OrphanRoads)
+                foreach (var (orphanLastPlacedCell, road) in OrphanRoads)
                 {
                     if (JoinWithExistRoads(placedHexNodeRoads, joinedRoadCell, road))
                     {
                         // collect cells of the exist orphan road on which we have the connection
-                        changedOrphanRoads.Add(roadCell);
+                        changedOrphanRoads.Add(orphanLastPlacedCell);
                     }
                 }
 
@@ -433,14 +433,14 @@ namespace RailHexLib
                 OrphanRoads.Remove(placedHexNodeRoads.Cell);
             }
 
-            // if placed tile joins two or more structure roads then we create a trader between those structures
+            // if placed tile joins two or more structure roads
             if (changedStructureRoads.Count > 1)
             {
-                var changedStructureRoads_ = changedStructureRoads.Select(cell => structureRoads[cell]);
+                // var changedStructureRoads_ = changedStructureRoads.Select(cell => structureRoads[cell]);
 
-                var newTraders = SpawnTraders(placedHexNodeRoads.Cell, changedStructureRoads_);
-                placementResult.NewTraders = newTraders;
-                this.traders.AddRange(newTraders);
+                // var newTraders = SpawnTraders(placedHexNodeRoads.Cell, changedStructureRoads_);
+                // placementResult.NewTraders = newTraders;
+                // this.traders.AddRange(newTraders);
 
                 // All structure roads from the changedStructureRoads become new trade route, so we can safely remove them
                 foreach (var k in changedStructureRoads) structureRoads.Remove(k);
@@ -449,7 +449,7 @@ namespace RailHexLib
         }
 
         /// <summary>
-        /// Try to emplace the placedHexNodeRoad in the targetRoad on the joineryCell position
+        /// Try to emplace the placedHexNodeRoad in the targetRoad under the joineryCell node
         /// </summary>
         /// <param name="placedHexNodeRoad"></param>
         /// <param name="joineryCell"></param>
@@ -645,21 +645,21 @@ namespace RailHexLib
                 // ADD struct to newRoute
                 Dictionary<Cell, Structure> points = new()
                 {
-                    [pair[0].StartPoint] = pair[0].structure,
-                    [pair[1].StartPoint] = pair[1].structure
+                    [pair.Item1.StartPoint] = pair.Item1.structure,
+                    [pair.Item2.StartPoint] = pair.Item2.structure
                 };
 
-                var firstPath = pair[0].road.PathTo(joineryCell);
+                var firstPath = pair.Item1.road.PathTo(joineryCell);
                 logger.Log($"first path {firstPath}");
                 firstPath = firstPath.Where(i => !i.Equals(joineryCell)).ToList();
                 path.AddRange(firstPath); // add income cell too
                 path.Add(joineryCell);
-                logger.Log($"SpawnTarders: Node {pair[1].road} - path to {joineryCell}");
-                foreach (var node in pair[1].road)
+                logger.Log($"SpawnTarders: Node {pair.Item2.road} - path to {joineryCell}");
+                foreach (var node in pair.Item2.road)
                 {
                     logger.Log($"SpawnTarders: Node item: {node}: L{node.TopLeft}, UL{node.Top}, UR{node.TopRight}, R{node.BottomRight}, DR{node.Bottom}, DL{node.BottomLeft}");
                 }
-                var pth = pair[1].road.PathTo(joineryCell);
+                var pth = pair.Item2.road.PathTo(joineryCell);
                 logger.Log($"path: {pth}");
                 path.AddRange(pth.Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
                 Trader newRoute = new Trader(path, points);

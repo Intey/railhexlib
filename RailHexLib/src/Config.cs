@@ -31,10 +31,14 @@ namespace RailHexLib
             public static int LifeTimeIncreaseOnTraderVisit = 5;
             public static int InitialLife = 120;
             public static int ZoneConsumptionCount = 5;
+            // when connect one tile to structure we got 5 resource
+            // when connect 2 tiles of same resource to a structure we got (5+5)*1.5 = 15 resources
+            public static float ZoneJoinsMultiplier = 1.5f;
         }
         public static class Zone
         {
             public static int defaultResourceCount = 100;
+            
         }
         public static class NewSettlement
         {

@@ -184,14 +184,6 @@ namespace RailHexLib
         public virtual void VisitTrader(Trader trader)
         {
             lifeTime += Config.Structure.LifeTimeIncreaseOnTraderVisit;
-
-            foreach (var resource in trader.Inventory.Resources.Keys)
-            {
-                var picked = trader.Inventory.PickResource(
-                                                resource,
-                                                Config.Trader.maxResourceCountInInventory);
-                Inventory.AddResource(resource, picked);
-            }
         }
 
         public int PickResource(Resource name, int count)
