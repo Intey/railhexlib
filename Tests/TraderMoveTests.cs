@@ -80,7 +80,7 @@ namespace RailHexLib.Tests
             Config.Structure.InitialLife
             + Config.Structure.LifeTimeIncreaseOnTraderVisit;
 
-            Assert.AreEqual(expectedLife, trader.TradePoints[new Cell(0, -1, CELL_SIZE)].LifeTime);
+            Assert.AreEqual(expectedLife, trader.TradePoints[new Cell(0, -1, CELL_SIZE)].Item1.LifeTime);
 
         }
 
