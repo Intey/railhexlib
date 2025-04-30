@@ -134,7 +134,11 @@ namespace RailHexLib
             HashSet<HexNode> visited = new HashSet<HexNode>();
             return findCell(node, null, visited);
         }
-
+        /// <summary>
+        /// Create a list of cells from this node to target including both ends.
+        /// </summary>
+        /// <param name="targetCell"></param>
+        /// <returns></returns>
         public List<Cell> PathTo(Cell targetCell)
         {
             logger.Log($"Path from {Cell} to {targetCell}", "pathto");

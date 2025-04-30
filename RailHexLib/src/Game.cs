@@ -102,13 +102,18 @@ namespace RailHexLib
             }
         }
 
-        public void SendTrader(Trader trader, Dictionary<Structure, Dictionary<Resource, int>> exchangePoints)
+        /// <summary>
+        /// User action to send the trader between given structures (exchangePOints) with orders
+        /// </summary>
+        /// <param name="trader">trader that would be sent</param>
+        /// <param name="exchangePoints">Structures that trader will reach in the given order. 
+        /// Key is structure, value is resources that the trader should bring to it</param>
+        public static void SendTrader(Trader trader, List<KeyValuePair<Structure, Dictionary<Resource, int>>> exchangePoints)
         {
             foreach (var (structure, resources) in exchangePoints)
             {
-                trader.TradePoints[structure.GetEnterCell()] = structure;
+                trader.TradePoints[structure.GetEnterCell()] = (structure, resources);
             }
-            var routePairs = Utils.MakePairs(exchangePoints.Keys.ToList());
 
         }
         public bool CanPlaceCurrentTile(Cell cell)
@@ -662,10 +667,10 @@ namespace RailHexLib
                 var pth = pair.Item2.road.PathTo(joineryCell);
                 logger.Log($"path: {pth}");
                 path.AddRange(pth.Where<Cell>(i => !i.Equals(joineryCell)).Reverse<Cell>());
-                Trader newRoute = new Trader(path, points);
-                newRoute.OnTraderArrivesToAStructure += this.TraderArrivesToStructure;
+                // Trader newRoute = new Trader(path, points);
+                // newRoute.OnTraderArrivesToAStructure += this.TraderArrivesToStructure;
                 // ADD points to Route
-                result.Add(newRoute);
+                // result.Add(newRoute);
             }
 
             return result;

@@ -146,7 +146,7 @@ namespace RailHexLib.Tests
                 placedCell,
                 structures[0].GetEnterCell(),
             };
-            Assert.AreEqual(expectedRoad, r1.Cells);
+            Assert.AreEqual(expectedRoad, r1.routePath);
         }
         [Test]
         public void TestLongRoute()
@@ -191,7 +191,7 @@ namespace RailHexLib.Tests
                 new Cell(0, -2, CELL_SIZE),
                 new Cell(0, -1, CELL_SIZE),
             };
-            Assert.AreEqual(r1.Cells, expectedRoad);
+            Assert.AreEqual(r1.routePath, expectedRoad);
             Assert.AreEqual(2, game.Structures.Count);
 
         }
@@ -238,7 +238,7 @@ namespace RailHexLib.Tests
                 new Cell(0, -2, CELL_SIZE),
                 structures[0].GetEnterCell(),//0,-1
             };
-            Assert.AreEqual(r1.Cells, expectedRoad);
+            Assert.AreEqual(r1.routePath, expectedRoad);
             Assert.AreEqual(2, game.Structures.Count);
         }
         [Test]
@@ -288,7 +288,7 @@ namespace RailHexLib.Tests
                 new Cell(0, -2, CELL_SIZE),
                 structures[0].GetEnterCell(),//0,-1
             };
-            Assert.AreEqual(r1.Cells, expectedRoad);
+            Assert.AreEqual(r1.routePath, expectedRoad);
             Assert.AreEqual(2, game.Structures.Count);
         }
 

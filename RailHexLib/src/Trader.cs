@@ -17,25 +17,37 @@ namespace RailHexLib
 
         public event EventHandler<Trader.PointReachedArgs> OnTraderArrivesToAStructure;
 
-        public Trader(List<Cell> cells, Dictionary<Cell, Structure> tradePoints)
+        public Trader()
         {
-            Cells = cells;
-            TradePoints = tradePoints;
+
+        }
+        /// <summary>
+        /// Send trader with given orders and route
+        /// Route is a List of tradepoints, where each trade point is a structure, orders to exchange in the structure and a path to next structure
+        /// </summary>
+        /// <param name="route"></param>
+        public void Send(Dictionary<Structure, (Dictionary<Resource, int>, List<Cell>)> route)
+        {
+            foreach (var (structure, (orders, path)) in route)
+            {
+                TradePoints[structure.GetEnterCell()] = (structure, orders);
+                routePath.AddRange(path);
+            }
         }
 
-        public List<Cell> Cells;
-        public Dictionary<Cell, Structure> TradePoints;
+        public List<Cell> routePath = new();
+        public Dictionary<Cell, (Structure, Dictionary<Resource, int>)> TradePoints = new();
         int CurrentPositionIndex = 0;
         int Direction = 1; // positive - forward, negative - backward
-        Inventory inventory = new Inventory();
+        private Inventory inventory = new();
 
         public Inventory Inventory { get => inventory; }
-        public Cell CurrentPosition => Cells[CurrentPositionIndex];
+        public Cell CurrentPosition => routePath[CurrentPositionIndex];
         public void Tick(int ticks = 1)
         {
 
             // calc that trader go over the settlement
-            int maxIndex = Cells.Count - 1;
+            int maxIndex = routePath.Count - 1;
             for (int i = 0; i < ticks; i++)
             {
                 CurrentPositionIndex += Direction;
@@ -49,25 +61,29 @@ namespace RailHexLib
 
                 if (TradePoints.ContainsKey(CurrentPosition))
                 {
-                    var reachedStructure = TradePoints[CurrentPosition];
+                    var (reachedStructure, orders) = TradePoints[CurrentPosition];
                     // pick resources to fit inventory
-                    visitStructure(reachedStructure);
+                    visitStructure(reachedStructure, orders);
                 }
             }
         }
 
-        void visitStructure(Structure reachedStructure)
+        void visitStructure(Structure reachedStructure, Dictionary<Resource, int> orders)
         {
             // exchange
-            foreach (var (resType, count) in reachedStructure.Resources)
+            foreach (var (resType, count) in orders)
             {
                 var existResource = inventory.ResourceCount(resType);
-                // we will pick lowest value, some percent or rest count to fill inventory 
-                var toPick = Math.Min(
-                    (int)(count * Config.Trader.consumptionPercent),
-                    Config.Trader.maxResourceCountInInventory - existResource
-                );
-                inventory.AddResource(resType, reachedStructure.Inventory.PickResource(resType, toPick));
+                // should pick
+                if (count > 0)
+                {
+                    inventory.AddResource(resType, reachedStructure.PickResource(resType, count));
+                }
+                else if (count < 0)
+                {
+                    reachedStructure.Inventory.AddResource(resType, inventory.PickResource(resType, -count));
+                }
+                
             }
 
             foreach (var resource in Inventory.Resources.Keys)
@@ -79,11 +95,12 @@ namespace RailHexLib
             }
             reachedStructure.VisitTrader(this);
 
-            var tmp_event = OnTraderArrivesToAStructure;
-            if (tmp_event != null)
-            {
-                tmp_event(this, new Trader.PointReachedArgs(reachedStructure));
-            }
+            // var tmp_event = OnTraderArrivesToAStructure;
+            // if (tmp_event != null)
+            // {
+            //     tmp_event(this, new Trader.PointReachedArgs(reachedStructure));
+            // }
+            OnTraderArrivesToAStructure?.Invoke(this, new Trader.PointReachedArgs(reachedStructure));
         }
 
     } // class
