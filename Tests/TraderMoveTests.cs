@@ -61,14 +61,14 @@ namespace RailHexLib.Tests
             };
             trader.Tick(2);
 
-            Assert.AreEqual(new List<Structure>() { trader.TradePoints[new Cell(0, -1, CELL_SIZE)] }, result);
+            Assert.AreEqual(new List<Structure>() { trader.TradePoints[new Cell(0, -1, CELL_SIZE)].Item1 }, result);
 
             result = new List<Structure>();
             trader.Tick(6);
             Assert.AreEqual(
-                new List<Structure>() { trader.TradePoints[new Cell(0, -3, CELL_SIZE)]
-                                , trader.TradePoints[new Cell(0, -1, CELL_SIZE)]
-                                , trader.TradePoints[new Cell(0, -3, CELL_SIZE)]
+                new List<Structure>() { trader.TradePoints[new Cell(0, -3, CELL_SIZE)].Item1
+                                , trader.TradePoints[new Cell(0, -1, CELL_SIZE)].Item1
+                                , trader.TradePoints[new Cell(0, -3, CELL_SIZE)].Item1
                                     }
             , result);
         }
@@ -97,7 +97,7 @@ namespace RailHexLib.Tests
             var restInSettlement = 10 - traderShouldPick;
             trader.Tick();
             trader.Tick();
-            var resources = trader.TradePoints[new Cell(0, -1)].Resources;
+            var resources = trader.TradePoints[new Cell(0, -1)].Item1.Resources;
             Assert.AreEqual(
                 restInSettlement,
                 count
@@ -118,7 +118,7 @@ namespace RailHexLib.Tests
             );
 
             restInSettlement = 10 - traderShouldPick;
-            resources = trader.TradePoints[new Cell(0, -3)].Resources;
+            resources = trader.TradePoints[new Cell(0, -3)].Item1.Resources;
             Assert.AreEqual(
                     restInSettlement,
                     resources[Resource.Fish]

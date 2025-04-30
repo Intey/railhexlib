@@ -21,6 +21,15 @@ namespace RailHexLib
         {
 
         }
+
+        public Trader(List<Cell> route, Dictionary<Cell, Structure> tradePoints)
+        {
+            routePath = route;
+            foreach (var kv in tradePoints)
+            {
+                TradePoints[kv.Key] = (kv.Value, new Dictionary<Resource,int>());
+            }
+        }
         /// <summary>
         /// Send trader with given orders and route
         /// Route is a List of tradepoints, where each trade point is a structure, orders to exchange in the structure and a path to next structure
