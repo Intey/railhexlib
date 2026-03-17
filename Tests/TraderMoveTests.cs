@@ -6,6 +6,7 @@ namespace RailHexLib.Tests
     [TestFixture]
     class TraderMoveTests
     {
+        const int INITIAL_FISH_COUNT = 10;
         const float CELL_SIZE = 1f;
         [SetUp]
         public void Prepare()
@@ -17,8 +18,8 @@ namespace RailHexLib.Tests
             s2
         };
 
-            structs[0].addResource(Resource.Fish, 10);
-            structs[1].addResource(Resource.Fish, 10);
+            structs[0].addResource(Resource.Fish, INITIAL_FISH_COUNT);
+            structs[1].addResource(Resource.Fish, INITIAL_FISH_COUNT);
 
             var cells = new List<Cell>() {
             new Cell(0, -3, CELL_SIZE),
@@ -93,8 +94,8 @@ namespace RailHexLib.Tests
                 count = args.ReachedStructure.Resources[Resource.Fish];
             };
 
-            var traderShouldPick = (int)(10 * Config.Trader.consumptionPercent);
-            var restInSettlement = 10 - traderShouldPick;
+            var traderShouldPick = (int)(INITIAL_FISH_COUNT * Config.Trader.consumptionPercent);
+            var restInSettlement = INITIAL_FISH_COUNT - traderShouldPick;
             trader.Tick();
             trader.Tick();
             var resources = trader.TradePoints[new Cell(0, -1)].Item1.Resources;
