@@ -49,7 +49,7 @@
           fsharp-analyzers = dotnetSixTool "FSharp.Analyzers.Cli" "fsharp-analyzers";
           default = pkgs.buildDotnetModule {
             inherit projectFile testProjectFile dotnet-sdk dotnet-runtime;
-            pname = "HelloWorld";
+            pname = "RailHexLib";
             version = version;
             src = ./.;
             nugetDeps = ./nix/deps.nix; # run `nix build .#default.passthru.fetch-deps && ./result` and put the result here
