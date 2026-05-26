@@ -1,5 +1,5 @@
 {
-  description = "Hello World in .NET";
+  description = "RailHexLib — C# game logic library";
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -12,53 +12,55 @@
     flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = import nixpkgs {inherit system;};
-        projectFile = "./HelloWorld/HelloWorld.fsproj";
-        testProjectFile = "./HelloWorld.Test/HelloWorld.Test.fsproj";
+        projectFile = "RailHexLib/RailHexLib.csproj";
         dotnet-sdk = pkgs.dotnet-sdk_8;
         dotnet-runtime = pkgs.dotnetCorePackages.runtime_8_0;
-        version = "0.0.1";
-        dotnetSixTool = dllOverride: toolName: let
-          toolVersion = (builtins.fromJSON (builtins.readFile ./.config/dotnet-tools.json)).tools."${toolName}".version;
-          sha256 = (builtins.head (builtins.filter (elem: elem.pname == toolName) ((import ./nix/deps.nix) {fetchNuGet = x: x;}))).sha256;
-        in
-          pkgs.stdenvNoCC.mkDerivation rec {
-            name = toolName;
-            version = toolVersion;
-            nativeBuildInputs = [pkgs.makeWrapper];
-            src = pkgs.fetchNuGet {
-              inherit version sha256;
-              pname = name;
-              installPhase = ''mkdir -p $out/bin && cp -r tools/net6.0/any/* $out/bin'';
-            };
-            installPhase = let
-              dll =
-                if isNull dllOverride
-                then name
-                else dllOverride;
-            in ''
-              runHook preInstall
-              mkdir -p "$out/lib"
-              cp -r ./bin/* "$out/lib"
-              makeWrapper "${dotnet-runtime}/bin/dotnet" "$out/bin/${name}" --add-flags "$out/lib/${dll}.dll"
-              runHook postInstall
-            '';
-          };
+        version = "0.1.0";
+
+        railHexLib = pkgs.buildDotnetModule {
+          inherit projectFile dotnet-sdk dotnet-runtime version;
+          pname = "RailHexLib";
+          src = ./.;
+          nugetDeps = ./nix/deps.nix;
+          executables = [];
+          # Тесты собираются отдельно (`dotnet test` в Tests/);
+          # их пакеты требуют апдейта и блокируют сборку библиотеки.
+          doCheck = false;
+
+          # dotnet-tools.json (csharpier) нужен только для dev-окружения.
+          # В nix-сборке его восстановление падает, т.к. csharpier не входит
+          # в nugetDeps библиотеки. Убираем перед фазой configure.
+          prePatch = ''
+            rm -rf .config
+          '';
+
+          # Кладём собранную DLL в $out/lib, чтобы её мог подхватить
+          # Godot-проект через ссылку (см. Makefile основного репо).
+          # Путь содержит RID (например, net8.0/linux-x64/), поэтому ищем
+          # рекурсивно — берём первую найденную DLL/PDB.
+          installPhase = ''
+            runHook preInstall
+            mkdir -p $out/lib
+            dll=$(find RailHexLib/bin/Release -name RailHexLib.dll -print -quit)
+            pdb=$(find RailHexLib/bin/Release -name RailHexLib.pdb -print -quit || true)
+            cp "$dll" $out/lib/
+            if [ -n "$pdb" ]; then cp "$pdb" $out/lib/; fi
+            runHook postInstall
+          '';
+        };
       in {
         packages = {
-          fantomas = dotnetSixTool null "fantomas";
-          fsharp-analyzers = dotnetSixTool "FSharp.Analyzers.Cli" "fsharp-analyzers";
-          default = pkgs.buildDotnetModule {
-            inherit projectFile testProjectFile dotnet-sdk dotnet-runtime;
-            pname = "RailHexLib";
-            version = version;
-            src = ./.;
-            nugetDeps = ./nix/deps.nix; # run `nix build .#default.passthru.fetch-deps && ./result` and put the result here
-            doCheck = true;
-          };
+          default = railHexLib;
+          library = railHexLib;
         };
         devShells = {
           default = pkgs.mkShell {
-            buildInputs = [dotnet-sdk pkgs.git pkgs.alejandra pkgs.nodePackages.markdown-link-check];
+            buildInputs = [
+              dotnet-sdk
+              pkgs.git
+              pkgs.alejandra
+              pkgs.nodePackages.markdown-link-check
+            ];
           };
         };
       }
