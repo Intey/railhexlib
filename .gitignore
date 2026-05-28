@@ -4,3 +4,4 @@ Tests/TestResults/
 obj/
 .aider*
 result
+*.uid
