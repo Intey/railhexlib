@@ -1,4 +1,4 @@
-﻿using RailHexLib.Interfaces;
+using RailHexLib.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -39,7 +39,9 @@ namespace RailHexLib.DevTools
             if (category != null)
             {
                 this.category = category;
-                var listener = new ConsoleTraceListener();
+                // ConsoleTraceListener отсутствует в netstandard2.1 (нужен для Unity).
+                // TextWriterTraceListener(Console.Out) даёт тот же вывод в консоль.
+                var listener = new TextWriterTraceListener(Console.Out);
                 debug.Listeners.Add(listener);
                 if (Environment.GetEnvironmentVariable("DEBUG_LOG") != null)
                     debug.Switch.Level = SourceLevels.All;
@@ -98,7 +100,7 @@ namespace RailHexLib.DevTools
         TraceSource source;
         public Logger(string category=null) : base(category)
         {
-            var listener = new ConsoleTraceListener();
+            var listener = new TextWriterTraceListener(Console.Out);
             source = new TraceSource(category);
             source.Listeners.Add(listener);
             source.Switch.Level = SourceLevels.All;
